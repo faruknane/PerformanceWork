@@ -2,7 +2,7 @@
 {
     public partial class Vectorization
     {
-        public unsafe class PointerCarrier
+        public unsafe struct PointerCarrier
         {
             public float* ptr;
         }

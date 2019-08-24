@@ -8,13 +8,42 @@ namespace PerformanceWorkTests
     public class VectorizationTests
     {
         [TestMethod]
+        public void Equality()
+        {
+            {
+                float[] v1 = { 1, 2, 3 };
+                float[] v2 = { 1, 2, 3 };
+                bool res = Vectorization.EqualsAVX(v1, v2, v1.Length);
+                bool res2 = true;
+                Assert.AreEqual(res, res2);
+            }
+            {
+                float[] v1 = { 1, 2, 2 };
+                float[] v2 = { 1, 2, 3 };
+                bool res = Vectorization.EqualsAVX(v1, v2, v1.Length);
+                bool res2 = false;
+                Assert.AreEqual(res, res2);
+            }
+        }
+        [TestMethod]
         public void Add()
         {
             float[] v1 = { 1, 2, 3 };
             float[] v2 = { 1, 2, 3 };
             float[] res = new float[3];
-            Vectorization.AddAVX(ref v1, ref v2, ref res, res.Length);
+            Vectorization.AddAVX(v1, v2, res, res.Length);
             float[] res2 = { 2, 4, 6 };
+
+            Assert.IsTrue(ArrayEqual<float>(res, res2));
+        }
+        [TestMethod]
+        public void Add2()
+        {
+            float[] v1 = { 1, 2, 3 };
+            float v2 = 2;
+            float[] res = new float[3];
+            Vectorization.AddAVX(v1, v2, res, res.Length);
+            float[] res2 = { 3, 4, 5 };
 
             Assert.IsTrue(ArrayEqual<float>(res, res2));
         }
@@ -80,26 +109,21 @@ namespace PerformanceWorkTests
             float[] v1 = { 1, 2, 3 };
             float[] v2 = { 1, 2, 3 };
             float[] res = new float[3];
-            Vectorization.MultiplyAVX(ref v1, ref v2, ref res, res.Length);
+            Vectorization.MultiplyAVX(v1, v2, res, res.Length);
             float[] res2 = { 1, 4, 9 };
 
             Assert.IsTrue(ArrayEqual<float>(res, res2));
         }
-
         [TestMethod]
-        public void MatrixMultiplyTranspose()
+        public void Multiply2()
         {
-            int x = 50, y = 100, z = 30;
-            Matrix a = new Matrix(x, y);
-            Matrix b = new Matrix(y, z);
-            Matrix res = new Matrix(x, z);
-            Matrix res2 = new Matrix(x, z);
+            float[] v1 = { 1, 2, 3 };
+            float v2 = 3;
+            float[] res = new float[3];
+            Vectorization.MultiplyAVX(v1, v2, res, res.Length);
+            float[] res2 = { 3, 6, 9 };
 
-            Random r = new Random();
-
-            
-
-
+            Assert.IsTrue(ArrayEqual<float>(res, res2));
         }
 
 

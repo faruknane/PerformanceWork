@@ -11,28 +11,61 @@ namespace PerformanceWork.OptimizedNumerics
     {
 
         #region Working Properly
-
-        /// <summary>
-        /// result = left + right
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <param name="result"></param>
-        /// <param name="length"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddAVX(ref float[] left, ref float[] right, ref float[] result, int length)
+        public static unsafe void AddAVX(float[] left, float[] right, float[] result, long length)
         {
             fixed (float* ptr_a = left, ptr_b = right, ptr_res = result)
             {
-                for (long i = 0; i < length; i += Vector256<float>.Count)
+                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
                 {
                     Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
                     Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
                     Vector256<float> res = Avx2.Add(v1, v2);
                     Avx2.Store(&ptr_res[i], res);
                 }
+                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                {
+                    ptr_res[i] = ptr_a[i] + ptr_b[i];
+                }
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void AddAVX(float[] left, float right, float[] result, long length)
+        {
+            float* ptr_b = &right;
+            fixed (float* ptr_a = left, ptr_res = result)
+            {
+                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                {
+                    Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                    Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_b);
+                    Vector256<float> res = Avx2.Add(v1, v2);
+                    Avx2.Store(&ptr_res[i], res);
+                }
+                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                {
+                    ptr_res[i] = ptr_a[i] + *ptr_b;
+                }
+            }
+        }
+        public static unsafe void SubtractAVX(float[] left, float[] right, float[] result, long length)
+        {
+            fixed (float* ptr_a = left, ptr_b = right, ptr_res = result)
+            {
+                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                {
+                    Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                    Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
+                    Vector256<float> res = Avx2.Subtract(v1, v2);
+                    Avx2.Store(&ptr_res[i], res);
+                }
+                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                {
+                    ptr_res[i] = ptr_a[i] - ptr_b[i];
+                }
+            }
+        }
+
         /// <summary>
         /// result =  left Dot right
         /// </summary>
@@ -196,23 +229,66 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void MultiplyAVX(ref float[] arr1, ref float[] arr2, ref float[] result, long length)
+        public static unsafe void MultiplyAVX(float[] arr1, float[] arr2, float[] result, long length)
         {
             fixed (float* ptr_a = arr1, ptr_b = arr2, ptr_res = result)
             {
-                for (int i = 0; i < length; i += Vector256<float>.Count)
+                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
                 {
                     Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
                     Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
                     Vector256<float> res = Avx2.Multiply(v1, v2);
                     Avx2.Store(&ptr_res[i], res);
                 }
+                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                {
+                    ptr_res[i] = ptr_a[i] * ptr_b[i];
+                }
             }
         }
 
+        public static unsafe void MultiplyAVX(float[] arr1, float arr2, float[] result, long length)
+        {
+            float* ptr_b = &arr2;
+            fixed (float* ptr_a = arr1, ptr_res = result)
+            {
+                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                {
+                    Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                    Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_b);
+                    Vector256<float> res = Avx2.Multiply(v1, v2);
+                    Avx2.Store(&ptr_res[i], res);
+                }
+                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                {
+                    ptr_res[i] = ptr_a[i] * *ptr_b;
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool EqualsAVX(float[] arr1, float[] arr2, long length)
+        {
+            fixed (float* ptr_a = arr1, ptr_b = arr2)
+            {
+                for(long i = 0; i < length; i++)
+                    if (ptr_a[i] != ptr_b[i])
+                        return false;
+                return true;
+                //for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                //{
+                //    Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                //    Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
+                //    Vector256<float> res = Avx2.Compare(v1, v2);
+                //    Avx2.Store(&ptr_res[i], res);
+                //}
+                //for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                //{
+                //    ptr_res[i] = ptr_a[i] * ptr_b[i];
+                //}
+            }
+        }
         #endregion
-
-
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static void MatrixMultiply(ref Matrix a, ref Matrix b, ref Matrix c)
@@ -328,38 +404,11 @@ namespace PerformanceWork.OptimizedNumerics
                         long postionx = (fi / increment) * (increment * n);
 
                         //Avx2.Prefetch0(&ptr_b[positiony]);
-                        //Avx2.Prefetch0(&ptr_a[postionx]);
-
-
+                        //Avx2.Prefetch0(&j);
                         for (long j = 0; j < n; ++j)
                         {
-                            #region real b
-                            //Vector256<float> y = Avx2.LoadVector256(&ptr_b[j * p + k]); 
-                            #endregion
-
-                            #region bk
-                            Vector256<float> y = Avx2.LoadVector256(&ptr_b[positiony + j*8]);
-                            #endregion
-
-                            #region real a
-                            //res0 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i0 * n + j]), res0);
-                            //res1 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i1 * n + j]), res1);
-                            //res2 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i2 * n + j]), res2);
-                            //res3 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i3 * n + j]), res3);
-                            //res4 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i4 * n + j]), res4);
-                            //res5 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i5 * n + j]), res5);
-                            //res6 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i6 * n + j]), res6);
-                            //res7 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i7 * n + j]), res7);
-                            //res8 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i8 * n + j]), res8);
-                            //res9 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i9 * n + j]), res9);
-                            //res10 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i10 * n + j]), res10);
-                            //res11 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i11 * n + j]), res11);
-                            //res12 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i12 * n + j]), res12);
-                            //res13 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i13 * n + j]), res13);
-                            //res14 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[i14 * n + j]), res14);
-                            #endregion
-                            if(true)
-                            #region ak
+                            Vector256<float> y = Avx2.LoadVector256(&ptr_b[positiony + j * 8]);
+                            if (true)
                             {
                                 res0 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 0]), res0);
                                 res1 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 1]), res1);
@@ -377,25 +426,7 @@ namespace PerformanceWork.OptimizedNumerics
                                 res13 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 13]), res13);
                                 //res14 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 14]), res14);
                             }
-                            #endregion
 
-                            #region TransposeA
-                            //a -> m x n
-                            //res0 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i0]), res0);
-                            //res1 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i1]), res1);
-                            //res2 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i2]), res2);
-                            //res3 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i3]), res3);
-                            //res4 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i4]), res4);
-                            //res5 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i5]), res5);
-                            //res6 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i6]), res6);
-                            //res7 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i7]), res7);
-                            //res8 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i8]), res8);
-                            //res9 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i9]), res9);
-                            //res10 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i10]), res10);
-                            //res11 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i11]), res11);
-                            //res12 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i12]), res12);
-                            //res13 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[j * m + i13]), res13);
-                            #endregion
                         }
 
                         Avx2.Store(&ptr_c[i0 * p + k], res0);
@@ -423,294 +454,5 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
 
-
-
-
-
-        #region will be deleted
-        /// <summary>
-        /// result = Matmul(arr1, T(arr2)) Not ready! Do not use this function.
-        /// </summary>
-        /// <param name="arr1"></param>
-        /// <param name="arr2"></param>
-        /// <param name="result">Result matrix shouldn't be the same matrix with arr1 and arr2</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void MatrixMultiplyWithTranspose(ref Matrix arr1, ref Matrix arr2, ref Matrix result)
-        {
-            long increment = 3;
-            fixed (float* ptr_a = arr1.Array, ptr_b = arr2.Array, ptr_res = result.Array)
-            {
-                for (long ri = 0; ri < arr1.D1 / increment * increment; ri += increment)
-                {
-                    for (long rj = 0; rj < arr2.D1 / increment * increment; rj += increment)
-                    {
-                        Vector256<float> sum00 = new Vector256<float>();
-                        Vector256<float> sum01 = new Vector256<float>();
-                        Vector256<float> sum02 = new Vector256<float>();
-                        Vector256<float> sum10 = new Vector256<float>();
-                        Vector256<float> sum11 = new Vector256<float>();
-                        Vector256<float> sum12 = new Vector256<float>();
-                        Vector256<float> sum20 = new Vector256<float>();
-                        Vector256<float> sum21 = new Vector256<float>();
-                        Vector256<float> sum22 = new Vector256<float>();
-
-                        long loci0 = ri * arr1.D2;
-                        long loci1 = loci0 + arr1.D2;
-                        long loci2 = loci1 + arr1.D2;
-
-                        long locj0 = rj * arr2.D2;
-                        long locj1 = locj0 + arr2.D2;
-                        long locj2 = locj1 + arr2.D2;
-
-
-                        Avx2.Prefetch0(&ptr_a[loci0]);
-                        Avx2.Prefetch0(&ptr_a[loci1]);
-                        Avx2.Prefetch0(&ptr_a[loci2]);
-                        Avx2.Prefetch0(&ptr_b[locj0]);
-                        Avx2.Prefetch0(&ptr_b[locj1]);
-                        Avx2.Prefetch0(&ptr_b[locj2]);
-
-
-                        for (long l = 0; l < arr2.D2 / Vector256<float>.Count * Vector256<float>.Count; l += Vector256<float>.Count)
-                        {
-                            Vector256<float> i = Avx2.LoadVector256(&ptr_a[loci0 + l]);
-                            Vector256<float> j0 = Avx2.LoadVector256(&ptr_b[locj0 + l]);
-                            sum00 = Fma.MultiplyAdd(j0, i, sum00);
-                            Vector256<float> j1 = Avx2.LoadVector256(&ptr_b[locj1 + l]);
-                            sum01 = Fma.MultiplyAdd(i, j1, sum01);
-                            Vector256<float> j2 = Avx2.LoadVector256(&ptr_b[locj2 + l]);
-                            sum02 = Fma.MultiplyAdd(i, j2, sum02);
-                            i = Avx2.LoadVector256(&ptr_a[loci1 + l]);
-                            sum10 = Fma.MultiplyAdd(i, j0, sum10);
-                            sum11 = Fma.MultiplyAdd(i, j1, sum11);
-                            sum12 = Fma.MultiplyAdd(i, j2, sum12);
-                            i = Avx2.LoadVector256(&ptr_a[loci2 + l]);
-
-                            sum20 = Fma.MultiplyAdd(i, j0, sum20);
-                            sum21 = Fma.MultiplyAdd(i, j1, sum21);
-                            sum22 = Fma.MultiplyAdd(i, j2, sum22);
-                        }
-                        
-                        sum00 = Fma.HorizontalAdd(sum00, sum00);
-                        sum00 = Fma.HorizontalAdd(sum00, sum00);
-                        float res00 = sum00.GetElement(0) + sum00.GetElement(4);
-                        sum01 = Fma.HorizontalAdd(sum01, sum01);
-                        sum01 = Fma.HorizontalAdd(sum01, sum01);
-                        float res01 = sum01.GetElement(0) + sum01.GetElement(4);
-                        sum02 = Fma.HorizontalAdd(sum02, sum02);
-                        sum02 = Fma.HorizontalAdd(sum02, sum02);
-                        float res02 = sum02.GetElement(0) + sum02.GetElement(4);
-
-                        sum10 = Fma.HorizontalAdd(sum10, sum10);
-                        sum10 = Fma.HorizontalAdd(sum10, sum10);
-                        float res10 = sum10.GetElement(0) + sum10.GetElement(4);
-                        sum11 = Fma.HorizontalAdd(sum11, sum11);
-                        sum11 = Fma.HorizontalAdd(sum11, sum11);
-                        float res11 = sum11.GetElement(0) + sum11.GetElement(4);
-                        sum12 = Fma.HorizontalAdd(sum12, sum12);
-                        sum12 = Fma.HorizontalAdd(sum12, sum12);
-                        float res12 = sum12.GetElement(0) + sum12.GetElement(4);
-
-                        sum20 = Fma.HorizontalAdd(sum20, sum20);
-                        sum20 = Fma.HorizontalAdd(sum20, sum20);
-                        float res20 = sum20.GetElement(0) + sum20.GetElement(4);
-                        sum21 = Fma.HorizontalAdd(sum21, sum21);
-                        sum21 = Fma.HorizontalAdd(sum21, sum21);
-                        float res21 = sum21.GetElement(0) + sum21.GetElement(4);
-                        sum22 = Fma.HorizontalAdd(sum22, sum22);
-                        sum22 = Fma.HorizontalAdd(sum22, sum22);
-                        float res22 = sum22.GetElement(0) + sum22.GetElement(4);
-
-                        for (long l = arr2.D2 / Vector256<float>.Count * Vector256<float>.Count; l < arr2.D2; l++)
-                        {
-                            res00 += ptr_a[loci0 + l] * ptr_b[locj0 + l];
-                            res01 += ptr_a[loci0 + l] * ptr_b[locj1 + l];
-                            res02 += ptr_a[loci0 + l] * ptr_b[locj2 + l];
-                            res10 += ptr_a[loci1 + l] * ptr_b[locj0 + l];
-                            res11 += ptr_a[loci1 + l] * ptr_b[locj1 + l];
-                            res12 += ptr_a[loci1 + l] * ptr_b[locj2 + l];
-                            res20 += ptr_a[loci2 + l] * ptr_b[locj0 + l];
-                            res21 += ptr_a[loci2 + l] * ptr_b[locj1 + l];
-                            res22 += ptr_a[loci2 + l] * ptr_b[locj2 + l];
-                        }
-
-                        ptr_res[ri * result.D2 + rj] = res00;
-                        ptr_res[ri * result.D2 + rj + 1] = res01;
-                        ptr_res[ri * result.D2 + rj + 2] = res02;
-                        ptr_res[(ri+1) * result.D2 + rj] = res10;
-                        ptr_res[(ri + 1) * result.D2 + rj + 1] = res11;
-                        ptr_res[(ri + 1) * result.D2 + rj + 2] = res12;
-                        ptr_res[(ri + 2) * result.D2 + rj] = res20;
-                        ptr_res[(ri + 2) * result.D2 + rj + 1] = res21;
-                        ptr_res[(ri + 2) * result.D2 + rj + 2] = res22;
-                    }
-                    for (long rj = arr2.D1 / increment * increment; rj < arr2.D1; rj++)
-                    {
-                        Vector256<float> sum00 = new Vector256<float>();
-                        Vector256<float> sum10 = new Vector256<float>();
-                        Vector256<float> sum20 = new Vector256<float>();
-
-                        long loci0 = ri * arr1.D2;
-                        long loci1 = loci0 + arr1.D2;
-                        long loci2 = loci1 + arr1.D2;
-
-
-                        long locj0 = rj * arr2.D2;
-
-                        for (long l = 0; l < arr2.D2 / Vector256<float>.Count * Vector256<float>.Count; l += Vector256<float>.Count)
-                        {
-                            Vector256<float> i0 = Avx2.LoadVector256(&ptr_a[loci0 + l]);
-                            Vector256<float> i1 = Avx2.LoadVector256(&ptr_a[loci1 + l]);
-                            Vector256<float> i2 = Avx2.LoadVector256(&ptr_a[loci2 + l]);
-                            Vector256<float> j0 = Avx2.LoadVector256(&ptr_b[locj0 + l]);
-                            sum00 = Fma.MultiplyAdd(i0, j0, sum00);
-                            sum10 = Fma.MultiplyAdd(i1, j0, sum10);
-                            sum20 = Fma.MultiplyAdd(i2, j0, sum20);
-                        }
-
-                        sum00 = Fma.HorizontalAdd(sum00, sum00);
-                        sum00 = Fma.HorizontalAdd(sum00, sum00);
-                        float res00 = sum00.GetElement(0) + sum00.GetElement(4);
-
-                        sum10 = Fma.HorizontalAdd(sum10, sum10);
-                        sum10 = Fma.HorizontalAdd(sum10, sum10);
-                        float res10 = sum10.GetElement(0) + sum10.GetElement(4);
-
-                        sum20 = Fma.HorizontalAdd(sum20, sum20);
-                        sum20 = Fma.HorizontalAdd(sum20, sum20);
-                        float res20 = sum20.GetElement(0) + sum20.GetElement(4);
-
-                        for (long l = arr2.D2 / Vector256<float>.Count * Vector256<float>.Count; l < arr2.D2; l++)
-                        {
-                            res00 += ptr_a[loci0 + l] * ptr_b[locj0 + l];
-                            res10 += ptr_a[loci1 + l] * ptr_b[locj0 + l];
-                            res20 += ptr_a[loci2 + l] * ptr_b[locj0 + l];
-                        }
-                        ptr_res[ri * result.D2 + rj] = res00;
-                        ptr_res[(ri + 1) * result.D2 + rj] = res10;
-                        ptr_res[(ri + 2) * result.D2 + rj] = res20;
-                    }
-                }
-
-                for (long ri = arr1.D1 / increment * increment; ri < arr1.D1; ri++)
-                {
-                    for (long rj = 0; rj < arr2.D1 / increment * increment; rj += increment)
-                    {
-                        Vector256<float> sum00 = new Vector256<float>();
-                        Vector256<float> sum01 = new Vector256<float>();
-                        Vector256<float> sum02 = new Vector256<float>();
-
-                        long loci0 = ri * arr1.D2;
-
-                        long locj0 = rj * arr2.D2;
-                        long locj1 = locj0 + arr2.D2;
-                        long locj2 = locj1 + arr2.D2;
-
-                        for (long l = 0; l < arr2.D2 / Vector256<float>.Count * Vector256<float>.Count; l += Vector256<float>.Count)
-                        {
-                            Vector256<float> i0 = Avx2.LoadVector256(&ptr_a[loci0 + l]);
-                            Vector256<float> j0 = Avx2.LoadVector256(&ptr_b[locj0 + l]);
-                            Vector256<float> j1 = Avx2.LoadVector256(&ptr_b[locj1 + l]);
-                            Vector256<float> j2 = Avx2.LoadVector256(&ptr_b[locj2 + l]);
-                            sum00 = Fma.MultiplyAdd(i0, j0, sum00);
-                            sum01 = Fma.MultiplyAdd(i0, j1, sum01);
-                            sum02 = Fma.MultiplyAdd(i0, j2, sum02);
-                        }
-
-                        sum00 = Fma.HorizontalAdd(sum00, sum00);
-                        sum00 = Fma.HorizontalAdd(sum00, sum00);
-                        float res00 = sum00.GetElement(0) + sum00.GetElement(4);
-                        sum01 = Fma.HorizontalAdd(sum01, sum01);
-                        sum01 = Fma.HorizontalAdd(sum01, sum01);
-                        float res01 = sum01.GetElement(0) + sum01.GetElement(4);
-                        sum02 = Fma.HorizontalAdd(sum02, sum02);
-                        sum02 = Fma.HorizontalAdd(sum02, sum02);
-                        float res02 = sum02.GetElement(0) + sum02.GetElement(4);
-
-                        for (long l = arr2.D2 / Vector256<float>.Count * Vector256<float>.Count; l < arr2.D2; l++)
-                        {
-                            res00 += ptr_a[loci0 + l] * ptr_b[locj0 + l];
-                            res01 += ptr_a[loci0 + l] * ptr_b[locj1 + l];
-                            res02 += ptr_a[loci0 + l] * ptr_b[locj2 + l];
-                        }
-                        ptr_res[ri * result.D2 + rj] = res00;
-                        ptr_res[ri * result.D2 + rj + 1] = res01;
-                        ptr_res[ri * result.D2 + rj + 2] = res02;
-                    }
-                    for (long rj = arr2.D1 / increment * increment; rj < arr2.D1; rj++)
-                    {
-                        Vector256<float> sum00 = new Vector256<float>();
-                        long loci0 = ri * arr1.D2;
-                        long locj0 = rj * arr2.D2;
-                        for (long l = 0; l < arr2.D2 / Vector256<float>.Count * Vector256<float>.Count; l += Vector256<float>.Count)
-                        {
-                            Vector256<float> i0 = Avx2.LoadVector256(&ptr_a[loci0 + l]);
-                            Vector256<float> j0 = Avx2.LoadVector256(&ptr_b[locj0 + l]);
-                            sum00 = Fma.MultiplyAdd(i0, j0, sum00);
-                        }
-                        sum00 = Fma.HorizontalAdd(sum00, sum00);
-                        sum00 = Fma.HorizontalAdd(sum00, sum00);
-                        float res00 = sum00.GetElement(0) + sum00.GetElement(4);
-                        for (long l = arr2.D2 / Vector256<float>.Count * Vector256<float>.Count; l < arr2.D2; l++)
-                            res00 += ptr_a[loci0 + l] * ptr_b[locj0 + l];
-                        ptr_res[ri * result.D2 + rj] = res00;
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Not ready! Do not use this function.
-        /// </summary>
-        /// <param name="arr1"></param>
-        /// <param name="arr2"></param>
-        /// <param name="result"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void MatrixMultiplyParallel(ref Matrix arr1, ref Matrix arr2, ref Matrix result)
-        {
-            int rowbyte = (arr1.D2 * 4);
-            int L1 = 256 * 1024;
-            long increment = ((L1 / rowbyte) / 2);//16+16 rows will be cached. 32*1000*4 byte = 32*4kb we have 256kb l1 
-            long maxsize = arr1.D1;
-            long maxsize2 = arr1.D2;
-
-            int degree = 0;
-            int num;
-            ThreadPool.GetMinThreads(out degree, out num);
-            long maxinccanbe = maxsize / degree / 4;
-            increment = Math.Max(1, Math.Min(maxinccanbe, increment));
-            fixed (float* ptr_a = arr1.Array, ptr_b = arr2.Array, ptr_res = result.Array)
-            {
-                
-                PointerCarrier a = new PointerCarrier();
-                a.ptr = ptr_a;
-                PointerCarrier b = new PointerCarrier();
-                b.ptr = ptr_b;
-                PointerCarrier res = new PointerCarrier();
-                res.ptr = ptr_res;
-
-                Parallel.For(0, (increment -1+ maxsize)/ increment, new ParallelOptions() { MaxDegreeOfParallelism = degree }, (long ri) =>
-                {
-                   
-                    for (long rj = 0; rj < maxsize; rj += increment)
-                    {
-                        for (long i = ri; i < ri + increment && i < maxsize; i++)
-                            for (long j = rj; j < rj + increment && j < maxsize; j++)
-                            {
-                                res.ptr[i * maxsize2 + j] = (float)DotProductAVX(&a.ptr[i * maxsize2], &b.ptr[j * maxsize2], maxsize2);
-                            }
-                    }
-                });
-
-                //Parallel.For(0, maxsize, new ParallelOptions() { MaxDegreeOfParallelism = degree }, (int i) =>
-                //{
-                //    for (int j = 0; j < maxsize; j++)
-                //    {
-                //        res.ptr[i*maxsize2 + j] = (float)DotProductAVX(&a.ptr[i * maxsize2], &b.ptr[j * maxsize2], maxsize2);
-                //    }
-                //});
-
-            }
-        }
-        #endregion
     }
 }

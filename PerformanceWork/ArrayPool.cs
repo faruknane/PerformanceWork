@@ -9,7 +9,6 @@ namespace PerformanceWork
 {
     public class ArrayPool<T> : IDisposable
     {
-        private int count = 0;
         public int TimesLarger
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -24,11 +23,9 @@ namespace PerformanceWork
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set;
         }
-        public int Count
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return count; }
-        }
+        public int Count { [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get; private set;
+        } = 0;
 
         public int UnreturnedArrayCount
         {
@@ -90,7 +87,7 @@ namespace PerformanceWork
                 return null;
             else
             {
-                count--;
+                Count--;
                 T[] res = select.Array;
 
                 if (select.L != null)
@@ -120,7 +117,7 @@ namespace PerformanceWork
                 throw new Exception("ArrayPool Maxcount has been reached!");
 
             var n = new FloatFastNode<T>(array);
-            count++;
+            Count++;
             if (last == null)
             {
                 first = last = n;
