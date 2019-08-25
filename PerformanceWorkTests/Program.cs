@@ -17,27 +17,6 @@ namespace PerformanceWorkTests
     {
         public static int Size = 14 * 14 * 5 * 5;
 
-        public unsafe static void VectorizationAddAVX()
-        {
-            Vectorization.AddAVX(a.Array, b.Array, c.Array, c.Array.Length);
-        }
-
-        public unsafe static void DotProductAVX()
-        {
-            Vectorization.DotProductAVX(ref a.Array, ref b.Array, c.Array.Length);
-        }
-        public unsafe static void DotProductAVXParallel()
-        {
-            fixed (float* ptra = a.Array, ptrb = b.Array)
-            {
-                Vectorization.DotProductAVXParallel(ptra, ptrb, a.Array.Length);
-            }
-        }
-        public unsafe static void MatrixMultiply()
-        {
-            Vectorization.MatrixMultiply(ref a, ref b, ref c);
-        }
-
 
         public static Matrix a, b, c;
 
@@ -61,11 +40,11 @@ namespace PerformanceWorkTests
                 a.Array[i] = i;
                 b.Array[i] = i;
             }
+
             fixed (float* ptr_a = a.Array, ptr_b = b.Array)
             {
                 Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[0]);
-                Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[0]);
-                Vector256<float> res = Avx2.Compare(v1, v2, FloatComparisonMode.UnorderedEqualNonSignaling);
+                Vector256<float> res = Fma.
                 Console.WriteLine(res);
             }
 

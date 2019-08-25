@@ -1,4 +1,6 @@
-﻿namespace PerformanceWork.OptimizedNumerics
+﻿using System;
+
+namespace PerformanceWork.OptimizedNumerics
 {
     public partial class Vectorization
     {
@@ -7,5 +9,6 @@
             public float* ptr;
         }
 
+        
     }
 }

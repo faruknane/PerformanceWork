@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace PerformanceWork.OptimizedNumerics
 {
-    public unsafe struct Matrix : IDisposable
+    public unsafe class Matrix : IDisposable
     {   
         public float[] Array;
         public int D1, D2;
@@ -93,24 +93,24 @@ namespace PerformanceWork.OptimizedNumerics
 
             if (this.D1 != o.D1 || this.D2 != o.D2) return false;
 
-            return Vectorization.EqualsAVX(this.Array, o.Array, this.Array.Length);
+            return Vectorization.ElementWiseEqualsAVX(this.Array, o.Array, this.Array.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix operator +(Matrix a, Matrix b)
         {
             if (a.D1 != b.D1 || a.D2 != b.D2)
-                throw new Exception("Matrices to be sum should have the same dimensions!");
+                throw new Exception("Matrices to be sum should have same dimensions!");
 
             Matrix res = new Matrix(a.D1, a.D2);
-            Vectorization.AddAVX(a.Array, b.Array, res.Array, res.Array.Length);
+            Vectorization.ElementWiseAddAVX(a.Array, b.Array, res.Array, res.Array.Length);
             return res;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix operator +(Matrix a, float b)
         {
             Matrix res = new Matrix(a.D1, a.D2);
-            Vectorization.AddAVX(a.Array, b, res.Array, res.Array.Length);
+            Vectorization.ElementWiseAddAVX(a.Array, b, res.Array, res.Array.Length);
             return res;
         }
 
@@ -118,17 +118,17 @@ namespace PerformanceWork.OptimizedNumerics
         public static Matrix operator -(Matrix a, Matrix b)
         {
             if (a.D1 != b.D1 || a.D2 != b.D2)
-                throw new Exception("Matrices to be sum should have the same dimensions!");
+                throw new Exception("Matrices to be sum should have same dimensions!");
 
             Matrix res = new Matrix(a.D1, a.D2);
-            Vectorization.SubtractAVX(a.Array, b.Array, res.Array, res.Array.Length);
+            Vectorization.ElementWiseSubtractAVX(a.Array, b.Array, res.Array, res.Array.Length);
             return res;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix operator -(Matrix a, float b)
         {
             Matrix res = new Matrix(a.D1, a.D2);
-            Vectorization.AddAVX(a.Array, -b, res.Array, res.Array.Length);
+            Vectorization.ElementWiseAddAVX(a.Array, -b, res.Array, res.Array.Length);
             return res;
         }
 
@@ -136,14 +136,14 @@ namespace PerformanceWork.OptimizedNumerics
         public static Matrix operator *(Matrix a, float b)
         {
             Matrix res = new Matrix(a.D1, a.D2);
-            Vectorization.MultiplyAVX(a.Array, b, res.Array, res.Array.Length);
+            Vectorization.ElementWiseMultiplyAVX(a.Array, b, res.Array, res.Array.Length);
             return res;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix operator /(Matrix a, float b)
         {
             Matrix res = new Matrix(a.D1, a.D2);
-            Vectorization.MultiplyAVX(a.Array, 1 / b, res.Array, res.Array.Length);
+            Vectorization.ElementWiseMultiplyAVX(a.Array, 1 / b, res.Array, res.Array.Length);
             return res;
         }
 
@@ -160,5 +160,29 @@ namespace PerformanceWork.OptimizedNumerics
             m[0] = a;
             return m;
         }
+        public void ElementWiseMultiply(Matrix b)
+        {
+            if (this.D1 != b.D1 || this.D2 != b.D2)
+                throw new Exception("The dimensions should be same!");
+
+            Vectorization.ElementWiseMultiplyAVX(this.Array, b.Array, this.Array, this.Array.Length);
+        }
+        #region Static Methods
+        public static Matrix ElementWiseMultiply(Matrix a, Matrix b)
+        {
+            if (a.D1 != b.D1 || a.D2 != b.D2)
+                throw new Exception("The dimensions should be same!");
+
+            Matrix c = new Matrix(a.D1,a.D2);
+            Vectorization.ElementWiseMultiplyAVX(a.Array,b.Array,c.Array,c.Array.Length);
+            return c;
+        }
+        public static Matrix CreateCopy(Matrix m)
+        {
+            Matrix c = new Matrix(m.D1,m.D2);
+            Vectorization.ElementWiseAssignAVX(c.Array, m.Array,c.Array.Length);
+            return c;
+        }
+        #endregion
     }
 }

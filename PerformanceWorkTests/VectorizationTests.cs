@@ -8,19 +8,32 @@ namespace PerformanceWorkTests
     public class VectorizationTests
     {
         [TestMethod]
+        public void Assigning()
+        {
+            int Size = 123;
+            float[] v1 = new float[Size];
+            float[] v2 = new float[Size];
+            for (int i = 0; i < v1.Length; i++)
+                v1[i] = i;
+
+            Vectorization.ElementWiseAssignAVX(v2, v1, v1.Length);
+            Assert.IsTrue(ArrayEqual<float>(v1, v2));
+        }
+
+        [TestMethod]
         public void Equality()
         {
             {
                 float[] v1 = { 1, 2, 3 };
                 float[] v2 = { 1, 2, 3 };
-                bool res = Vectorization.EqualsAVX(v1, v2, v1.Length);
+                bool res = Vectorization.ElementWiseEqualsAVX(v1, v2, v1.Length);
                 bool res2 = true;
                 Assert.AreEqual(res, res2);
             }
             {
                 float[] v1 = { 1, 2, 2 };
                 float[] v2 = { 1, 2, 3 };
-                bool res = Vectorization.EqualsAVX(v1, v2, v1.Length);
+                bool res = Vectorization.ElementWiseEqualsAVX(v1, v2, v1.Length);
                 bool res2 = false;
                 Assert.AreEqual(res, res2);
             }
@@ -31,7 +44,7 @@ namespace PerformanceWorkTests
             float[] v1 = { 1, 2, 3 };
             float[] v2 = { 1, 2, 3 };
             float[] res = new float[3];
-            Vectorization.AddAVX(v1, v2, res, res.Length);
+            Vectorization.ElementWiseAddAVX(v1, v2, res, res.Length);
             float[] res2 = { 2, 4, 6 };
 
             Assert.IsTrue(ArrayEqual<float>(res, res2));
@@ -42,7 +55,7 @@ namespace PerformanceWorkTests
             float[] v1 = { 1, 2, 3 };
             float v2 = 2;
             float[] res = new float[3];
-            Vectorization.AddAVX(v1, v2, res, res.Length);
+            Vectorization.ElementWiseAddAVX(v1, v2, res, res.Length);
             float[] res2 = { 3, 4, 5 };
 
             Assert.IsTrue(ArrayEqual<float>(res, res2));
@@ -56,7 +69,7 @@ namespace PerformanceWorkTests
             for (int i = 0; i < size; i++)
                 v1[i] = v2[i] = i;
 
-            double res = Vectorization.DotProductAVX(ref v1, ref v2, size);
+            double res = Vectorization.DotProductFMA(ref v1, ref v2, size);
 
             double res2 = 0;
             for (int i = 0; i < size; i++)
@@ -74,7 +87,7 @@ namespace PerformanceWorkTests
                 v1[i] = v2[i] = i;
             fixed (float* ptr = v1, ptr2 = v2)
             {
-                double res = Vectorization.DotProductAVX(ptr, ptr2, size);
+                double res = Vectorization.DotProductFMA(ptr, ptr2, size);
                 double res2 = 0;
                 for (int i = 0; i < size; i++)
                     res2 += v1[i] * v2[i];
@@ -95,7 +108,7 @@ namespace PerformanceWorkTests
 
                 fixed (float* ptr = v1, ptr2 = v2)
                 {
-                    double res = Vectorization.DotProductAVXParallel(ptr, ptr2, (int)size);
+                    double res = Vectorization.DotProductFMAParallel(ptr, ptr2, (int)size);
                     long res2 = size * (size - 1) * (2 * size - 1) / 6;
                     Assert.AreEqual(res, (double)res2);
                 }
@@ -109,7 +122,7 @@ namespace PerformanceWorkTests
             float[] v1 = { 1, 2, 3 };
             float[] v2 = { 1, 2, 3 };
             float[] res = new float[3];
-            Vectorization.MultiplyAVX(v1, v2, res, res.Length);
+            Vectorization.ElementWiseMultiplyAVX(v1, v2, res, res.Length);
             float[] res2 = { 1, 4, 9 };
 
             Assert.IsTrue(ArrayEqual<float>(res, res2));
@@ -120,7 +133,7 @@ namespace PerformanceWorkTests
             float[] v1 = { 1, 2, 3 };
             float v2 = 3;
             float[] res = new float[3];
-            Vectorization.MultiplyAVX(v1, v2, res, res.Length);
+            Vectorization.ElementWiseMultiplyAVX(v1, v2, res, res.Length);
             float[] res2 = { 3, 6, 9 };
 
             Assert.IsTrue(ArrayEqual<float>(res, res2));

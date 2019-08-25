@@ -12,7 +12,7 @@ namespace PerformanceWork.OptimizedNumerics
 
         #region Working Properly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddAVX(float[] left, float[] right, float[] result, long length)
+        public static unsafe void ElementWiseAddAVX(float[] left, float[] right, float[] result, long length)
         {
             fixed (float* ptr_a = left, ptr_b = right, ptr_res = result)
             {
@@ -30,7 +30,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddAVX(float[] left, float right, float[] result, long length)
+        public static unsafe void ElementWiseAddAVX(float[] left, float right, float[] result, long length)
         {
             float* ptr_b = &right;
             fixed (float* ptr_a = left, ptr_res = result)
@@ -48,7 +48,7 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
-        public static unsafe void SubtractAVX(float[] left, float[] right, float[] result, long length)
+        public static unsafe void ElementWiseSubtractAVX(float[] left, float[] right, float[] result, long length)
         {
             fixed (float* ptr_a = left, ptr_b = right, ptr_res = result)
             {
@@ -74,7 +74,7 @@ namespace PerformanceWork.OptimizedNumerics
         /// <param name="result"></param>
         /// <param name="length"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe float DotProductAVX(ref float[] left, ref float[] right, int length)
+        public static unsafe float DotProductFMA(ref float[] left, ref float[] right, int length)
         {
             //editliyorum
             fixed (float* ptr_a = left, ptr_b = right)
@@ -105,7 +105,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe float DotProductAVX(float* ptr_a, float* ptr_b, long length)
+        public static unsafe float DotProductFMA(float* ptr_a, float* ptr_b, long length)
         {
             long remain = length % Vector256<float>.Count;
 
@@ -132,7 +132,7 @@ namespace PerformanceWork.OptimizedNumerics
             return result;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe float DotProductAVXParallel(float* ptr_a, float* ptr_b, long length)
+        public static unsafe float DotProductFMAParallel(float* ptr_a, float* ptr_b, long length)
         {
             int degree = 0;
             int num;
@@ -161,7 +161,7 @@ namespace PerformanceWork.OptimizedNumerics
             object locker = new object();
             Parallel.For(0, degree, new ParallelOptions() { MaxDegreeOfParallelism = degree} ,(long threadno) =>
             {
-                float ownres = DotProductAVX(carrierA.ptr + starts[threadno], carrierB.ptr + starts[threadno], blocks[threadno]);
+                float ownres = DotProductFMA(carrierA.ptr + starts[threadno], carrierB.ptr + starts[threadno], blocks[threadno]);
                 lock (locker)
                 {
                     result += ownres;
@@ -229,7 +229,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void MultiplyAVX(float[] arr1, float[] arr2, float[] result, long length)
+        public static unsafe void ElementWiseMultiplyAVX(float[] arr1, float[] arr2, float[] result, long length)
         {
             fixed (float* ptr_a = arr1, ptr_b = arr2, ptr_res = result)
             {
@@ -247,7 +247,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
-        public static unsafe void MultiplyAVX(float[] arr1, float arr2, float[] result, long length)
+        public static unsafe void ElementWiseMultiplyAVX(float[] arr1, float arr2, float[] result, long length)
         {
             float* ptr_b = &arr2;
             fixed (float* ptr_a = arr1, ptr_res = result)
@@ -267,7 +267,7 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe bool EqualsAVX(float[] arr1, float[] arr2, long length)
+        public static unsafe bool ElementWiseEqualsAVX(float[] arr1, float[] arr2, long length)
         {
             fixed (float* ptr_a = arr1, ptr_b = arr2)
             {
@@ -288,6 +288,23 @@ namespace PerformanceWork.OptimizedNumerics
                 //}
             }
         }
+
+        public unsafe static void ElementWiseAssignAVX(float[] left, float[] right, long length)
+        {
+            fixed (float* ptr_left = left, ptr_right = right)
+            {
+                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                {
+                    Vector256<float> v = Avx2.LoadVector256(&ptr_right[i]);
+                    Avx2.Store(&ptr_left[i],v);
+                }
+                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                {
+                    ptr_left[i] = ptr_right[i];
+                }
+            }
+        }
+
         #endregion
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
