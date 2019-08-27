@@ -7,14 +7,14 @@ namespace PerformanceWork.OptimizedNumerics
     {   
         public float[] Array;
         public int D1, D2;
-        internal static ArrayPool<float> pool = ArrayPool<float>.Create(2, 50);
+        public static ArrayPool<float> Pool = ArrayPool<float>.Create(2, 50);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Matrix(int d1, int d2)
         {
             D1 = d1;
             D2 = d2;
-            Array = pool.Rent(D1 * D2);
+            Array = Pool.Rent(D1 * D2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -22,16 +22,21 @@ namespace PerformanceWork.OptimizedNumerics
         {
             D1 = arr.GetLength(0);
             D2 = arr.GetLength(1);
-            Array = pool.Rent(D1 * D2);
+            Array = Pool.Rent(D1 * D2);
             for (int i = 0; i < D1; i++)
                 for (int j = 0; j < D2; j++)
                     this[i, j] = arr[i, j];
         }
 
+        public void SetZero()
+        {
+            Vectorization.ElementWiseSetValueAVX(Array, 0, Array.Length);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
         {
-            pool.Return(Array);
+            Pool.Return(Array);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -104,9 +104,9 @@ namespace PerformanceWork
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool Condition(int minlenght, int mylength)
+        private bool Condition(int minlength, int mylength)
         {
-            if (mylength >= minlenght && mylength <= minlenght * TimesLarger) return true;
+            if (mylength >= minlength && mylength <= minlength * TimesLarger) return true;
             return false;
         }
 

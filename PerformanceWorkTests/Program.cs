@@ -35,22 +35,14 @@ namespace PerformanceWorkTests
                 for (int j = 0; j < Size; j++)
                     c[i, j] = 0;
 
-            for(int i =0; i < 8; i++)
+            for(int i = 0; i < 10; i++)
             {
-                a.Array[i] = i;
-                b.Array[i] = i;
-            }
-
-            fixed (float* ptr_a = a.Array, ptr_b = b.Array)
-            {
-                Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[0]);
-                Vector256<float> res = Fma.
-                Console.WriteLine(res);
+                Vectorization.DotProductFMA(a.Array, b.Array, a.Array.Length);
             }
 
 
             //Stopwatch s = new Stopwatch();
-            
+
 
             //s.Restart();
             //for (int i = 0; i < 1; i++)

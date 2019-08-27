@@ -8,6 +8,19 @@ namespace PerformanceWorkTests
     public class VectorizationTests
     {
         [TestMethod]
+        public void MatrixSetZero()
+        {
+            int Size = 123;
+            float[] v1 = new float[Size];
+            float[] v2 = new float[Size];
+            for (int i = 0; i < v1.Length; i++)
+                v1[i] = i;
+
+            Vectorization.ElementWiseSetValueAVX(v1, 0, v1.Length);
+            Assert.IsTrue(ArrayEqual<float>(v1, v2));
+        }
+
+        [TestMethod]
         public void Assigning()
         {
             int Size = 123;
@@ -69,7 +82,7 @@ namespace PerformanceWorkTests
             for (int i = 0; i < size; i++)
                 v1[i] = v2[i] = i;
 
-            double res = Vectorization.DotProductFMA(ref v1, ref v2, size);
+            double res = Vectorization.DotProductFMA(v1, v2, size);
 
             double res2 = 0;
             for (int i = 0; i < size; i++)
