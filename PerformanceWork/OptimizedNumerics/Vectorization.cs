@@ -318,26 +318,7 @@ namespace PerformanceWork.OptimizedNumerics
                 //}
             }
         }
-        #endregion
 
-        #region Unfinished Methods
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static void Exponential(float[] x, float[] res, long length)
-        {
-            fixed (float* ptr_x = x)
-            {
-                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i+= Vector256<float>.Count)
-                {
-
-                }
-
-                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
-                {
-
-                }
-            }
-        }
-        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static void MatrixMultiply(ref Matrix a, ref Matrix b, ref Matrix c)
         {
@@ -373,14 +354,14 @@ namespace PerformanceWork.OptimizedNumerics
                         ++positionyforcreating;
                     }
                 }
-                
+
 
                 for (long fi = 0; fi < m / increment * increment; fi += increment)
                 {
                     for (long j = 0; j < n; ++j)
                     {
                         //ptr_a[i0 * n + j]
-                        ptr_a[(fi / increment) * (increment * n) + j * increment + 0] = ptr_real_a[(fi + 0)*n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 0] = ptr_real_a[(fi + 0) * n + j];
                         ptr_a[(fi / increment) * (increment * n) + j * increment + 1] = ptr_real_a[(fi + 1) * n + j];
                         ptr_a[(fi / increment) * (increment * n) + j * increment + 2] = ptr_real_a[(fi + 2) * n + j];
                         ptr_a[(fi / increment) * (increment * n) + j * increment + 3] = ptr_real_a[(fi + 3) * n + j];
@@ -400,7 +381,7 @@ namespace PerformanceWork.OptimizedNumerics
 
 
 
-                
+
                 #endregion
                 for (long fi = 0; fi < m / increment * increment; fi += increment)
                 {
@@ -543,7 +524,27 @@ namespace PerformanceWork.OptimizedNumerics
             ak.Dispose();
             bk.Dispose();
         }
+
         #endregion
+
+        #region Unfinished Methods
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static void Exponential(float[] x, float[] res, long length)
+        {
+            fixed (float* ptr_x = x)
+            {
+                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i+= Vector256<float>.Count)
+                {
+
+                }
+
+                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                {
+
+                }
+            }
+        }
+         #endregion
 
     }
 }
