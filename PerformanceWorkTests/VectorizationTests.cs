@@ -152,6 +152,36 @@ namespace PerformanceWorkTests
             Assert.IsTrue(ArrayEqual<float>(res, res2));
         }
 
+        [TestMethod]
+        public void MatrixMultiply()
+        {
+            Random r = new Random();
+            int n = r.Next(2, 30);
+            int m = r.Next(2, 30);
+            int p = r.Next(2, 30);
+            Matrix a = new float[n, m];
+            Matrix b = new float[m, p];
+
+            Matrix res = new float[n, p];
+            for (int i = 0; i < a.D1; i++)
+                for (int j = 0; j < a.D2; j++)
+                    a[i, j] = r.Next(-10,10);
+            for (int i = 0; i < b.D1; i++)
+                for (int j = 0; j < b.D2; j++)
+                    b[i, j] = r.Next(-10,10);
+
+            for (int i = 0; i < a.D1; i++)
+                for (int j = 0; j < a.D2; j++)
+                    for (int k = 0; k < b.D2; k++)
+                    {
+                        res[i, k] += a[i, j] * b[j, k];
+                    }
+
+            var c = Matrix.MatrixMultiply(a, b);
+
+            Assert.IsTrue(ArrayEqual<float>(res.Array, c.Array));
+        }
+
 
         public bool ArrayEqual<T>(T[] v1, T[] v2)
         {

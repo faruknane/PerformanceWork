@@ -15,9 +15,12 @@ namespace PerformanceWorkTests
 {
     public class Program
     {
-        public static int Size = 14 * 14 * 5 * 5;
+        public static int Size = 1000;
 
-
+        private static void MatrixMultiply()
+        {
+            Vectorization.MatrixMultiply(ref a, ref b, ref c);
+        }
         public static Matrix a, b, c;
 
         static unsafe void Main(string[] args)
@@ -35,21 +38,23 @@ namespace PerformanceWorkTests
                 for (int j = 0; j < Size; j++)
                     c[i, j] = 0;
 
-            for(int i = 0; i < 10; i++)
-            {
-                Vectorization.DotProductFMA(a.Array, b.Array, a.Array.Length);
-            }
+            //for(int i = 0; i < 10; i++)
+            //{
+            //    Vectorization.DotProductFMA(a.Array, b.Array, a.Array.Length);
+            //}
 
 
-            //Stopwatch s = new Stopwatch();
+            Stopwatch s = new Stopwatch();
 
+            Program.MatrixMultiply();
+            Program.MatrixMultiply();
 
-            //s.Restart();
-            //for (int i = 0; i < 1; i++)
-            //    Program.MatrixMultiply();
-            //s.Stop();
-            //long time = s.ElapsedMilliseconds;
-            //Console.WriteLine("MatrixMultiply Size: " + Size + ", Time: " + time);
+            s.Restart();
+            for (int i = 0; i < 10; i++)
+                Program.MatrixMultiply();
+            s.Stop();
+            long time = s.ElapsedMilliseconds;
+            Console.WriteLine("MatrixMultiply Size: " + Size + ", Time: " + time);
 
             //a.Dispose();
             //b.Dispose();
@@ -68,7 +73,6 @@ namespace PerformanceWorkTests
             //var summary = BenchmarkRunner.Run<Program>();
         }
 
-
-
+       
     }
 }

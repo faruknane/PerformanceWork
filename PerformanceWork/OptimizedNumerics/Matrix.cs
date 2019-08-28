@@ -188,6 +188,12 @@ namespace PerformanceWork.OptimizedNumerics
             Vectorization.ElementWiseAssignAVX(c.Array, m.Array,c.Array.Length);
             return c;
         }
+        public static Matrix MatrixMultiply(Matrix a, Matrix b)
+        {
+            Matrix c = new Matrix(a.D1, b.D2);
+            Vectorization.MatrixMultiply(ref a, ref b, ref c);
+            return c;
+        }
         #endregion
     }
 }
