@@ -8,6 +8,7 @@ namespace PerformanceWork.OptimizedNumerics
         public float[] Array;
         public int D1, D2;
         public static ArrayPool<float> Pool = ArrayPool<float>.Create(2, 1350);
+        bool returned = false;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Matrix(int d1, int d2)
@@ -36,11 +37,14 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
         {
+            if (returned)
+                throw new Exception("Already Returned!");
+            returned = true;
             Pool.Return(Array);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal float* GetPointer()
+        public float* GetPointer()
         {
             fixed (float* ptr = Array)
                 return ptr;
@@ -165,6 +169,7 @@ namespace PerformanceWork.OptimizedNumerics
             m[0] = a;
             return m;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ElementWiseMultiply(Matrix b)
         {
             if (this.D1 != b.D1 || this.D2 != b.D2)
@@ -173,6 +178,7 @@ namespace PerformanceWork.OptimizedNumerics
             Vectorization.ElementWiseMultiplyAVX(this.Array, b.Array, this.Array, D1 * D2);
         }
         #region Static Methods
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix ElementWiseMultiply(Matrix a, Matrix b)
         {
             if (a.D1 != b.D1 || a.D2 != b.D2)
@@ -182,17 +188,29 @@ namespace PerformanceWork.OptimizedNumerics
             Vectorization.ElementWiseMultiplyAVX(a.Array,b.Array,c.Array, a.D1 * a.D2);
             return c;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix CreateCopy(Matrix m)
         {
             Matrix c = new Matrix(m.D1,m.D2);
             Vectorization.ElementWiseAssignAVX(c.Array, m.Array, m.D1 * m.D2);
             return c;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix MatrixMultiply(Matrix a, Matrix b)
         {
             Matrix c = new Matrix(a.D1, b.D2);
             Vectorization.MatrixMultiply(ref a, ref b, ref c);
             return c;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix TranposeOf(Matrix x)
+        {
+            Matrix m = new Matrix(x.D2, x.D1);
+            for (int i = 0; i < x.D1; i++)
+            for (int j = 0; j < x.D2; j++)
+                    m[j, i] = x[i, j];
+            return m;
         }
         #endregion
     }

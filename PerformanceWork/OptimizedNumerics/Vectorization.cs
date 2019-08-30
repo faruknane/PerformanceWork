@@ -26,6 +26,16 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void ElementWiseSetValueAVX(float* ptr_a, float val, long length)
+        {
+            float* ptr_val = &val;
+            Vector256<float> v = Avx2.BroadcastScalarToVector256(ptr_val);
+            for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                Avx2.Store(&ptr_a[i], v);
+            for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                ptr_a[i] = val;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void ElementWiseAddAVX(float[] left, float[] right, float[] result, long length)
         {
             fixed (float* ptr_a = left, ptr_b = right, ptr_res = result)
@@ -62,6 +72,7 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void ElementWiseSubtractAVX(float[] left, float[] right, float[] result, long length)
         {
             fixed (float* ptr_a = left, ptr_b = right, ptr_res = result)
@@ -77,6 +88,21 @@ namespace PerformanceWork.OptimizedNumerics
                 {
                     ptr_res[i] = ptr_a[i] - ptr_b[i];
                 }
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void ElementWiseSubtractAVX(float* ptr_left, float* ptr_right, float* ptr_res, long length)
+        {
+            for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+            {
+                Vector256<float> v1 = Avx2.LoadVector256(&ptr_left[i]);
+                Vector256<float> v2 = Avx2.LoadVector256(&ptr_right[i]);
+                Vector256<float> res = Avx2.Subtract(v1, v2);
+                Avx2.Store(&ptr_res[i], res);
+            }
+            for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+            {
+                ptr_res[i] = ptr_left[i] - ptr_right[i];
             }
         }
 
@@ -259,6 +285,7 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void ElementWiseMultiplyAVX(float[] arr1, float arr2, float[] result, long length)
         {
             float* ptr_b = &arr2;
@@ -277,6 +304,7 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static void ElementWiseAssignAVX(float[] left, float[] right, long length)
         {
             fixed (float* ptr_left = left, ptr_right = right)
@@ -329,6 +357,214 @@ namespace PerformanceWork.OptimizedNumerics
             long increment = 14;
 
             fixed (float* ptr_a = ak.Array, ptr_b = bk.Array, ptr_c = c.Array, ptr_real_a = a.Array, ptr_real_b = b.Array)
+            {
+                #region editing ak,bk array with pointers
+                for (long k = 0; k < p / Vector256<float>.Count * Vector256<float>.Count; k += Vector256<float>.Count)
+                {
+                    long positionyforcreating = (k / Vector256<float>.Count) * Vector256<float>.Count * n;
+                    for (long j = 0; j < n; ++j)
+                    {
+                        ptr_b[positionyforcreating] = ptr_real_b[j * p + k + 0];
+                        ++positionyforcreating;
+                        ptr_b[positionyforcreating] = ptr_real_b[j * p + k + 1];
+                        ++positionyforcreating;
+                        ptr_b[positionyforcreating] = ptr_real_b[j * p + k + 2];
+                        ++positionyforcreating;
+                        ptr_b[positionyforcreating] = ptr_real_b[j * p + k + 3];
+                        ++positionyforcreating;
+                        ptr_b[positionyforcreating] = ptr_real_b[j * p + k + 4];
+                        ++positionyforcreating;
+                        ptr_b[positionyforcreating] = ptr_real_b[j * p + k + 5];
+                        ++positionyforcreating;
+                        ptr_b[positionyforcreating] = ptr_real_b[j * p + k + 6];
+                        ++positionyforcreating;
+                        ptr_b[positionyforcreating] = ptr_real_b[j * p + k + 7];
+                        ++positionyforcreating;
+                    }
+                }
+
+
+                for (long fi = 0; fi < m / increment * increment; fi += increment)
+                {
+                    for (long j = 0; j < n; ++j)
+                    {
+                        //ptr_a[i0 * n + j]
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 0] = ptr_real_a[(fi + 0) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 1] = ptr_real_a[(fi + 1) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 2] = ptr_real_a[(fi + 2) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 3] = ptr_real_a[(fi + 3) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 4] = ptr_real_a[(fi + 4) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 5] = ptr_real_a[(fi + 5) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 6] = ptr_real_a[(fi + 6) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 7] = ptr_real_a[(fi + 7) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 8] = ptr_real_a[(fi + 8) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 9] = ptr_real_a[(fi + 9) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 10] = ptr_real_a[(fi + 10) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 11] = ptr_real_a[(fi + 11) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 12] = ptr_real_a[(fi + 12) * n + j];
+                        ptr_a[(fi / increment) * (increment * n) + j * increment + 13] = ptr_real_a[(fi + 13) * n + j];
+                        //ptr_a[(fi / increment) * (increment * n) + j * increment + 14] = a[fi + 14, j];
+                    }
+                }
+
+
+
+
+                #endregion
+                for (long fi = 0; fi < m / increment * increment; fi += increment)
+                {
+                    long i0 = fi;
+                    long i1 = fi + 1;
+                    long i2 = fi + 2;
+                    long i3 = fi + 3;
+                    long i4 = fi + 4;
+                    long i5 = fi + 5;
+                    long i6 = fi + 6;
+                    long i7 = fi + 7;
+                    long i8 = fi + 8;
+                    long i9 = fi + 9;
+                    long i10 = fi + 10;
+                    long i11 = fi + 11;
+                    long i12 = fi + 12;
+                    long i13 = fi + 13;
+                    //long i14 = fi + 14;
+
+                    //we can cancel (/ Vector256<float>.Count * Vector256<float>.Count) below
+                    for (long k = 0; k < p / Vector256<float>.Count * Vector256<float>.Count; k += Vector256<float>.Count)
+                    {
+                        // 4 x 8 result
+                        Vector256<float> res0 = new Vector256<float>(); //first row of the result
+                        Vector256<float> res1 = new Vector256<float>();
+                        Vector256<float> res2 = new Vector256<float>();
+                        Vector256<float> res3 = new Vector256<float>();
+                        Vector256<float> res4 = new Vector256<float>();
+                        Vector256<float> res5 = new Vector256<float>();
+                        Vector256<float> res6 = new Vector256<float>();
+                        Vector256<float> res7 = new Vector256<float>();
+                        Vector256<float> res8 = new Vector256<float>();
+                        Vector256<float> res9 = new Vector256<float>();
+                        Vector256<float> res10 = new Vector256<float>();
+                        Vector256<float> res11 = new Vector256<float>();
+                        Vector256<float> res12 = new Vector256<float>();
+                        Vector256<float> res13 = new Vector256<float>();
+                        //Vector256<float> res14 = new Vector256<float>();
+
+                        long positiony = (k / 8) * 8 * n;
+                        long postionx = (fi / increment) * (increment * n);
+
+                        //Avx2.Prefetch0(&ptr_b[positiony]);
+                        //Avx2.Prefetch0(&j);
+                        for (long j = 0; j < n; ++j)
+                        {
+                            Vector256<float> y = Avx2.LoadVector256(&ptr_b[positiony + j * 8]);
+                            if (true)
+                            {
+                                res0 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 0]), res0);
+                                res1 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 1]), res1);
+                                res2 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 2]), res2);
+                                res3 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 3]), res3);
+                                res4 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 4]), res4);
+                                res5 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 5]), res5);
+                                res6 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 6]), res6);
+                                res7 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 7]), res7);
+                                res8 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 8]), res8);
+                                res9 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 9]), res9);
+                                res10 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 10]), res10);
+                                res11 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 11]), res11);
+                                res12 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 12]), res12);
+                                res13 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 13]), res13);
+                                //res14 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_a[postionx + j * increment + 14]), res14);
+                            }
+
+                        }
+
+                        Avx2.Store(&ptr_c[i0 * p + k], res0);
+                        Avx2.Store(&ptr_c[i1 * p + k], res1);
+                        Avx2.Store(&ptr_c[i2 * p + k], res2);
+                        Avx2.Store(&ptr_c[i3 * p + k], res3);
+                        Avx2.Store(&ptr_c[i4 * p + k], res4);
+                        Avx2.Store(&ptr_c[i5 * p + k], res5);
+                        Avx2.Store(&ptr_c[i6 * p + k], res6);
+                        Avx2.Store(&ptr_c[i7 * p + k], res7);
+                        Avx2.Store(&ptr_c[i8 * p + k], res8);
+                        Avx2.Store(&ptr_c[i9 * p + k], res9);
+                        Avx2.Store(&ptr_c[i10 * p + k], res10);
+                        Avx2.Store(&ptr_c[i11 * p + k], res11);
+                        Avx2.Store(&ptr_c[i12 * p + k], res12);
+                        Avx2.Store(&ptr_c[i13 * p + k], res13);
+                        //Avx2.Store(&ptr_c[i14 * p + k], res14);
+                    }//k < p remaining part
+                    for (long k = p / Vector256<float>.Count * Vector256<float>.Count; k < p; k++)
+                    {
+                        long postionx = (fi / increment) * (increment * n);
+                        for (int j = 0; j < n; j++)
+                        {
+                            ptr_c[i0 * p + k] += ptr_a[postionx + j * increment + 0] * ptr_real_b[j * p + k];
+                            ptr_c[i1 * p + k] += ptr_a[postionx + j * increment + 1] * ptr_real_b[j * p + k];
+                            ptr_c[i2 * p + k] += ptr_a[postionx + j * increment + 2] * ptr_real_b[j * p + k];
+                            ptr_c[i3 * p + k] += ptr_a[postionx + j * increment + 3] * ptr_real_b[j * p + k];
+                            ptr_c[i4 * p + k] += ptr_a[postionx + j * increment + 4] * ptr_real_b[j * p + k];
+                            ptr_c[i5 * p + k] += ptr_a[postionx + j * increment + 5] * ptr_real_b[j * p + k];
+                            ptr_c[i6 * p + k] += ptr_a[postionx + j * increment + 6] * ptr_real_b[j * p + k];
+                            ptr_c[i7 * p + k] += ptr_a[postionx + j * increment + 7] * ptr_real_b[j * p + k];
+                            ptr_c[i8 * p + k] += ptr_a[postionx + j * increment + 8] * ptr_real_b[j * p + k];
+                            ptr_c[i9 * p + k] += ptr_a[postionx + j * increment + 9] * ptr_real_b[j * p + k];
+                            ptr_c[i10 * p + k] += ptr_a[postionx + j * increment + 10] * ptr_real_b[j * p + k];
+                            ptr_c[i11 * p + k] += ptr_a[postionx + j * increment + 11] * ptr_real_b[j * p + k];
+                            ptr_c[i12 * p + k] += ptr_a[postionx + j * increment + 12] * ptr_real_b[j * p + k];
+                            ptr_c[i13 * p + k] += ptr_a[postionx + j * increment + 13] * ptr_real_b[j * p + k];
+                        }
+
+                    }
+                }
+                for (long fi = m / increment * increment; fi < m; fi++)
+                {
+                    long i0 = fi;
+                    for (long k = 0; k < p / Vector256<float>.Count * Vector256<float>.Count; k += Vector256<float>.Count)
+                    {
+                        // 4 x 8 result
+                        Vector256<float> res0 = new Vector256<float>(); //first row of the result
+
+                        long positiony = (k / 8) * 8 * n;
+
+                        //Avx2.Prefetch0(&ptr_b[positiony]);
+                        //Avx2.Prefetch0(&j);
+                        for (long j = 0; j < n; ++j)
+                        {
+                            Vector256<float> y = Avx2.LoadVector256(&ptr_b[positiony + j * 8]);
+                            if (true)
+                            {
+                                res0 = Fma.MultiplyAdd(y, Avx2.BroadcastScalarToVector256(&ptr_real_a[fi * n + j]), res0);
+                            }
+                        }
+                        Avx2.Store(&ptr_c[i0 * p + k], res0);
+                    }//k < p remaining part
+                    for (int j = 0; j < n; j++)
+                    {
+                        for (long k = p / Vector256<float>.Count * Vector256<float>.Count; k < p; k++)
+                        {
+                            ptr_c[fi * p + k] += ptr_real_a[fi * n + j] * ptr_real_b[j * p + k];
+                        }
+                    }
+
+                }
+            }
+            ak.Dispose();
+            bk.Dispose();
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static void MatrixMultiply(float* a, long aD1, long aD2, float* b, long bD1, long bD2, float* c)
+        {
+            Vectorization.ElementWiseSetValueAVX(c, 0, aD1 * bD2);
+            long m = aD1, n = aD2, p = bD2;
+            Matrix bk = new Matrix((int)bD1, (int)bD2);
+            Matrix ak = new Matrix((int)aD1, (int)aD2);
+            long increment = 14;
+
+            float* ptr_real_a = a;
+            float* ptr_real_b = b;
+            float* ptr_c = c;
+            fixed (float* ptr_a = ak.Array, ptr_b = bk.Array)
             {
                 #region editing ak,bk array with pointers
                 for (long k = 0; k < p / Vector256<float>.Count * Vector256<float>.Count; k += Vector256<float>.Count)

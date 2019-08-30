@@ -153,7 +153,7 @@ namespace PerformanceWorkTests
         }
 
         [TestMethod]
-        public void MatrixMultiply()
+        public unsafe void MatrixMultiply()
         {
             Random r = new Random();
             int n = r.Next(2, 30);
@@ -165,10 +165,10 @@ namespace PerformanceWorkTests
             Matrix res = new float[n, p];
             for (int i = 0; i < a.D1; i++)
                 for (int j = 0; j < a.D2; j++)
-                    a[i, j] = r.Next(-10,10);
+                    a[i, j] = r.Next(-10, 10);
             for (int i = 0; i < b.D1; i++)
                 for (int j = 0; j < b.D2; j++)
-                    b[i, j] = r.Next(-10,10);
+                    b[i, j] = r.Next(-10, 10);
 
             for (int i = 0; i < a.D1; i++)
                 for (int j = 0; j < a.D2; j++)
@@ -178,6 +178,41 @@ namespace PerformanceWorkTests
                     }
 
             var c = Matrix.MatrixMultiply(a, b);
+           
+
+            Assert.IsTrue(ArrayEqual<float>(res.Array, c.Array));
+        }
+        [TestMethod]
+        public unsafe void MatrixMultiply2()
+        {
+            Random r = new Random();
+            int n = r.Next(2, 30);
+            int m = r.Next(2, 30);
+            int p = r.Next(2, 30);
+            Matrix a = new float[n, m];
+            Matrix b = new float[m, p];
+
+            Matrix res = new float[n, p];
+            for (int i = 0; i < a.D1; i++)
+                for (int j = 0; j < a.D2; j++)
+                    a[i, j] = r.Next(-10, 10);
+            for (int i = 0; i < b.D1; i++)
+                for (int j = 0; j < b.D2; j++)
+                    b[i, j] = r.Next(-10, 10);
+
+            for (int i = 0; i < a.D1; i++)
+                for (int j = 0; j < a.D2; j++)
+                    for (int k = 0; k < b.D2; k++)
+                    {
+                        res[i, k] += a[i, j] * b[j, k];
+                    }
+
+            //var c = Matrix.MatrixMultiply(a, b);
+
+            Matrix c = new Matrix(a.D1, b.D2);
+            fixed (float* ptr_a = a.Array, ptr_b = b.Array, ptr_c = c.Array)
+                Vectorization.MatrixMultiply(ptr_a, a.D1, a.D2, ptr_b, b.D1, b.D2, ptr_c);
+
 
             Assert.IsTrue(ArrayEqual<float>(res.Array, c.Array));
         }
