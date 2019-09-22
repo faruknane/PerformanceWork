@@ -8,6 +8,10 @@
     <IsPackable>false</IsPackable>
 
     <StartupObject>PerformanceWorkTests.Program</StartupObject>
+
+    <ApplicationIcon />
+
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

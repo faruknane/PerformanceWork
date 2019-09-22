@@ -17,7 +17,7 @@ namespace PerformanceWorkTests
                 v1[i] = i;
 
             Vectorization.ElementWiseSetValueAVX(v1, 0, v1.Length);
-            Assert.IsTrue(ArrayEqual<float>(v1, v2));
+            Assert.IsTrue(ArrayEqual(v1, v2));
         }
 
         [TestMethod]
@@ -30,7 +30,7 @@ namespace PerformanceWorkTests
                 v1[i] = i;
 
             Vectorization.ElementWiseAssignAVX(v2, v1, v1.Length);
-            Assert.IsTrue(ArrayEqual<float>(v1, v2));
+            Assert.IsTrue(ArrayEqual(v1, v2));
         }
 
         [TestMethod]
@@ -39,14 +39,14 @@ namespace PerformanceWorkTests
             {
                 float[] v1 = { 1, 2, 3 };
                 float[] v2 = { 1, 2, 3 };
-                bool res = Vectorization.ElementWiseEqualsAVX(v1, v2, v1.Length);
+                bool res = Vectorization.ElementWiseIsEqualsAVX(v1, v2, v1.Length);
                 bool res2 = true;
                 Assert.AreEqual(res, res2);
             }
             {
                 float[] v1 = { 1, 2, 2 };
                 float[] v2 = { 1, 2, 3 };
-                bool res = Vectorization.ElementWiseEqualsAVX(v1, v2, v1.Length);
+                bool res = Vectorization.ElementWiseIsEqualsAVX(v1, v2, v1.Length);
                 bool res2 = false;
                 Assert.AreEqual(res, res2);
             }
@@ -60,7 +60,7 @@ namespace PerformanceWorkTests
             Vectorization.ElementWiseAddAVX(v1, v2, res, res.Length);
             float[] res2 = { 2, 4, 6 };
 
-            Assert.IsTrue(ArrayEqual<float>(res, res2));
+            Assert.IsTrue(ArrayEqual(res, res2));
         }
         [TestMethod]
         public void Add2()
@@ -71,7 +71,7 @@ namespace PerformanceWorkTests
             Vectorization.ElementWiseAddAVX(v1, v2, res, res.Length);
             float[] res2 = { 3, 4, 5 };
 
-            Assert.IsTrue(ArrayEqual<float>(res, res2));
+            Assert.IsTrue(ArrayEqual(res, res2));
         }
         [TestMethod]
         public void DotProduct()
@@ -138,7 +138,7 @@ namespace PerformanceWorkTests
             Vectorization.ElementWiseMultiplyAVX(v1, v2, res, res.Length);
             float[] res2 = { 1, 4, 9 };
 
-            Assert.IsTrue(ArrayEqual<float>(res, res2));
+            Assert.IsTrue(ArrayEqual(res, res2));
         }
         [TestMethod]
         public void Multiply2()
@@ -149,82 +149,107 @@ namespace PerformanceWorkTests
             Vectorization.ElementWiseMultiplyAVX(v1, v2, res, res.Length);
             float[] res2 = { 3, 6, 9 };
 
-            Assert.IsTrue(ArrayEqual<float>(res, res2));
+            Assert.IsTrue(ArrayEqual(res, res2));
         }
 
         [TestMethod]
         public unsafe void MatrixMultiply()
         {
-            Random r = new Random();
-            int n = r.Next(2, 30);
-            int m = r.Next(2, 30);
-            int p = r.Next(2, 30);
-            Matrix a = new float[n, m];
-            Matrix b = new float[m, p];
 
-            Matrix res = new float[n, p];
-            for (int i = 0; i < a.D1; i++)
-                for (int j = 0; j < a.D2; j++)
-                    a[i, j] = r.Next(-10, 10);
-            for (int i = 0; i < b.D1; i++)
-                for (int j = 0; j < b.D2; j++)
-                    b[i, j] = r.Next(-10, 10);
+            for (int kk = 0; kk < 1000; kk++)
+            {
+                Random r = new Random();
+                int n = r.Next(2, 30);
+                int m = r.Next(2, 30);
+                int p = r.Next(2, 30);
+                Matrix a = new float[n, m];
+                Matrix b = new float[m, p];
 
-            for (int i = 0; i < a.D1; i++)
-                for (int j = 0; j < a.D2; j++)
-                    for (int k = 0; k < b.D2; k++)
-                    {
-                        res[i, k] += a[i, j] * b[j, k];
-                    }
+                Matrix res = new float[n, p];
+                for (int i = 0; i < a.D1; i++)
+                    for (int j = 0; j < a.D2; j++)
+                        a[i, j] = r.Next(-10, 10);
+                for (int i = 0; i < b.D1; i++)
+                    for (int j = 0; j < b.D2; j++)
+                        b[i, j] = r.Next(-10, 10);
 
-            var c = Matrix.MatrixMultiply(a, b);
-           
+                for (int i = 0; i < a.D1; i++)
+                    for (int j = 0; j < a.D2; j++)
+                        for (int k = 0; k < b.D2; k++)
+                        {
+                            res[i, k] += a[i, j] * b[j, k];
+                        }
 
-            Assert.IsTrue(ArrayEqual<float>(res.Array, c.Array));
+                var c = Matrix.MatrixMultiply(a, b);
+
+                if (!Vectorization.ElementWiseIsEqualsAVX(res.Array, c.Array, res.D1 * res.D2))
+                {
+                    throw new Exception("Eþit Deðil!");
+                }
+                a.Dispose();
+                b.Dispose();
+                c.Dispose();
+                res.Dispose();
+            }
         }
         [TestMethod]
         public unsafe void MatrixMultiply2()
         {
-            Random r = new Random();
-            int n = r.Next(2, 30);
-            int m = r.Next(2, 30);
-            int p = r.Next(2, 30);
-            Matrix a = new float[n, m];
-            Matrix b = new float[m, p];
+            for (int kk = 0; kk < 1000; kk++)
+            {
 
-            Matrix res = new float[n, p];
-            for (int i = 0; i < a.D1; i++)
-                for (int j = 0; j < a.D2; j++)
-                    a[i, j] = r.Next(-10, 10);
-            for (int i = 0; i < b.D1; i++)
-                for (int j = 0; j < b.D2; j++)
-                    b[i, j] = r.Next(-10, 10);
+                Random r = new Random();
+                int n = r.Next(2, 30);
+                int m = r.Next(2, 30);
+                int p = r.Next(2, 30);
+                Matrix a = new float[n, m];
+                Matrix b = new float[m, p];
 
-            for (int i = 0; i < a.D1; i++)
-                for (int j = 0; j < a.D2; j++)
-                    for (int k = 0; k < b.D2; k++)
-                    {
-                        res[i, k] += a[i, j] * b[j, k];
-                    }
+                Matrix res = new float[n, p];
+                for (int i = 0; i < a.D1; i++)
+                    for (int j = 0; j < a.D2; j++)
+                        a[i, j] = r.Next(-10, 10);
+                for (int i = 0; i < b.D1; i++)
+                    for (int j = 0; j < b.D2; j++)
+                        b[i, j] = r.Next(-10, 10);
 
-            //var c = Matrix.MatrixMultiply(a, b);
+                for (int i = 0; i < a.D1; i++)
+                    for (int j = 0; j < a.D2; j++)
+                        for (int k = 0; k < b.D2; k++)
+                        {
+                            res[i, k] += a[i, j] * b[j, k];
+                        }
 
-            Matrix c = new Matrix(a.D1, b.D2);
-            fixed (float* ptr_a = a.Array, ptr_b = b.Array, ptr_c = c.Array)
-                Vectorization.MatrixMultiply(ptr_a, a.D1, a.D2, ptr_b, b.D1, b.D2, ptr_c);
+                //var c = Matrix.MatrixMultiply(a, b);
 
+                Matrix c = new Matrix(a.D1, b.D2);
+                Vectorization.MatrixMultiply(a.GetPointer(), a.D1, a.D2, b.GetPointer(), b.D1, b.D2, c.GetPointer());
 
-            Assert.IsTrue(ArrayEqual<float>(res.Array, c.Array));
+                if (!Vectorization.ElementWiseIsEqualsAVX(res.Array, c.Array, res.D1 * res.D2))
+                {
+                    throw new Exception("Eþit Deðil!");
+                }
+                a.Dispose();
+                b.Dispose();
+                c.Dispose();
+                res.Dispose();
+            }
         }
 
-
-        public bool ArrayEqual<T>(T[] v1, T[] v2)
+        [TestMethod]
+        public unsafe void SigmoidTest()
         {
-            if (v1.Length != v2.Length) return false;
-            for (int i = 0; i < v1.Length; i++)
-                if (!v1[i].Equals(v2[i]))
-                    return false;
-            return true;
+            float[] v1 = { 1, 2, 3 };
+            float[] res = new float[3];
+            fixed (float* ptr_v1 = v1, ptr_res = res)
+                Vectorization.Sigmoid(ptr_v1, ptr_res, v1.Length);
+            float[] res2 = { 0.7310586f, 0.880797f, 0.95257413f };
+            //Assert.IsTrue(ArrayEqual(res, res2));
+        }
+
+        public bool ArrayEqual(float[] v1, float[] v2)
+        {
+            return Vectorization.ElementWiseIsEqualsAVX(v1,v2,v1.Length);
         }
     }
 }

@@ -7,12 +7,12 @@ using System.Text;
 namespace PerformanceWork
 {
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public unsafe class FloatFastNode<T>
+    public unsafe class FloatFastNode
     {
-        public FloatFastNode<T> L;
-        public FloatFastNode<T> R;
-        public T[] Array;
-
+        public FloatFastNode L;
+        public FloatFastNode R;
+        public void* Array;
+        public int Length;
         public bool HasRight
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -24,11 +24,15 @@ namespace PerformanceWork
             get => L != null;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetLeft(ref FloatFastNode<T> n) => L = n;
+        public void SetLeft(ref FloatFastNode n) => L = n;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetRight(ref FloatFastNode<T> n) => R = n;
+        public void SetRight(ref FloatFastNode n) => R = n;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FloatFastNode(T[] arr) => Array = arr;
+        public unsafe FloatFastNode(void* arr, int length)
+        {
+            this.Length = length;
+            Array = arr;
+        }
     }
 
 

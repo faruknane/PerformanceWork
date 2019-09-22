@@ -1,13 +1,15 @@
-﻿using System;
+﻿using PerformanceWork.OptimizedNumerics;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PerformanceWork
 {
-    public class ArrayPool<T> : IDisposable
+    public unsafe class ArrayPool<T> : IDisposable
     {
         public int TimesLarger
         {
@@ -35,8 +37,8 @@ namespace PerformanceWork
             set;
         }
 
-        FloatFastNode<T> first;
-        FloatFastNode<T> last;
+        FloatFastNode first;
+        FloatFastNode last;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ArrayPool(int timeslarger, int maxarraycount)
@@ -51,27 +53,35 @@ namespace PerformanceWork
             => new ArrayPool<T>(timeslarger, maxarraycount);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] Rent(int minlength)
+        public void* Rent(int minlength, out int l)
         {
+            //System.Diagnostics.StackTrace a = new System.Diagnostics.StackTrace();
+            //foreach (var item in a.GetFrames())
+            //{
+            //    Console.Write(item.ToString());
+            //    break;
+            //}
             UnreturnedArrayCount++;
-            T[] arr = FindandExtractArray(minlength);
+            void* arr = FindandExtractArray(minlength, out l);
             if(arr == null)
             {
-                arr = new T[minlength];
+                arr = MKL.MKL_malloc(minlength * Marshal.SizeOf<T>(), 32);
+                l = minlength;
                 return arr;
             }
             return arr;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T[] FindandExtractArray(int minlength)
+        private void* FindandExtractArray(int minlength, out int l)
         {
-            FloatFastNode<T> select = null;
+            l = -1;
+            FloatFastNode select = null;
             int min = int.MaxValue;
-            FloatFastNode<T> head = first;
+            FloatFastNode head = first;
             while(head != null)
             {
-                int mylength = head.Array.Length;
+                int mylength = head.Length;
                 if (Condition(minlength, mylength))
                 {
                     if (min > mylength)
@@ -88,8 +98,8 @@ namespace PerformanceWork
             else
             {
                 Count--;
-                T[] res = select.Array;
-
+                void* res = select.Array;
+                l = select.Length;
                 if (select.L != null)
                     select.L.R = select.R;
                 else 
@@ -111,12 +121,12 @@ namespace PerformanceWork
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(T[] array)
+        public void Return(void* array, int l)
         {
             if (Count == MaxCount)
                 throw new Exception("ArrayPool Maxcount has been reached!");
 
-            var n = new FloatFastNode<T>(array);
+            var n = new FloatFastNode(array, l);
             Count++;
             if (last == null)
             {

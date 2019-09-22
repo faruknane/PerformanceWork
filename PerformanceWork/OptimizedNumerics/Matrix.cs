@@ -5,7 +5,9 @@ namespace PerformanceWork.OptimizedNumerics
 {
     public unsafe class Matrix : IDisposable
     {   
-        public float[] Array;
+        public float* Array;
+        private int Length;
+
         public int D1, D2;
         public static ArrayPool<float> Pool = ArrayPool<float>.Create(2, 1350);
         bool returned = false;
@@ -15,7 +17,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             D1 = d1;
             D2 = d2;
-            Array = Pool.Rent(D1 * D2);
+            Array = (float*)Pool.Rent(D1 * D2, out Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -23,7 +25,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             D1 = arr.GetLength(0);
             D2 = arr.GetLength(1);
-            Array = Pool.Rent(D1 * D2);
+            Array = (float*)Pool.Rent(D1 * D2, out Length);
             for (int i = 0; i < D1; i++)
                 for (int j = 0; j < D2; j++)
                     this[i, j] = arr[i, j];
@@ -40,14 +42,13 @@ namespace PerformanceWork.OptimizedNumerics
             if (returned)
                 throw new Exception("Already Returned!");
             returned = true;
-            Pool.Return(Array);
+            Pool.Return(Array, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float* GetPointer()
         {
-            fixed (float* ptr = Array)
-                return ptr;
+            return Array;
         }
 
         public float this[int x]
@@ -92,6 +93,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
@@ -102,7 +104,7 @@ namespace PerformanceWork.OptimizedNumerics
 
             if (this.D1 != o.D1 || this.D2 != o.D2) return false;
 
-            return Vectorization.ElementWiseEqualsAVX(this.Array, o.Array, D1*D2);
+            return Vectorization.ElementWiseIsEqualsAVX(this.Array, o.Array, D1*D2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -115,6 +117,7 @@ namespace PerformanceWork.OptimizedNumerics
             Vectorization.ElementWiseAddAVX(a.Array, b.Array, res.Array, a.D1 * a.D2);
             return res;
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix operator +(Matrix a, float b)
         {
@@ -133,6 +136,7 @@ namespace PerformanceWork.OptimizedNumerics
             Vectorization.ElementWiseSubtractAVX(a.Array, b.Array, res.Array, a.D1 * a.D2);
             return res;
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix operator -(Matrix a, float b)
         {
@@ -148,6 +152,7 @@ namespace PerformanceWork.OptimizedNumerics
             Vectorization.ElementWiseMultiplyAVX(a.Array, b, res.Array, a.D1 * a.D2);
             return res;
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix operator /(Matrix a, float b)
         {
@@ -169,6 +174,7 @@ namespace PerformanceWork.OptimizedNumerics
             m[0] = a;
             return m;
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ElementWiseMultiply(Matrix b)
         {
@@ -177,6 +183,7 @@ namespace PerformanceWork.OptimizedNumerics
 
             Vectorization.ElementWiseMultiplyAVX(this.Array, b.Array, this.Array, D1 * D2);
         }
+
         #region Static Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix ElementWiseMultiply(Matrix a, Matrix b)
@@ -199,7 +206,7 @@ namespace PerformanceWork.OptimizedNumerics
         public static Matrix MatrixMultiply(Matrix a, Matrix b)
         {
             Matrix c = new Matrix(a.D1, b.D2);
-            Vectorization.MatrixMultiply(ref a, ref b, ref c);
+            Vectorization.MatrixMultiply(a, b, c);
             return c;
         }
 
@@ -208,8 +215,8 @@ namespace PerformanceWork.OptimizedNumerics
         {
             Matrix m = new Matrix(x.D2, x.D1);
             for (int i = 0; i < x.D1; i++)
-            for (int j = 0; j < x.D2; j++)
-                    m[j, i] = x[i, j];
+                for (int j = 0; j < x.D2; j++)
+                        m[j, i] = x[i, j];
             return m;
         }
         #endregion
