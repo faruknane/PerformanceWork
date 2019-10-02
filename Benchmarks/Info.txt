@@ -1,3 +1,0 @@
-System: i7-7700hq Processor, 8gb Ram, .Net Core 3.0 Pre-release
-
-Each experiment is run by 11 times. Skiped first iteration.

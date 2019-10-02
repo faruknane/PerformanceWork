@@ -13,46 +13,47 @@ namespace PerformanceWork
     {
         public int TimesLarger
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             set;
         }
         public int MaxCount
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             set;
         }
-        public int Count { [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int Count { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get; private set;
         } = 0;
 
         public int UnreturnedArrayCount
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             set;
         }
 
         FloatFastNode first;
         FloatFastNode last;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         private ArrayPool(int timeslarger, int maxarraycount)
         {
             TimesLarger = timeslarger;
             MaxCount = maxarraycount;
             first = null;
+            UnreturnedArrayCount = 0;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static ArrayPool<T> Create(int timeslarger, int maxarraycount)
             => new ArrayPool<T>(timeslarger, maxarraycount);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void* Rent(int minlength, out int l)
         {
             //System.Diagnostics.StackTrace a = new System.Diagnostics.StackTrace();
@@ -72,7 +73,7 @@ namespace PerformanceWork
             return arr;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         private void* FindandExtractArray(int minlength, out int l)
         {
             l = -1;
@@ -113,14 +114,14 @@ namespace PerformanceWork
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         private bool Condition(int minlength, int mylength)
         {
             if (mylength >= minlength && mylength <= minlength * TimesLarger) return true;
             return false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void Return(void* array, int l)
         {
             if (Count == MaxCount)
@@ -141,13 +142,13 @@ namespace PerformanceWork
             UnreturnedArrayCount--;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void ClearMemory()
         {
             first = last = null;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void Dispose()
         {
             ClearMemory();

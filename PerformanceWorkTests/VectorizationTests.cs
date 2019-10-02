@@ -52,27 +52,36 @@ namespace PerformanceWorkTests
             }
         }
         [TestMethod]
-        public void Add()
+        public unsafe void Add()
         {
-            float[] v1 = { 1, 2, 3 };
-            float[] v2 = { 1, 2, 3 };
+            int l = 1000000;
+            float[] v1 = new float[l];
+            for (int i = 0; i < l; i++)
+                v1[i] = i;
+            float[] v2 = new float[l];
+            for (int i = 0; i < l; i++)
+                v2[i] = i;
             float[] res = new float[3];
-            Vectorization.ElementWiseAddAVX(v1, v2, res, res.Length);
-            float[] res2 = { 2, 4, 6 };
-
+            fixed (float* a = v1, b = v2, y = res)
+                Vectorization.ElementWiseAddAVX(a, b, y, res.Length);
+            float[] res2 = new float[l];
+            for (int i = 0; i < l; i++)
+                res2[i] = i * 2;
             Assert.IsTrue(ArrayEqual(res, res2));
         }
         [TestMethod]
-        public void Add2()
+        public unsafe void Add2()
         {
             float[] v1 = { 1, 2, 3 };
             float v2 = 2;
             float[] res = new float[3];
-            Vectorization.ElementWiseAddAVX(v1, v2, res, res.Length);
+            fixed (float* a = v1, y = res)
+                Vectorization.ElementWiseAddAVX(a, v2, y, res.Length);
             float[] res2 = { 3, 4, 5 };
 
             Assert.IsTrue(ArrayEqual(res, res2));
         }
+       
         [TestMethod]
         public void DotProduct()
         {
@@ -108,47 +117,40 @@ namespace PerformanceWorkTests
             }
         }
 
-        [TestMethod]
-        public unsafe void DotProductParallel()
-        {
-            for(long size = 1; size < 300; size++)
-            {
-                float[] v1 = new float[size];
-                float[] v2 = new float[size];
-
-                for (int i = 0; i < size; i++)
-                    v1[i] = v2[i] = i;
-
-                fixed (float* ptr = v1, ptr2 = v2)
-                {
-                    double res = Vectorization.DotProductFMAParallel(ptr, ptr2, (int)size);
-                    long res2 = size * (size - 1) * (2 * size - 1) / 6;
-                    Assert.AreEqual(res, (double)res2);
-                }
-            }
-            
-        }
 
         [TestMethod]
-        public void Multiply()
+        public unsafe void Multiply()
         {
-            float[] v1 = { 1, 2, 3 };
-            float[] v2 = { 1, 2, 3 };
+            int l = 1000000;
+            float[] v1 = new float[l];
+            for (int i = 0; i < l; i++)
+                v1[i] = i;
+            float[] v2 = new float[l];
+            for (int i = 0; i < l; i++)
+                v2[i] = i;
             float[] res = new float[3];
-            Vectorization.ElementWiseMultiplyAVX(v1, v2, res, res.Length);
-            float[] res2 = { 1, 4, 9 };
-
+            fixed (float* a = v1, b = v2, y = res)
+                Vectorization.ElementWiseMultiplyAVX(a, b, y, res.Length);
+            float[] res2 = new float[l];
+            for (int i = 0; i < l; i++)
+                res2[i] = i*i;
             Assert.IsTrue(ArrayEqual(res, res2));
         }
         [TestMethod]
-        public void Multiply2()
+        public unsafe void Multiply2()
         {
-            float[] v1 = { 1, 2, 3 };
+            int l = 1000000;
+            float[] v1 = new float[l];
+            for (int i = 0; i < l; i++)
+                v1[i] = i;
+
             float v2 = 3;
             float[] res = new float[3];
-            Vectorization.ElementWiseMultiplyAVX(v1, v2, res, res.Length);
-            float[] res2 = { 3, 6, 9 };
-
+            fixed (float* a = v1, y = res)
+                Vectorization.ElementWiseMultiplyAVX(a, v2, y, res.Length);
+            float[] res2 = new float[l];
+            for (int i = 0; i < l; i++)
+                res2[i] = i*3;
             Assert.IsTrue(ArrayEqual(res, res2));
         }
 
@@ -239,12 +241,33 @@ namespace PerformanceWorkTests
         [TestMethod]
         public unsafe void SigmoidTest()
         {
-            float[] v1 = { 1, 2, 3 };
-            float[] res = new float[3];
+            float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+            float[] res = new float[9];
             fixed (float* ptr_v1 = v1, ptr_res = res)
                 Vectorization.Sigmoid(ptr_v1, ptr_res, v1.Length);
-            float[] res2 = { 0.7310586f, 0.880797f, 0.95257413f };
-            //Assert.IsTrue(ArrayEqual(res, res2));
+            float[] res2 = { 0.731058359f, 0.8807941f, 0.95257f, 0.731058359f, 0.8807941f, 0.95257f, 0.731058359f, 0.8807941f, 0.95257f };
+            Assert.IsTrue(ArrayEqual(res, res2));
+        }
+
+        [TestMethod]
+        public unsafe void SumOfVectorTest()
+        {
+            float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+            float res = 0;
+            fixed (float* ptr_v1 = v1)
+                res = Vectorization.SumOfVector(ptr_v1, v1.Length);
+            float res2 = 18;
+            Assert.IsTrue(res == res2);
+        }
+
+        [TestMethod]
+        public unsafe void ElementWise_A_MultipliedBy_1_Minus_ATest()
+        {
+            float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+            fixed (float* ptr_v1 = v1)
+                Vectorization.ElementWise_A_MultipliedBy_1_Minus_A(ptr_v1, ptr_v1, v1.Length);
+            float[] res2 = { 0, -2, -6 , 0, -2, -6 , 0, -2, -6 };
+            Assert.IsTrue(ArrayEqual(v1, res2));
         }
 
         public bool ArrayEqual(float[] v1, float[] v2)

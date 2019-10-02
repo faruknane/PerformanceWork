@@ -9,7 +9,6 @@ namespace PerformanceWork.OptimizedNumerics
 {
     public partial class Vectorization
     {
-
         #region Working Properly
         private static unsafe void ElementWiseDivideAVX(float val, float* ptr_a, float* ptr_res, int length)
         {
@@ -27,7 +26,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSetValueAVX(float[] x, float val, long length)
         {
             float* ptr_val = &val;
@@ -40,7 +39,7 @@ namespace PerformanceWork.OptimizedNumerics
                     x[i] = val;
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSetValueAVX(float* ptr_a, float val, long length)
         {
             float* ptr_val = &val;
@@ -50,7 +49,7 @@ namespace PerformanceWork.OptimizedNumerics
             for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
                 ptr_a[i] = val;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseAddAVX(float[] left, float[] right, float[] result, long length)
         {
             fixed (float* ptr_a = left, ptr_b = right, ptr_res = result)
@@ -68,24 +67,25 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseAddAVX(float* ptr_a, float* ptr_b, float* ptr_res, long length)
         {
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
             {
-                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                for (long i = 0; i < l; i += Vector256<float>.Count)
                 {
                     Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
                     Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
                     Vector256<float> res = Avx2.Add(v1, v2);
                     Avx2.Store(&ptr_res[i], res);
                 }
-                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                for (long i = l; i < length; i++)
                 {
                     ptr_res[i] = ptr_a[i] + ptr_b[i];
                 }
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseAddAVX(float[] left, float right, float[] result, long length)
         {
             float* ptr_b = &right;
@@ -104,25 +104,8 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void ElementWiseAddAVX(float* ptr_a, float right, float* ptr_res, long length)
-        {
-            float* ptr_b = &right;
-            {
-                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
-                {
-                    Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
-                    Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_b);
-                    Vector256<float> res = Avx2.Add(v1, v2);
-                    Avx2.Store(&ptr_res[i], res);
-                }
-                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
-                {
-                    ptr_res[i] = ptr_a[i] + *ptr_b;
-                }
-            }
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSubtractAVX(float[] left, float[] right, float[] result, long length)
         {
             fixed (float* ptr_a = left, ptr_b = right, ptr_res = result)
@@ -140,13 +123,30 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSubtractAVX(float* ptr_left, float* ptr_right, float* ptr_res, long length)
         {
             for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
             {
                 Vector256<float> v1 = Avx2.LoadVector256(&ptr_left[i]);
                 Vector256<float> v2 = Avx2.LoadVector256(&ptr_right[i]);
+                Vector256<float> res = Avx2.Subtract(v1, v2);
+                Avx2.Store(&ptr_res[i], res);
+            }
+            for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+            {
+                ptr_res[i] = ptr_left[i] - ptr_right[i];
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void ElementWiseSubtractAVXBetaB(float* ptr_left, float* ptr_right, float* ptr_res, long length, float b)
+        {
+            for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+            {
+                Vector256<float> v1 = Avx2.LoadVector256(&ptr_left[i]);
+                Vector256<float> v2 = Avx2.LoadVector256(&ptr_right[i]);
+                v2 = Avx2.Multiply(v2, Avx2.BroadcastScalarToVector256(&b));
                 Vector256<float> res = Avx2.Subtract(v1, v2);
                 Avx2.Store(&ptr_res[i], res);
             }
@@ -163,7 +163,7 @@ namespace PerformanceWork.OptimizedNumerics
         /// <param name="right"></param>
         /// <param name="result"></param>
         /// <param name="length"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe float DotProductFMA(float[] left, float[] right, long length)
         {
             fixed (float* ptr_a = left, ptr_b = right)
@@ -193,7 +193,7 @@ namespace PerformanceWork.OptimizedNumerics
                 return result;
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe float DotProductFMA(float* ptr_a, float* ptr_b, long length)
         {
             long remain = length % Vector256<float>.Count;
@@ -220,44 +220,44 @@ namespace PerformanceWork.OptimizedNumerics
             result += remainingsum;
             return result;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe float DotProductFMAParallel(float* ptr_a, float* ptr_b, long length)
-        {
-            int degree = 0;
-            int num;
-            ThreadPool.GetMinThreads(out degree, out num);
-            PointerCarrier carrierA = new PointerCarrier();
-            PointerCarrier carrierB = new PointerCarrier();
-            carrierA.ptr = ptr_a;
-            carrierB.ptr = ptr_b;
+        //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        //public static unsafe float DotProductFMAParallel(float* ptr_a, float* ptr_b, long length)
+        //{
+        //    int degree = 0;
+        //    int num;
+        //    ThreadPool.GetMinThreads(out degree, out num);
+        //    PointerCarrier carrierA = new PointerCarrier();
+        //    PointerCarrier carrierB = new PointerCarrier();
+        //    carrierA.ptr = ptr_a;
+        //    carrierB.ptr = ptr_b;
 
-            long[] blocks = new long[degree];
+        //    long[] blocks = new long[degree];
 
-            for (int i = 0; i < degree; i++)
-                blocks[i] = length / degree;
+        //    for (int i = 0; i < degree; i++)
+        //        blocks[i] = length / degree;
 
-            blocks[degree-1] += length % degree;
+        //    blocks[degree-1] += length % degree;
 
-            long[] starts = new long[degree];
-            long sum = 0;
-            for (int i = 0; i < degree; i++)
-            {
-                starts[i] = sum;
-                sum += blocks[i];
-            }
+        //    long[] starts = new long[degree];
+        //    long sum = 0;
+        //    for (int i = 0; i < degree; i++)
+        //    {
+        //        starts[i] = sum;
+        //        sum += blocks[i];
+        //    }
 
-            float result = 0;
-            object locker = new object();
-            Parallel.For(0, degree, new ParallelOptions() { MaxDegreeOfParallelism = degree} ,(long threadno) =>
-            {
-                float ownres = DotProductFMA(carrierA.ptr + starts[threadno], carrierB.ptr + starts[threadno], blocks[threadno]);
-                lock (locker)
-                {
-                    result += ownres;
-                }
-            });
-            return result;
-        }
+        //    float result = 0;
+        //    object locker = new object();
+        //    Parallel.For(0, degree, new ParallelOptions() { MaxDegreeOfParallelism = degree} ,(long threadno) =>
+        //    {
+        //        float ownres = DotProductFMA(carrierA.ptr + starts[threadno], carrierB.ptr + starts[threadno], blocks[threadno]);
+        //        lock (locker)
+        //        {
+        //            result += ownres;
+        //        }
+        //    });
+        //    return result;
+        //}
         /// <summary>
         /// Tranpose of a 8x8 Matrix
         /// </summary>
@@ -265,7 +265,7 @@ namespace PerformanceWork.OptimizedNumerics
         /// <param name="right"></param>
         /// <param name="result"></param>
         /// <param name="length"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void MatrixTranspose8x8(float[] matrix, float[] result)
         {
             fixed (float* ptr_a = matrix, ptr_res = result)
@@ -317,7 +317,7 @@ namespace PerformanceWork.OptimizedNumerics
                 Avx.Store(&ptr_res[56], y7);
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseMultiplyAVX(float[] arr1, float[] arr2, float[] result, long length)
         {
             fixed (float* ptr_a = arr1, ptr_b = arr2, ptr_res = result)
@@ -335,7 +335,7 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseMultiplyAVX(float[] arr1, float arr2, float[] result, long length)
         {
             float* ptr_b = &arr2;
@@ -354,7 +354,7 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseMultiplyAVX(float* ptr_a, float* ptr_b, float* ptr_res, long length)
         {
             {
@@ -371,7 +371,27 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void ElementWiseAddAVX(float* ptr_a, float right, float* ptr_res, long length)
+        {
+            float* ptr_b = &right;
+            {
+                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                {
+                    Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                    Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_b);
+                    Vector256<float> res = Avx2.Add(v1, v2);
+                    Avx2.Store(&ptr_res[i], res);
+                }
+                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                {
+                    ptr_res[i] = ptr_a[i] + *ptr_b;
+                }
+            }
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseMultiplyAVX(float* ptr_a, float arr2, float* ptr_res, long length)
         {
             float* ptr_b = &arr2;
@@ -389,7 +409,8 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public unsafe static void ElementWiseAssignAVX(float[] left, float[] right, long length)
         {
             fixed (float* ptr_left = left, ptr_right = right)
@@ -405,7 +426,7 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public unsafe static void ElementWiseAssignAVX(float* ptr_left, float* ptr_right, long length)
         {
             {
@@ -421,10 +442,39 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public unsafe static float SumOfVector(float* vector, long length)
+        {
+            long remain = length % Vector256<float>.Count;
+
+            Vector256<float> sum = new Vector256<float>();
+            long i = 0;
+            while (i < length - remain)
+            {
+                Vector256<float> v1 = Avx2.LoadVector256(&vector[i]);
+                sum = Avx2.Add(sum, v1);
+                i += Vector256<float>.Count;
+            }
+
+            float result = 0;
+            sum = Fma.HorizontalAdd(sum, sum);
+            sum = Fma.HorizontalAdd(sum, sum);
+            result = sum.GetElement(0) + sum.GetElement(4);
+            
+            float remainingsum = 0;
+            for (i = length - remain; i < length; i++)
+                remainingsum += vector[i];
+            result += remainingsum;
+
+            return result;
+        }
+
+        
+
         #endregion
 
         #region Unoptimized Methods
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe bool ElementWiseIsEqualsAVX(float[] arr1, float[] arr2, long length)
         {
             fixed (float* ptr_a = arr1, ptr_b = arr2)
@@ -447,7 +497,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe bool ElementWiseIsEqualsAVX(float* ptr_a, float* ptr_b, long length)
         {
                 for (long i = 0; i < length; i++)
@@ -457,7 +507,7 @@ namespace PerformanceWork.OptimizedNumerics
            
         }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         //public unsafe static void MatrixMultiplyMine(ref Matrix a, ref Matrix b, ref Matrix c)
         //{
         //    c.SetZero();
@@ -663,7 +713,7 @@ namespace PerformanceWork.OptimizedNumerics
         //    ak.Dispose();
         //    bk.Dispose();
         //}
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         //public unsafe static void MatrixMultiplyMine(float* a, long aD1, long aD2, float* b, long bD1, long bD2, float* c)
         //{
         //    Vectorization.ElementWiseSetValueAVX(c, 0, aD1 * bD2);
