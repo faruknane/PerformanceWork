@@ -75,8 +75,7 @@ namespace PerformanceWork.OptimizedNumerics
                 for (long i = 0; i < l; i += Vector256<float>.Count)
                 {
                     Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
-                    Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
-                    Vector256<float> res = Avx2.Add(v1, v2);
+                    Vector256<float> res = Avx2.Add(v1, Avx2.LoadVector256(&ptr_b[i]));
                     Avx2.Store(&ptr_res[i], res);
                 }
                 for (long i = l; i < length; i++)
@@ -89,16 +88,17 @@ namespace PerformanceWork.OptimizedNumerics
         public static unsafe void ElementWiseAddAVX(float[] left, float right, float[] result, long length)
         {
             float* ptr_b = &right;
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
             fixed (float* ptr_a = left, ptr_res = result)
             {
-                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                for (long i = 0; i < l; i += Vector256<float>.Count)
                 {
                     Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
                     Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_b);
                     Vector256<float> res = Avx2.Add(v1, v2);
                     Avx2.Store(&ptr_res[i], res);
                 }
-                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                for (long i = l; i < length; i++)
                 {
                     ptr_res[i] = ptr_a[i] + *ptr_b;
                 }
@@ -108,16 +108,17 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSubtractAVX(float[] left, float[] right, float[] result, long length)
         {
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
             fixed (float* ptr_a = left, ptr_b = right, ptr_res = result)
             {
-                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                for (long i = 0; i < l; i += Vector256<float>.Count)
                 {
                     Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
                     Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
                     Vector256<float> res = Avx2.Subtract(v1, v2);
                     Avx2.Store(&ptr_res[i], res);
                 }
-                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                for (long i = l; i < length; i++)
                 {
                     ptr_res[i] = ptr_a[i] - ptr_b[i];
                 }
@@ -126,14 +127,15 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSubtractAVX(float* ptr_left, float* ptr_right, float* ptr_res, long length)
         {
-            for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
+            for (long i = 0; i < l; i += Vector256<float>.Count)
             {
                 Vector256<float> v1 = Avx2.LoadVector256(&ptr_left[i]);
                 Vector256<float> v2 = Avx2.LoadVector256(&ptr_right[i]);
                 Vector256<float> res = Avx2.Subtract(v1, v2);
                 Avx2.Store(&ptr_res[i], res);
             }
-            for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+            for (long i = l; i < length; i++)
             {
                 ptr_res[i] = ptr_left[i] - ptr_right[i];
             }
@@ -142,7 +144,8 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSubtractAVXBetaB(float* ptr_left, float* ptr_right, float* ptr_res, long length, float b)
         {
-            for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
+            for (long i = 0; i < l; i += Vector256<float>.Count)
             {
                 Vector256<float> v1 = Avx2.LoadVector256(&ptr_left[i]);
                 Vector256<float> v2 = Avx2.LoadVector256(&ptr_right[i]);
@@ -150,7 +153,7 @@ namespace PerformanceWork.OptimizedNumerics
                 Vector256<float> res = Avx2.Subtract(v1, v2);
                 Avx2.Store(&ptr_res[i], res);
             }
-            for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+            for (long i = l; i < length; i++)
             {
                 ptr_res[i] = ptr_left[i] - ptr_right[i];
             }
@@ -320,35 +323,40 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseMultiplyAVX(float[] arr1, float[] arr2, float[] result, long length)
         {
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
             fixed (float* ptr_a = arr1, ptr_b = arr2, ptr_res = result)
             {
-                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                for (long i = 0; i < l; i += Vector256<float>.Count)
                 {
                     Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
                     Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
                     Vector256<float> res = Avx2.Multiply(v1, v2);
                     Avx2.Store(&ptr_res[i], res);
                 }
-                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                for (long i = l; i < length; i++)
                 {
                     ptr_res[i] = ptr_a[i] * ptr_b[i];
                 }
             }
         }
+
+        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseMultiplyAVX(float[] arr1, float arr2, float[] result, long length)
         {
             float* ptr_b = &arr2;
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
             fixed (float* ptr_a = arr1, ptr_res = result)
             {
-                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                for (long i = 0; i < l; i += Vector256<float>.Count)
                 {
                     Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
                     Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_b);
                     Vector256<float> res = Avx2.Multiply(v1, v2);
                     Avx2.Store(&ptr_res[i], res);
                 }
-                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                for (long i = l; i < length; i++)
                 {
                     ptr_res[i] = ptr_a[i] * *ptr_b;
                 }
@@ -357,20 +365,50 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseMultiplyAVX(float* ptr_a, float* ptr_b, float* ptr_res, long length)
         {
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
             {
-                for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+                for (long i = 0; i < l; i += Vector256<float>.Count)
                 {
                     Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
                     Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
                     Vector256<float> res = Avx2.Multiply(v1, v2);
                     Avx2.Store(&ptr_res[i], res);
                 }
-                for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+                for (long i = l; i < length; i++)
                 {
                     ptr_res[i] = ptr_a[i] * ptr_b[i];
                 }
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe float ElementWiseMultiplyAndReturnSum(float* ptr_a, float* ptr_b, float* ptr_res, long length)
+        {
+            Vector256<float> sum = new Vector256<float>();
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
+            for (long i = 0; i < l; i += Vector256<float>.Count)
+            {
+                Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
+                Vector256<float> res = Avx2.Multiply(v1, v2);
+                sum = Avx2.Add(sum, res);
+                Avx2.Store(&ptr_res[i], res);
+            }
+
+            float result = 0;
+            sum = Fma.HorizontalAdd(sum, sum);
+            sum = Fma.HorizontalAdd(sum, sum);
+            result = sum.GetElement(0) + sum.GetElement(4);
+
+            float remainingsum = 0;
+            for (long i = l; i < length; i++)
+            {
+                ptr_res[i] = ptr_a[i] * ptr_b[i];
+                remainingsum += ptr_res[i];
+            }
+            result += remainingsum;
+            return result;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseAddAVX(float* ptr_a, float right, float* ptr_res, long length)
         {

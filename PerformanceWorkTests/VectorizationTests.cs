@@ -270,6 +270,37 @@ namespace PerformanceWorkTests
             Assert.IsTrue(ArrayEqual(v1, res2));
         }
 
+        [TestMethod]
+        public unsafe void ElementWiseMultiplyAndReturnSumTest()
+        {
+            float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+            float[] v2 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+            float res = 0;
+            fixed (float* ptr_v1 = v1, ptr_v2 = v2)
+                res = Vectorization.ElementWiseMultiplyAndReturnSum(ptr_v1, ptr_v2, ptr_v1, v1.Length);
+            float res2 = 42;
+            Assert.IsTrue(res == res2);
+            float[] res3 = { 1, 4, 9 , 1, 4, 9 , 1, 4, 9};
+            Assert.IsTrue(ArrayEqual(v1, res3));
+        }
+
+        [TestMethod]
+        public unsafe void SumOfPerColumnTest()
+        {
+            Matrix a = new Matrix(626, 100);
+            Matrix c = new Matrix(1, 100);
+            for (int i = 0; i < a.D1; i++)
+                for (int j = 0; j < a.D2; j++)
+                    a[i, j] = i;
+            //sum = 625*626/2
+            Vectorization.SumOfPerColumn(a.Array, c.Array, a.D1, a.D2);
+            float res2 = 625 * 626 / 2;
+
+            bool d = true;
+            for (int j = 0; j < a.D2; j++)
+                d = d & (c[0, j] == res2);
+            Assert.IsTrue(d);
+        }
         public bool ArrayEqual(float[] v1, float[] v2)
         {
             return Vectorization.ElementWiseIsEqualsAVX(v1,v2,v1.Length);

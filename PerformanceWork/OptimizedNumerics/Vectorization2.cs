@@ -124,6 +124,27 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void SumOfPerColumn(float* ptr_a, float* ptr_res, long d1, long d2)
+        {
+            long l = d2 / Vector256<float>.Count * Vector256<float>.Count;
+            for (long j = 0; j < l; j += Vector256<float>.Count)
+            {
+                Vector256<float> sum = new Vector256<float>();
+                for (long i = 0; i < d1; i++)
+                {
+                    sum = Avx2.Add(sum, Avx2.LoadVector256(&ptr_a[i * d2 + j]));
+                }
+                Avx2.Store(&ptr_res[j], sum);
+            }
 
+            for (long j = l; j < d2; j++)
+            {
+                float sum = 0;
+                for (long i = 0; i < d1; i++)
+                    sum += ptr_a[i * d2 + j];
+                ptr_res[j] = sum;
+            }
+        }
     }
 }
