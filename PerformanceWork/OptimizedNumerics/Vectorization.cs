@@ -84,6 +84,24 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void ElementWiseDivideAVX(float* ptr_a, float* ptr_b, float* ptr_res, long length)
+        {
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
+            {
+                for (long i = 0; i < l; i += Vector256<float>.Count)
+                {
+                    Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                    Vector256<float> res = Avx2.Divide(v1, Avx2.LoadVector256(&ptr_b[i]));
+                    Avx2.Store(&ptr_res[i], res);
+                }
+                for (long i = l; i < length; i++)
+                {
+                    ptr_res[i] = ptr_a[i]/ptr_b[i];
+                }
+            }
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseAddAVX(float[] left, float right, float[] result, long length)
         {
@@ -140,7 +158,14 @@ namespace PerformanceWork.OptimizedNumerics
                 ptr_res[i] = ptr_left[i] - ptr_right[i];
             }
         }
-
+        /// <summary>
+        /// res = left - right*BetaB
+        /// </summary>
+        /// <param name="ptr_left"></param>
+        /// <param name="ptr_right"></param>
+        /// <param name="ptr_res"></param>
+        /// <param name="length"></param>
+        /// <param name="b"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSubtractAVXBetaB(float* ptr_left, float* ptr_right, float* ptr_res, long length, float b)
         {
@@ -155,7 +180,32 @@ namespace PerformanceWork.OptimizedNumerics
             }
             for (long i = l; i < length; i++)
             {
-                ptr_res[i] = ptr_left[i] - ptr_right[i];
+                ptr_res[i] = ptr_left[i] - ptr_right[i]*b;
+            }
+        }
+        /// <summary>
+        /// res = left + right*BetaB
+        /// </summary>
+        /// <param name="ptr_left"></param>
+        /// <param name="ptr_right"></param>
+        /// <param name="ptr_res"></param>
+        /// <param name="length"></param>
+        /// <param name="b"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void ElementWiseAddAVXBetaB(float* ptr_left, float* ptr_right, float* ptr_res, long length, float b)
+        {
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
+            Vector256<float> v3 = Avx2.BroadcastScalarToVector256(&b);
+            for (long i = 0; i < l; i += Vector256<float>.Count)
+            {
+                Vector256<float> v1 = Avx2.LoadVector256(&ptr_left[i]);
+                Vector256<float> v2 = Avx2.LoadVector256(&ptr_right[i]);
+                v1 = Fma.MultiplyAdd(v2, v3, v1);
+                Avx2.Store(&ptr_res[i], v1);
+            }
+            for (long i = l; i < length; i++)
+            {
+                ptr_res[i] = ptr_left[i] + ptr_right[i]*b;
             }
         }
 

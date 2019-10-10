@@ -17,7 +17,7 @@ namespace PerformanceWorkTests
 {
     public unsafe class Program
     {
-        public static int Size = 626;
+        public static int Size = 5000;
 
         private static void MatrixMultiply()
         {
@@ -39,11 +39,9 @@ namespace PerformanceWorkTests
 
         static unsafe void Main(string[] args)
         {
-            a = new Matrix(Size, 100);
-            b = new Matrix(Size, 100);
-            c = new Matrix(1, 100);
-                for (int i = 0; i < a.D1 * a.D2; i++)
-                    a[i] = i;
+            a = new Matrix(Size, Size);
+            b = new Matrix(Size, Size);
+            c = new Matrix(Size, Size);
 
             //for (int i = 0; i < b.D1; i++)
             //    for (int j = 0; j < b.D2; j++)
@@ -55,22 +53,11 @@ namespace PerformanceWorkTests
 
             Stopwatch s = new Stopwatch();
             s.Start();
-            
-            for (int ii = 0; ii < 10000; ii++)
+            for (int i = 0; i < 4; i++)
             {
-                Vectorization.SumOfPerColumn(a.Array, c.Array, a.D1, a.D2);
             }
-
             s.Stop();
-            Console.WriteLine(c[0]);
-            Console.WriteLine($"SumOfPerColumn -> {s.ElapsedMilliseconds}"); s.Start();
-            s.Restart();
-            //for (int i = 0; i < 100000; i++)
-            //{
-            //    Vectorization.ElementWiseAddAVX(a.GetPointer(), b.GetPointer(), c.GetPointer(), c.D1 * c.D2);
-            //}
-            s.Stop();
-            Console.WriteLine($"? -> {s.ElapsedMilliseconds}"); s.Start();
+            Console.WriteLine($"DotProductFMA -> {s.ElapsedMilliseconds}"); s.Start();
         }
 
 

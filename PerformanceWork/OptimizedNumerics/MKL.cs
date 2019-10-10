@@ -55,6 +55,11 @@ namespace PerformanceWork.OptimizedNumerics
                         ExactSpelling = true, SetLastError = false)]
         public static extern void pslacpy(char* uplo, int* m, int* n, float* a, int* ia, int* ja, int* desca, float* b, int* ib, int* jb, int* descb);
 
+        //[SuppressUnmanagedCodeSecurityAttribute]
+        //[DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
+        //                ExactSpelling = true, SetLastError = false)]
+        //public static extern void mkl_set_num_threads(int nt);
+
         public sealed class ORDER
         {
             private ORDER() { }

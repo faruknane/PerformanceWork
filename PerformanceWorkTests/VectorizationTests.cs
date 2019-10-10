@@ -280,8 +280,19 @@ namespace PerformanceWorkTests
                 res = Vectorization.ElementWiseMultiplyAndReturnSum(ptr_v1, ptr_v2, ptr_v1, v1.Length);
             float res2 = 42;
             Assert.IsTrue(res == res2);
-            float[] res3 = { 1, 4, 9 , 1, 4, 9 , 1, 4, 9};
+            float[] res3 = { 1, 4, 9, 1, 4, 9, 1, 4, 9 };
             Assert.IsTrue(ArrayEqual(v1, res3));
+        }
+
+        [TestMethod]
+        public unsafe void ElementWiseAddAVXBetaBTest()
+        {
+            float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+            float[] v2 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+            fixed (float* ptr_v1 = v1, ptr_v2 = v2)
+                Vectorization.ElementWiseAddAVXBetaB(ptr_v1, ptr_v2, ptr_v1, v1.Length, 10);
+            float[] res = { 11, 22, 33, 11, 22, 33, 11, 22, 33 };
+            Assert.IsTrue(ArrayEqual(res, v1));
         }
 
         [TestMethod]

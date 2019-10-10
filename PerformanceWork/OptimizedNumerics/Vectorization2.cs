@@ -16,7 +16,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             MKL.cblas_sgemm(MKL.ORDER.RowMajor, MKL.TRANSPOSE.NoTrans, MKL.TRANSPOSE.NoTrans, a.D1, b.D2, b.D1, 1.0f, a.GetPointer(), b.D1, b.GetPointer(), b.D2, 0.0f, c.GetPointer(), b.D2);
         }
-
+     
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void MatrixMultiply(float* a, int ad1, int ad2, float* b, int bd1, int bd2, float* c)
         {
