@@ -86,6 +86,24 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void MakeNegativeAVX(float* ptr_a, float* ptr_res, long length)
+        {
+            Vector256<float> zero = new Vector256<float>();
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
+            {
+                for (long i = 0; i < l; i += Vector256<float>.Count)
+                {
+                    Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                    Avx2.Store(&ptr_res[i], Avx2.Subtract(zero, v1));
+                }
+                for (long i = l; i < length; i++)
+                {
+                    ptr_res[i] = -ptr_a[i];
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseDivideAVX(float* ptr_a, float* ptr_b, float* ptr_res, long length)
         {
             long l = length / Vector256<float>.Count * Vector256<float>.Count;
@@ -169,12 +187,13 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSubtractAVXBetaB(float* ptr_left, float* ptr_right, float* ptr_res, long length, float b)
         {
+            Vector256<float> vectorb = Avx2.BroadcastScalarToVector256(&b);
             long l = length / Vector256<float>.Count * Vector256<float>.Count;
             for (long i = 0; i < l; i += Vector256<float>.Count)
             {
                 Vector256<float> v1 = Avx2.LoadVector256(&ptr_left[i]);
                 Vector256<float> v2 = Avx2.LoadVector256(&ptr_right[i]);
-                v2 = Avx2.Multiply(v2, Avx2.BroadcastScalarToVector256(&b));
+                v2 = Avx2.Multiply(v2, vectorb);
                 Vector256<float> res = Avx2.Subtract(v1, v2);
                 Avx2.Store(&ptr_res[i], res);
             }

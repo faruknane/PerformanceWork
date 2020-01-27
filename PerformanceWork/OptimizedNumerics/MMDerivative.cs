@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PerformanceWork.OptimizedNumerics.Pool;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -14,9 +15,9 @@ namespace PerformanceWork.OptimizedNumerics
         public bool Negative { get; set; } = false;
 
         public float* Derivatives;
-        private int Length;
-        public static ArrayPool<float> Pool2 = ArrayPool<float>.Create(3, 1350);
-        public static object l = new object();
+        private int length;
+        public static ArrayPool<float> Pool2 = ArrayPool<float>.Create(1000000, 100000);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public MMDerivative(int d1, int d2, int d3, int d4, bool setzero)
         {
@@ -24,9 +25,9 @@ namespace PerformanceWork.OptimizedNumerics
             D2 = d2;
             D3 = d3;
             D4 = d4;
-            lock (l)
-                Derivatives = (float*)Pool2.Rent(d1 * d2 * d3 * d4, out Length);
 
+            Derivatives = (float*)Pool2.Rent(d1 * d2 * d3 * d4, out length);
+           
             if (setzero)
             {
                 Vectorization.ElementWiseSetValueAVX(Derivatives, 0, d1 * d2 * d3 * d4);
@@ -42,8 +43,7 @@ namespace PerformanceWork.OptimizedNumerics
                 Console.WriteLine("array is returned already");
             }
             GC.SuppressFinalize(this);
-            lock (l)
-                Pool2.Return(Derivatives, Length);
+            Pool2.Return(Derivatives, length);
             x++;
         }
 
@@ -61,7 +61,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
-        public static MMDerivative I(int d1, int d2)
+        public static MMDerivative Identitiy(int d1, int d2)
         {
             MMDerivative res = new MMDerivative(d1, d2, d1, d2, true);
             for (int i = 0; i < d1; i++)

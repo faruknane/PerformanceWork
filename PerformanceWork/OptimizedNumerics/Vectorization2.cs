@@ -12,9 +12,9 @@ namespace PerformanceWork.OptimizedNumerics
         public static int Mode = 0x00000003;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void MatrixMultiply(Matrix a, Matrix b, Matrix c)
+        public static unsafe void MatrixMultiply(Tensor<float> a, Tensor<float> b, Tensor<float> c)
         {
-            MKL.cblas_sgemm(MKL.ORDER.RowMajor, MKL.TRANSPOSE.NoTrans, MKL.TRANSPOSE.NoTrans, a.D1, b.D2, b.D1, 1.0f, a.GetPointer(), b.D1, b.GetPointer(), b.D2, 0.0f, c.GetPointer(), b.D2);
+            MKL.cblas_sgemm(MKL.ORDER.RowMajor, MKL.TRANSPOSE.NoTrans, MKL.TRANSPOSE.NoTrans, a.Shape[0], b.Shape[1], b.Shape[0], 1.0f, (float*)a.Array, b.Shape[0], (float*)b.Array, b.Shape[1], 0.0f, (float*)c.Array, b.Shape[1]);
         }
      
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

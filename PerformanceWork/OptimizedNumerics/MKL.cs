@@ -21,6 +21,11 @@ namespace PerformanceWork.OptimizedNumerics
                 ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
         public static extern void* MKL_malloc(int size, int alignment);
 
+        [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
+                ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void MKL_free(void* a_ptr);
+
+
         [SuppressUnmanagedCodeSecurityAttribute]
 
         [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
