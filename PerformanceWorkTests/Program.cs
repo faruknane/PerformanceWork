@@ -38,7 +38,8 @@ namespace PerformanceWorkTests
       
         static unsafe void Main(string[] args)
         {
-            //Shape s1 = Shape.NewShape(2, 3);
+            Shape s1 = Shape.NewShape(2, 3, 5, 7);
+            Console.WriteLine(Shape.RemoveLastDimension(s1));
             //for (int i = 0; i < 100; i++)
             //{
             //    Index index = Index.NewIndex(s1);

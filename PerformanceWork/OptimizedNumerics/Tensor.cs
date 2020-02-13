@@ -159,19 +159,13 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public unsafe static Tensor<T> DerivativeIdentity(Shape s)
         {
-            Shape comb = Shape.Combine(s, s);
-
-            Tensor<T> t = new Tensor<T>(comb);
-            t.SetValue(0);
+            Tensor<T> t = new Tensor<T>(s.Clone());
             if(typeof(T) == typeof(float))
             {
-                float* ptr = (float*)t.Array;
-                for (int i = 0; i < s.TotalSize; i++)
-                    ptr[i * s.TotalSize + i] = 1;
+                t.SetValue(1.0f);
             }
             else
                 throw new Exception("Unsupported number type!");
-            
 
             return t;
         }

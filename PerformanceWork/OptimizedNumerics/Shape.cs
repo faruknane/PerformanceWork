@@ -277,6 +277,35 @@ namespace PerformanceWork.OptimizedNumerics
             return res;
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static Shape Multiply(Shape s1, Shape s2)
+        {
+            if (s1.N != s2.N)
+                throw new Exception("dimensions incompatibility!");
+
+            Shape res = Shape.NewShapeN(s1.N);
+            for (int i = 0; i < res.N; i++)
+                res.Dimensions[i] = s1[i] * s2[i];
+            res.CalculateMultiplied();
+
+            return res;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static Shape RemoveLastDimension(Shape s)
+        {
+            Shape res = Shape.NewShapeN(s.N - 1);
+
+            for (int i = 0; i < res.N; i++)
+                res.Dimensions[i] = s.Dimensions[i];
+
+            res.CalculateMultiplied();
+
+            return res;
+        }
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         ~Shape()
         {

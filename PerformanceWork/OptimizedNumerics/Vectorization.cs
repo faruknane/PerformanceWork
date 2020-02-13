@@ -10,19 +10,37 @@ namespace PerformanceWork.OptimizedNumerics
     public partial class Vectorization
     {
         #region Working Properly
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         private static unsafe void ElementWiseDivideAVX(float val, float* ptr_a, float* ptr_res, int length)
         {
             float* ptr_val = &val;
+            Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_val);
             for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
             {
                 Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
-                Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_val);
                 Vector256<float> res = Avx2.Divide(v2, v1);
                 Avx2.Store(&ptr_res[i], res);
             }
             for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
             {
                 ptr_res[i] = *ptr_val / ptr_a[i];
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private static unsafe void ElementWiseDivideAVX(float* ptr_a, float val, float* ptr_res, int length)
+        {
+            float* ptr_val = &val;
+            Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_val);
+            for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+            {
+                Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                Vector256<float> res = Avx2.Divide(v1, v2);
+                Avx2.Store(&ptr_res[i], res);
+            }
+            for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+            {
+                ptr_res[i] = ptr_a[i] / *ptr_val;
             }
         }
 
@@ -474,6 +492,31 @@ namespace PerformanceWork.OptimizedNumerics
                 ptr_res[i] = ptr_a[i] * ptr_b[i];
                 remainingsum += ptr_res[i];
             }
+            result += remainingsum;
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe float SumOfProduction(float* ptr_a, float* ptr_b, long length)
+        {
+            Vector256<float> sum = new Vector256<float>();
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
+            for (long i = 0; i < l; i += Vector256<float>.Count)
+            {
+                Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
+                Vector256<float> res = Avx2.Multiply(v1, v2);
+                sum = Avx2.Add(sum, res);
+            }
+
+            float result = 0;
+            sum = Fma.HorizontalAdd(sum, sum);
+            sum = Fma.HorizontalAdd(sum, sum);
+            result = sum.GetElement(0) + sum.GetElement(4);
+
+            float remainingsum = 0;
+            for (long i = l; i < length; i++)
+                remainingsum += ptr_a[i] * ptr_b[i];
             result += remainingsum;
             return result;
         }

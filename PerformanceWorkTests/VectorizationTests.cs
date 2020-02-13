@@ -167,7 +167,7 @@ namespace PerformanceWorkTests
             Assert.IsTrue(ArrayEqual(res, res2));
         }
 
-        
+
         [TestMethod]
         public unsafe void SigmoidTest()
         {
@@ -176,6 +176,39 @@ namespace PerformanceWorkTests
             fixed (float* ptr_v1 = v1, ptr_res = res)
                 Vectorization.Sigmoid(ptr_v1, ptr_res, v1.Length);
             float[] res2 = { 0.731058359f, 0.8807941f, 0.95257f, 0.731058359f, 0.8807941f, 0.95257f, 0.731058359f, 0.8807941f, 0.95257f };
+            Assert.IsTrue(ArrayEqual(res, res2));
+        }
+
+        [TestMethod]
+        public unsafe void SoftmaxTest()
+        {
+            float[] v1 = { 1, 2, 3, 1 };
+            float[] res = new float[4];
+
+            fixed (float* ptr_v1 = v1, ptr_res = res)
+                Vectorization.Softmax(ptr_v1, ptr_res, 2, v1.Length);
+            float[] res2 = { 0.268932253f, 0.7310678f, 0.8808078f, 0.119192213f };
+            Assert.IsTrue(ArrayEqual(res, res2));
+        }
+
+        [TestMethod]
+        public unsafe void SoftmaxTest2()
+        {
+            float[] v1 = new float[128];
+
+            for (int i = 0; i < v1.Length; i++)
+                v1[i] = 1;
+
+            float[] res = new float[128];
+
+            fixed (float* ptr_v1 = v1, ptr_res = res)
+                Vectorization.Softmax(ptr_v1, ptr_res, 64, v1.Length);
+
+            float[] res2 = new float[128];
+            
+            for (int i = 0; i < res2.Length; i++)
+                res2[i] = 1f / 64;
+
             Assert.IsTrue(ArrayEqual(res, res2));
         }
 
