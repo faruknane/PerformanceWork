@@ -281,7 +281,7 @@ namespace PerformanceWork.OptimizedNumerics
 
             return res;
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void Subtract(Tensor<T> t1, Tensor<T> t2, Tensor<T> res)
         {
@@ -310,7 +310,7 @@ namespace PerformanceWork.OptimizedNumerics
                     throw new Exception("Unsupported number type!");
             }
         }
-
+        
         #endregion
 
     }

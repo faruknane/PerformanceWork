@@ -22,7 +22,7 @@ namespace PerformanceWork.OptimizedNumerics
                 i.Shape = shape;
                 i.ArrayReturned = false;
                 i.N = shape.N;
-                i.Indexes = (int*)IndexPool.Rent(i.N, out i.Length1);
+                i.Indices = (int*)IndexPool.Rent(i.N, out i.Length1);
             }
             return i;
         }
@@ -35,7 +35,7 @@ namespace PerformanceWork.OptimizedNumerics
             ObjectPool.Return(i);
         }
 
-        public int* Indexes;
+        public int* Indices;
         public int N { get; private set; }
         public Shape Shape { get; private set; }
 
@@ -45,7 +45,7 @@ namespace PerformanceWork.OptimizedNumerics
         public int this[int x]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            get => Indexes[x];
+            get => Indices[x];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -53,17 +53,46 @@ namespace PerformanceWork.OptimizedNumerics
         {
             this.Shape = s;
             this.N = s.N;
-            Indexes = (int*)IndexPool.Rent(this.N, out Length1);
+            Indices = (int*)IndexPool.Rent(this.N, out Length1);
         }
 
+        public void Add(int x)
+        {
+            //no error handling for performance issues
+            int i = N - 1;
+            Indices[i] += x;
+            while (Indices[i] >= Shape.Dimensions[i] && i > 0)
+            {
+                Indices[i - 1] += Indices[i] / Shape.Dimensions[i];
+                Indices[i] %= Shape.Dimensions[i];
+                i--;
+            }
+        }
+
+        public void SetZero()
+        {
+            for (int i = 0; i < N; i++)
+                Indices[i] = 0;
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void Dispose()
         {
             if (ArrayReturned)
                 throw new Exception("The index object is already returned!");
             ArrayReturned = true;
 
-            IndexPool.Return(Indexes, Length1);
+            IndexPool.Return(Indices, Length1);
             GC.SuppressFinalize(this);
+        }
+
+        public override string ToString()
+        {
+            string res = "";
+            for (int i = 0; i < N; i++)
+                res += Indices[i] + ", ";
+            return res;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
