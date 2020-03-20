@@ -118,11 +118,12 @@ int main()
 	checkCudaErrors(cublasCreate(&handle));
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-	for (int i = 0; i < 5000; i++)
+	for (int i = 0; i < 25000; i++)
 	{
 		addWithCuda(dev_c, dev_a, dev_c, arraySize);
 	}
 	NDeviceSynchronize();
+
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
 	NCheckError();
@@ -134,11 +135,12 @@ int main()
 		c[0], c[1], c[2], c[3], c[4]);
 
 	std::chrono::steady_clock::time_point begin2 = std::chrono::steady_clock::now();
-	for (int i = 0; i < 5000; i++)
+	for (int i = 0; i < 25000; i++)
 	{
 		addWithCublas(&handle, dev_c, dev_a, dev_c, arraySize);
 	}
 	NDeviceSynchronize();
+
 	std::chrono::steady_clock::time_point end2 = std::chrono::steady_clock::now();
 
 	NCheckError();

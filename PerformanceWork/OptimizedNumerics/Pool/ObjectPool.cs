@@ -5,6 +5,8 @@ using System.Text;
 
 namespace PerformanceWork.OptimizedNumerics.Pool
 {
+
+    //thread safe bir class mı?
     public unsafe class ObjectPool<T> : IDisposable
     {
         public int Count { get => Stack.Count; }

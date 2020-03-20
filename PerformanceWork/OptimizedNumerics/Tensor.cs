@@ -9,14 +9,14 @@ namespace PerformanceWork.OptimizedNumerics
 {
     public unsafe class Tensor<T> : IDisposable where T : struct
     {
-        public static ArrayPool<T> Host = ArrayPool<T>.Create(2000000, 100000);
-        public static List<ArrayPool<T>> GPU = new List<ArrayPool<T>>() { ArrayPool<T>.Create(2000000, 100000, true, 0) };
+        public static ArrayPool<T> Host = ArrayPool<T>.Create(30000000, 300000);
+        public static List<ArrayPool<T>> GPU = new List<ArrayPool<T>>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static ArrayPool<T> GetDevicePool(int deviceId)
         {
             for (int i = GPU.Count; i <= deviceId; i++)
-                GPU.Add(ArrayPool<T>.Create(2000000, 100000, true, i));
+                GPU.Add(ArrayPool<T>.Create(30000000, 300000, true, i));
             return GPU[deviceId];
         }
 
