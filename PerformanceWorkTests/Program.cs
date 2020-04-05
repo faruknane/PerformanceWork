@@ -35,18 +35,17 @@ namespace PerformanceWorkTests
             return true;
         }
 
-      
         static unsafe void Main(string[] args)
         {
             Shape s = Shape.NewShape(2, 3, 5, 7);
-            Index a = Index.NewIndex(s);
-            a.SetZero();
+            //Index a = Index.NewIndex(s);
+            //a.SetZero();
 
-            for(int i = 0; i < s.TotalSize; i++)
-            {
-                Console.WriteLine(a);
-                a.Add(1);
-            }
+            //for (int i = 0; i < s.TotalSize; i++)
+            //{
+            //    Console.WriteLine(a);
+            //    a.Add(1);
+            //}
             //for (int i = 0; i < 100; i++)
             //{
             //    Index index = Index.NewIndex(s1);

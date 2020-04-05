@@ -38,7 +38,7 @@
 //        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 //        public void SetZero()
 //        {
-//            Vectorization.ElementWiseSetValueAVX(Array, 0, D1*D2);
+//            VectorizationFloat.ElementWiseSetValueAVX(Array, 0, D1*D2);
 //        }
 
 //        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -112,7 +112,7 @@
 
 //            if (this.D1 != o.D1 || this.D2 != o.D2) return false;
 
-//            return Vectorization.ElementWiseIsEqualsAVX(this.Array, o.Array, D1*D2);
+//            return VectorizationFloat.ElementWiseIsEqualsAVX(this.Array, o.Array, D1*D2);
 //        }
 
 //        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -122,7 +122,7 @@
 //                throw new Exception("Matrices to be sum should have same dimensions!");
 
 //            Matrix res = new Matrix(a.D1, a.D2);
-//            Vectorization.ElementWiseAddAVX(a.Array, b.Array, res.Array, a.D1 * a.D2);
+//            VectorizationFloat.ElementWiseAddAVX(a.Array, b.Array, res.Array, a.D1 * a.D2);
 //            return res;
 //        }
 
@@ -130,7 +130,7 @@
 //        public static Matrix operator +(Matrix a, float b)
 //        {
 //            Matrix res = new Matrix(a.D1, a.D2);
-//            Vectorization.ElementWiseAddAVX(a.Array, b, res.Array, a.D1 * a.D2);
+//            VectorizationFloat.ElementWiseAddAVX(a.Array, b, res.Array, a.D1 * a.D2);
 //            return res;
 //        }
 
@@ -141,7 +141,7 @@
 //                throw new Exception("Matrices to be sum should have same dimensions!");
 
 //            Matrix res = new Matrix(a.D1, a.D2);
-//            Vectorization.ElementWiseSubtractAVX(a.Array, b.Array, res.Array, a.D1 * a.D2);
+//            VectorizationFloat.ElementWiseSubtractAVX(a.Array, b.Array, res.Array, a.D1 * a.D2);
 //            return res;
 //        }
 
@@ -149,7 +149,7 @@
 //        public static Matrix operator -(Matrix a, float b)
 //        {
 //            Matrix res = new Matrix(a.D1, a.D2);
-//            Vectorization.ElementWiseAddAVX(a.Array, -b, res.Array, a.D1 * a.D2);
+//            VectorizationFloat.ElementWiseAddAVX(a.Array, -b, res.Array, a.D1 * a.D2);
 //            return res;
 //        }
 
@@ -157,7 +157,7 @@
 //        public static Matrix operator *(Matrix a, float b)
 //        {
 //            Matrix res = new Matrix(a.D1, a.D2);
-//            Vectorization.ElementWiseMultiplyAVX(a.Array, b, res.Array, a.D1 * a.D2);
+//            VectorizationFloat.ElementWiseMultiplyAVX(a.Array, b, res.Array, a.D1 * a.D2);
 //            return res;
 //        }
 
@@ -165,7 +165,7 @@
 //        public static Matrix operator /(Matrix a, float b)
 //        {
 //            Matrix res = new Matrix(a.D1, a.D2);
-//            Vectorization.ElementWiseMultiplyAVX(a.Array, 1 / b, res.Array, a.D1 * a.D2);
+//            VectorizationFloat.ElementWiseMultiplyAVX(a.Array, 1 / b, res.Array, a.D1 * a.D2);
 //            return res;
 //        }
 
@@ -189,7 +189,7 @@
 //            if (this.D1 != b.D1 || this.D2 != b.D2)
 //                throw new Exception("The dimensions should be same!");
 
-//            Vectorization.ElementWiseMultiplyAVX(this.Array, b.Array, this.Array, D1 * D2);
+//            VectorizationFloat.ElementWiseMultiplyAVX(this.Array, b.Array, this.Array, D1 * D2);
 //        }
 
 //        #region Static Methods
@@ -200,21 +200,21 @@
 //                throw new Exception("The dimensions should be same!");
 
 //            Matrix c = new Matrix(a.D1,a.D2);
-//            Vectorization.ElementWiseMultiplyAVX(a.Array,b.Array,c.Array, a.D1 * a.D2);
+//            VectorizationFloat.ElementWiseMultiplyAVX(a.Array,b.Array,c.Array, a.D1 * a.D2);
 //            return c;
 //        }
 //        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 //        public static Matrix CreateCopy(Matrix m)
 //        {
 //            Matrix c = new Matrix(m.D1,m.D2);
-//            Vectorization.ElementWiseAssignAVX(c.Array, m.Array, m.D1 * m.D2);
+//            VectorizationFloat.ElementWiseAssignAVX(c.Array, m.Array, m.D1 * m.D2);
 //            return c;
 //        }
 //        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 //        public static Matrix MatrixMultiply(Matrix a, Matrix b)
 //        {
 //            Matrix c = new Matrix(a.D1, b.D2);
-//            Vectorization.MatrixMultiply(a, b, c);
+//            VectorizationFloat.MatrixMultiply(a, b, c);
 //            return c;
 //        }
 

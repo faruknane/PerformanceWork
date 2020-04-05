@@ -8,8 +8,10 @@ namespace PerformanceWork.OptimizedNumerics
 {
     public unsafe class Index : IDisposable
     {
-        public static ArrayPool<int> IndexPool = ArrayPool<int>.Create(10, 10);
+        public static ArrayPool ArrayPool = ArrayPool.Create(10, 10);
         public static ObjectPool<Index> ObjectPool = new ObjectPool<Index>();
+
+        //todo add + - operators with tuples in order to let users make rnn more simple like time - (1, 1) time * (1,2)
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Index NewIndex(Shape shape)
@@ -22,7 +24,7 @@ namespace PerformanceWork.OptimizedNumerics
                 i.Shape = shape;
                 i.ArrayReturned = false;
                 i.N = shape.N;
-                i.Indices = (int*)IndexPool.Rent(i.N, out i.Length1);
+                i.Indices = (int*)ArrayPool.Rent(i.N, out i.Length1, Data.Type.Int32);
             }
             return i;
         }
@@ -53,7 +55,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             this.Shape = s;
             this.N = s.N;
-            Indices = (int*)IndexPool.Rent(this.N, out Length1);
+            Indices = (int*)ArrayPool.Rent(this.N, out Length1, Data.Type.Int32);
         }
 
         public void Add(int x)
@@ -83,7 +85,7 @@ namespace PerformanceWork.OptimizedNumerics
                 throw new Exception("The index object is already returned!");
             ArrayReturned = true;
 
-            IndexPool.Return(Indices, Length1);
+            ArrayPool.Return(Indices, Length1);
             GC.SuppressFinalize(this);
         }
 

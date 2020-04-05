@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PerformanceWork.OptimizedNumerics
 {
-    public partial class Vectorization
+    public partial class VectorizationFloat
     {
         #region Working Properly
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -866,7 +866,7 @@ namespace PerformanceWork.OptimizedNumerics
         //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         //public unsafe static void MatrixMultiplyMine(float* a, long aD1, long aD2, float* b, long bD1, long bD2, float* c)
         //{
-        //    Vectorization.ElementWiseSetValueAVX(c, 0, aD1 * bD2);
+        //    VectorizationFloat.ElementWiseSetValueAVX(c, 0, aD1 * bD2);
         //    long m = aD1, n = aD2, p = bD2;
         //    Matrix bk = new Matrix((int)bD1, (int)bD2);
         //    Matrix ak = new Matrix((int)aD1, (int)aD2);

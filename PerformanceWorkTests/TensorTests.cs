@@ -12,8 +12,8 @@ namespace PerformanceWorkTests
         [TestMethod]
         public void SumTensorsCPU()
         {
-            Tensor<float> t = new Tensor<float>((3, 5));
-            Tensor<float> t2 = new Tensor<float>((3, 5));
+            Tensor t = new Tensor((3, 5), Data.Type.Float, DeviceIndicator.Host());
+            Tensor t2 = new Tensor((3, 5), Data.Type.Float, DeviceIndicator.Host());
             unsafe
             {
                 for (int i = 0; i < t.Shape[0]; i++)
@@ -23,7 +23,7 @@ namespace PerformanceWorkTests
                         ((float*)t2.Array)[t2.Shape.Index(i, j)] = i;
                     }
 
-                Tensor<float> t3 = Tensor<float>.Sum(t, t2);
+                Tensor t3 = Tensor.Sum(t, t2);
 
                 for (int i = 0; i < t.Shape[0]; i++)
                     for (int j = 0; j < t.Shape[1]; j++)
@@ -47,11 +47,11 @@ namespace PerformanceWorkTests
                 int m = r.Next(2, 30);
                 int p = r.Next(2, 30);
 
-                Tensor<float> a = new Tensor<float>((n, m));
-                Tensor<float> b = new Tensor<float>((m, p));
-                Tensor<float> res = new Tensor<float>((n, p));
+                Tensor a = new Tensor((n, m), Data.Type.Float, DeviceIndicator.Host());
+                Tensor b = new Tensor((m, p), Data.Type.Float, DeviceIndicator.Host());
+                Tensor res = new Tensor((n, p), Data.Type.Float, DeviceIndicator.Host());
 
-                res.SetValue(0);
+                res.SetFloat(0);
 
                 for (int i = 0; i < a.Shape[0]; i++)
                     for (int j = 0; j < a.Shape[1]; j++)
@@ -66,9 +66,9 @@ namespace PerformanceWorkTests
                         for (int k = 0; k < b.Shape[1]; k++)
                             ((float*)res.Array)[res.Shape.Index(i, k)] += ((float*)a.Array)[a.Shape.Index(i, j)] * ((float*)b.Array)[b.Shape.Index(j, k)];
 
-                Tensor<float> c = Tensor<float>.MatrixMultiply(a, b);
+                Tensor c = Tensor.MatrixMultiply(a, b);
 
-                if (!Vectorization.ElementWiseIsEqualsAVX((float*)res.Array, (float*)c.Array, res.Shape.TotalSize))
+                if (!VectorizationFloat.ElementWiseIsEqualsAVX((float*)res.Array, (float*)c.Array, res.Shape.TotalSize))
                 {
                     throw new Exception("Eşit Değil!");
                 }

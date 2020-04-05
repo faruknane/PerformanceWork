@@ -16,7 +16,7 @@ namespace PerformanceWorkTests
             for (int i = 0; i < v1.Length; i++)
                 v1[i] = i;
 
-            Vectorization.ElementWiseSetValueAVX(v1, 0, v1.Length);
+            VectorizationFloat.ElementWiseSetValueAVX(v1, 0, v1.Length);
             Assert.IsTrue(ArrayEqual(v1, v2));
         }
 
@@ -29,7 +29,7 @@ namespace PerformanceWorkTests
             for (int i = 0; i < v1.Length; i++)
                 v1[i] = i;
 
-            Vectorization.ElementWiseAssignAVX(v2, v1, v1.Length);
+            VectorizationFloat.ElementWiseAssignAVX(v2, v1, v1.Length);
             Assert.IsTrue(ArrayEqual(v1, v2));
         }
 
@@ -39,14 +39,14 @@ namespace PerformanceWorkTests
             {
                 float[] v1 = { 1, 2, 3 };
                 float[] v2 = { 1, 2, 3 };
-                bool res = Vectorization.ElementWiseIsEqualsAVX(v1, v2, v1.Length);
+                bool res = VectorizationFloat.ElementWiseIsEqualsAVX(v1, v2, v1.Length);
                 bool res2 = true;
                 Assert.AreEqual(res, res2);
             }
             {
                 float[] v1 = { 1, 2, 2 };
                 float[] v2 = { 1, 2, 3 };
-                bool res = Vectorization.ElementWiseIsEqualsAVX(v1, v2, v1.Length);
+                bool res = VectorizationFloat.ElementWiseIsEqualsAVX(v1, v2, v1.Length);
                 bool res2 = false;
                 Assert.AreEqual(res, res2);
             }
@@ -63,7 +63,7 @@ namespace PerformanceWorkTests
                 v2[i] = i;
             float[] res = new float[3];
             fixed (float* a = v1, b = v2, y = res)
-                Vectorization.ElementWiseAddAVX(a, b, y, res.Length);
+                VectorizationFloat.ElementWiseAddAVX(a, b, y, res.Length);
             float[] res2 = new float[l];
             for (int i = 0; i < l; i++)
                 res2[i] = i * 2;
@@ -76,7 +76,7 @@ namespace PerformanceWorkTests
             float v2 = 2;
             float[] res = new float[3];
             fixed (float* a = v1, y = res)
-                Vectorization.ElementWiseAddAVX(a, v2, y, res.Length);
+                VectorizationFloat.ElementWiseAddAVX(a, v2, y, res.Length);
             float[] res2 = { 3, 4, 5 };
 
             Assert.IsTrue(ArrayEqual(res, res2));
@@ -89,7 +89,7 @@ namespace PerformanceWorkTests
             float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3 };
             float[] res = new float[3];
             fixed (float* a = v1, y = res)
-                Vectorization.MakeNegativeAVX(a, y, res.Length);
+                VectorizationFloat.MakeNegativeAVX(a, y, res.Length);
             float[] res2 = { -1, -2, -3, -1, -2, -3, -1, -2, -3, -1, -2, -3 };
 
             Assert.IsTrue(ArrayEqual(res, res2));
@@ -104,7 +104,7 @@ namespace PerformanceWorkTests
             for (int i = 0; i < size; i++)
                 v1[i] = v2[i] = i;
 
-            double res = Vectorization.DotProductFMA(v1, v2, size);
+            double res = VectorizationFloat.DotProductFMA(v1, v2, size);
 
             double res2 = 0;
             for (int i = 0; i < size; i++)
@@ -122,7 +122,7 @@ namespace PerformanceWorkTests
                 v1[i] = v2[i] = i;
             fixed (float* ptr = v1, ptr2 = v2)
             {
-                double res = Vectorization.DotProductFMA(ptr, ptr2, size);
+                double res = VectorizationFloat.DotProductFMA(ptr, ptr2, size);
                 double res2 = 0;
                 for (int i = 0; i < size; i++)
                     res2 += v1[i] * v2[i];
@@ -143,7 +143,7 @@ namespace PerformanceWorkTests
                 v2[i] = i;
             float[] res = new float[3];
             fixed (float* a = v1, b = v2, y = res)
-                Vectorization.ElementWiseMultiplyAVX(a, b, y, res.Length);
+                VectorizationFloat.ElementWiseMultiplyAVX(a, b, y, res.Length);
             float[] res2 = new float[l];
             for (int i = 0; i < l; i++)
                 res2[i] = i*i;
@@ -160,7 +160,7 @@ namespace PerformanceWorkTests
             float v2 = 3;
             float[] res = new float[3];
             fixed (float* a = v1, y = res)
-                Vectorization.ElementWiseMultiplyAVX(a, v2, y, res.Length);
+                VectorizationFloat.ElementWiseMultiplyAVX(a, v2, y, res.Length);
             float[] res2 = new float[l];
             for (int i = 0; i < l; i++)
                 res2[i] = i*3;
@@ -174,7 +174,7 @@ namespace PerformanceWorkTests
             float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
             float[] res = new float[9];
             fixed (float* ptr_v1 = v1, ptr_res = res)
-                Vectorization.Sigmoid(ptr_v1, ptr_res, v1.Length);
+                VectorizationFloat.Sigmoid(ptr_v1, ptr_res, v1.Length);
             float[] res2 = { 0.731058359f, 0.8807941f, 0.95257f, 0.731058359f, 0.8807941f, 0.95257f, 0.731058359f, 0.8807941f, 0.95257f };
             Assert.IsTrue(ArrayEqual(res, res2));
         }
@@ -186,7 +186,7 @@ namespace PerformanceWorkTests
             float[] res = new float[4];
 
             fixed (float* ptr_v1 = v1, ptr_res = res)
-                Vectorization.Softmax(ptr_v1, ptr_res, 2, v1.Length);
+                VectorizationFloat.Softmax(ptr_v1, ptr_res, 2, v1.Length);
             float[] res2 = { 0.268932253f, 0.7310678f, 0.8808078f, 0.119192213f };
             Assert.IsTrue(ArrayEqual(res, res2));
         }
@@ -202,7 +202,7 @@ namespace PerformanceWorkTests
             float[] res = new float[128];
 
             fixed (float* ptr_v1 = v1, ptr_res = res)
-                Vectorization.Softmax(ptr_v1, ptr_res, 64, v1.Length);
+                VectorizationFloat.Softmax(ptr_v1, ptr_res, 64, v1.Length);
 
             float[] res2 = new float[128];
             
@@ -218,7 +218,7 @@ namespace PerformanceWorkTests
             float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
             float res = 0;
             fixed (float* ptr_v1 = v1)
-                res = Vectorization.SumOfVector(ptr_v1, v1.Length);
+                res = VectorizationFloat.SumOfVector(ptr_v1, v1.Length);
             float res2 = 18;
             Assert.IsTrue(res == res2);
         }
@@ -228,7 +228,7 @@ namespace PerformanceWorkTests
         {
             float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
             fixed (float* ptr_v1 = v1)
-                Vectorization.ElementWise_A_MultipliedBy_1_Minus_A(ptr_v1, ptr_v1, v1.Length);
+                VectorizationFloat.ElementWise_A_MultipliedBy_1_Minus_A(ptr_v1, ptr_v1, v1.Length);
             float[] res2 = { 0, -2, -6 , 0, -2, -6 , 0, -2, -6 };
             Assert.IsTrue(ArrayEqual(v1, res2));
         }
@@ -240,7 +240,7 @@ namespace PerformanceWorkTests
             float[] v2 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
             float res = 0;
             fixed (float* ptr_v1 = v1, ptr_v2 = v2)
-                res = Vectorization.ElementWiseMultiplyAndReturnSum(ptr_v1, ptr_v2, ptr_v1, v1.Length);
+                res = VectorizationFloat.ElementWiseMultiplyAndReturnSum(ptr_v1, ptr_v2, ptr_v1, v1.Length);
             float res2 = 42;
             Assert.IsTrue(res == res2);
             float[] res3 = { 1, 4, 9, 1, 4, 9, 1, 4, 9 };
@@ -253,7 +253,7 @@ namespace PerformanceWorkTests
             float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
             float[] v2 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
             fixed (float* ptr_v1 = v1, ptr_v2 = v2)
-                Vectorization.ElementWiseAddAVXBetaB(ptr_v1, ptr_v2, ptr_v1, v1.Length, 10);
+                VectorizationFloat.ElementWiseAddAVXBetaB(ptr_v1, ptr_v2, ptr_v1, v1.Length, 10);
             float[] res = { 11, 22, 33, 11, 22, 33, 11, 22, 33 };
             Assert.IsTrue(ArrayEqual(res, v1));
         }
@@ -279,7 +279,7 @@ namespace PerformanceWorkTests
 
         public bool ArrayEqual(float[] v1, float[] v2)
         {
-            return Vectorization.ElementWiseIsEqualsAVX(v1,v2,v1.Length);
+            return VectorizationFloat.ElementWiseIsEqualsAVX(v1,v2,v1.Length);
         }
     }
 }

@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace PerformanceWork.OptimizedNumerics
 {
-    public partial class Vectorization
+    public partial class VectorizationFloat
     {
         public static int Mode = 0x00000003;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void MatrixMultiply(Tensor<float> a, Tensor<float> b, Tensor<float> c)
+        public static unsafe void MatrixMultiply(Tensor a, Tensor b, Tensor c)
         {
             MKL.cblas_sgemm(MKL.ORDER.RowMajor, MKL.TRANSPOSE.NoTrans, MKL.TRANSPOSE.NoTrans, a.Shape[0], b.Shape[1], b.Shape[0], 1.0f, (float*)a.Array, b.Shape[0], (float*)b.Array, b.Shape[1], 0.0f, (float*)c.Array, b.Shape[1]);
         }
@@ -32,9 +32,9 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void Sigmoid(float* inp, float* outp, int length)
         {
-            Vectorization.ElementWiseMultiplyAVX(inp, -1, outp, length);
+            VectorizationFloat.ElementWiseMultiplyAVX(inp, -1, outp, length);
             MKL.vmsExp(length, outp, outp, Mode);
-            Vectorization.ElementWise_A_DividedBy_B_Plus_Vector(1, 1, outp, outp, length);
+            VectorizationFloat.ElementWise_A_DividedBy_B_Plus_Vector(1, 1, outp, outp, length);
         }
 
         public static unsafe void ElementWise_A_DividedBy_B_Plus_Vector(float a, float b, float* vector, float* ptr_res, int length)

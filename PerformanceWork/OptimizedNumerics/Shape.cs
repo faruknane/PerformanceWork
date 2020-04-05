@@ -9,7 +9,7 @@ namespace PerformanceWork.OptimizedNumerics
 {
     public unsafe class Shape : IDisposable
     {
-        public static ArrayPool<int> ShapePool = ArrayPool<int>.Create(10, 10);
+        public static ArrayPool ArrayPool = ArrayPool.Create(10, 10);
         public static ObjectPool<Shape> ObjectPool = new ObjectPool<Shape>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -22,8 +22,8 @@ namespace PerformanceWork.OptimizedNumerics
             {
                 s.ArrayReturned = false;
                 s.N = n;
-                s.Dimensions = (int*)ShapePool.Rent(s.N, out s.Length1);
-                s.Multiplied = (int*)ShapePool.Rent(s.N + 1, out s.Length2);
+                s.Dimensions = (int*)ArrayPool.Rent(s.N, out s.Length1, Data.Type.Int32);
+                s.Multiplied = (int*)ArrayPool.Rent(s.N + 1, out s.Length2, Data.Type.Int32);
             }
             return s;
         }
@@ -104,8 +104,8 @@ namespace PerformanceWork.OptimizedNumerics
         public Shape(int n)
         {
             this.N = n;
-            Dimensions = (int*)ShapePool.Rent(N, out Length1);
-            Multiplied = (int*)ShapePool.Rent(N+1, out Length2);
+            Dimensions = (int*)ArrayPool.Rent(N, out Length1, Data.Type.Int32);
+            Multiplied = (int*)ArrayPool.Rent(N+1, out Length2, Data.Type.Int32);
         }
 
 
@@ -117,8 +117,8 @@ namespace PerformanceWork.OptimizedNumerics
 
             N = dims.Length;
 
-            Dimensions = (int*)ShapePool.Rent(N, out Length1);
-            Multiplied = (int*)ShapePool.Rent(N+1, out Length2);
+            Dimensions = (int*)ArrayPool.Rent(N, out Length1, Data.Type.Int32);
+            Multiplied = (int*)ArrayPool.Rent(N+1, out Length2, Data.Type.Int32);
             Multiplied[N] = 1;
             for (int i = N - 1; i >= 0; i--)
             {
@@ -147,6 +147,16 @@ namespace PerformanceWork.OptimizedNumerics
             int res = 0;
             for (int i = 0; i < dims.Length; i++)
                 res += dims[i] * Multiplied[i + 1];
+            return res;
+        }
+
+        //todo create unit test for index methods
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public int Index(Index ind)
+        {
+            int res = 0;
+            for (int i = 0; i < ind.N; i++)
+                res += ind[i] * Multiplied[i + 1];
             return res;
         }
 
@@ -220,8 +230,8 @@ namespace PerformanceWork.OptimizedNumerics
                 throw new Exception("The shape object is already returned!");
             ArrayReturned = true;
 
-            ShapePool.Return(Dimensions, Length1);
-            ShapePool.Return(Multiplied, Length2);
+            ArrayPool.Return(Dimensions, Length1);
+            ArrayPool.Return(Multiplied, Length2);
             GC.SuppressFinalize(this);
         }
 

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace PerformanceWork.OptimizedNumerics.Pool
 {
-    public unsafe class ArrayPool<T> : IDisposable
+    public unsafe class ArrayPool : IDisposable
     {
         public int MaxLength { get; private set; }
         public int BucketCount { get; private set; }
@@ -19,7 +19,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         public bool OnGPU { get; private set; }
 
         private object Mutex = new object();
-
+        //todo deviceindicator
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public ArrayPool(int MaxLength, int BucketCount,  bool gpu = false, int devid = -1)
         {
@@ -33,7 +33,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public void* Rent(int minlength, out int length)
+        public void* Rent(int minlength, out int length, Data.Type t)
         {
             lock (Mutex)
             {
@@ -51,9 +51,9 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                 {
                     length = minlength + BucketSize;
                     if (OnGPU)
-                        return NCuda.Allocate(length * Marshal.SizeOf<T>(), DeviceId);
+                        return NCuda.Allocate(length * Data.GetByteSize(t), DeviceId);
                     else
-                        return MKL.MKL_malloc(length * Marshal.SizeOf<T>(), 32);
+                        return MKL.MKL_malloc(length * Data.GetByteSize(t), 32);
                 }
             }
         }
@@ -77,15 +77,15 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static ArrayPool<T> Create(int MaxLength, int BucketCount)
+        public static ArrayPool Create(int MaxLength, int BucketCount)
         { 
-            return new ArrayPool<T>(MaxLength, BucketCount);
+            return new ArrayPool(MaxLength, BucketCount);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static ArrayPool<T> Create(int MaxLength, int BucketCount, bool OnGPU, int DeviceId)
+        public static ArrayPool Create(int MaxLength, int BucketCount, bool OnGPU, int DeviceId)
         {
-            return new ArrayPool<T>(MaxLength, BucketCount, OnGPU, DeviceId);
+            return new ArrayPool(MaxLength, BucketCount, OnGPU, DeviceId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
