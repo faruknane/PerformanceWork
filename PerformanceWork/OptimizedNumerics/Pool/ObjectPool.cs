@@ -5,14 +5,13 @@ using System.Text;
 
 namespace PerformanceWork.OptimizedNumerics.Pool
 {
-
     //thread safe bir class mı?
     public unsafe class ObjectPool<T> : IDisposable
     {
         public int Count { get => Stack.Count; }
         public int UnreturnedCount { get; private set; } = 0;
         public Stack<T> Stack;
-
+        
         private object Mutex = new object();
 
         public ObjectPool()

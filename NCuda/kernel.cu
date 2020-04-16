@@ -3,7 +3,7 @@
 #include "device_launch_parameters.h"
 #include "cuda_runtime.h"
 #include <stdio.h>
-#include <cudnn.h>
+//#include <cudnn.h>
 #include <chrono>
 
 // CUDA runtime
@@ -96,13 +96,28 @@ extern "C" __declspec(dllexport) void NDeviceSynchronize()
 	checkCudaErrors(cudaDeviceSynchronize());
 }
 
-const int arraySize = 2000000;
+const int arraySize = 100000;
 const float a[arraySize] = { 0.1f, 0.2f, 0.3f, 0.4f, 0.1f };
 const float b[arraySize] = { 0, 0, 0, 0, 0 };
 float c[arraySize] = { 1,2,3,4,5 };
 
+__global__ void addSingleArrays2Kernel(const float* a, const float* b, float* c, int size)
+{
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	if (i < size)
+		c[i] = a[i] + b[i];
+}
 
-void addWithCuda(float* c, const float* a, const float* b, unsigned int size);
+inline void addWithCuda(float* a, float* b, float* c, int size, cudaStream_t& stream)
+{
+	int th = prop.maxThreadsPerBlock;
+
+	if (size < th)
+		th = size;
+
+	addSingleArrays2Kernel <<< (size + th - 1) / th, th, 0, stream>>> (a, b, c, size);
+}
+
 void addWithCublas(cublasHandle_t* h, float* c, const float* a, const float* b, unsigned int size);
 
 int main()
@@ -111,51 +126,44 @@ int main()
 	float* dev_b = (float*)NAllocate(arraySize * sizeof(float), 0);
 	float* dev_c = (float*)NAllocate(arraySize * sizeof(float), 0);
 
+	std::chrono::steady_clock::time_point begin3 = std::chrono::steady_clock::now();
 	NCopyFromHostToGPU((void*)a, dev_a, arraySize * sizeof(float));
 	NCopyFromHostToGPU((void*)b, dev_b, arraySize * sizeof(float));
-
-	cublasHandle_t handle;
-	checkCudaErrors(cublasCreate(&handle));
+	std::chrono::steady_clock::time_point end3 = std::chrono::steady_clock::now();
+	std::cout << "Time difference1 = " << std::chrono::duration_cast<std::chrono::milliseconds>(end3 - begin3).count() << "ms" << std::endl;
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-	for (int i = 0; i < 25000; i++)
+	cudaStream_t stream[1];
+	cudaStreamCreate(&stream[0]);
+	cout << "bitti1" << endl;
+	for (int i = 0; i < 100000; i++)
 	{
-		addWithCuda(dev_c, dev_a, dev_c, arraySize);
+		addWithCuda(dev_c, dev_a, dev_c , arraySize, stream[0]);
 	}
-	NDeviceSynchronize();
+	cudaStreamSynchronize(stream[0]);
 
+	cout << "bitti2" << endl;
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	std::cout << "Time difference2 = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
 
-	NCheckError();
 
-	std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
-	
+	std::chrono::steady_clock::time_point begin2 = std::chrono::steady_clock::now();
 	NCopyFromGPUToHost(dev_c, c, arraySize * sizeof(float));
 	printf("{1,2,3,4,5} + {10,20,30,40,50} = {%f,%f,%f,%f,%f}\n",
 		c[0], c[1], c[2], c[3], c[4]);
-
-	std::chrono::steady_clock::time_point begin2 = std::chrono::steady_clock::now();
-	for (int i = 0; i < 25000; i++)
-	{
-		addWithCublas(&handle, dev_c, dev_a, dev_c, arraySize);
-	}
-	NDeviceSynchronize();
-
+	
 	std::chrono::steady_clock::time_point end2 = std::chrono::steady_clock::now();
-
-	NCheckError();
-	checkCudaErrors(cublasDestroy(handle));
-
-	std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end2 - begin2).count() << "ms" << std::endl;
+	std::cout << "Time difference4 = " << std::chrono::duration_cast<std::chrono::milliseconds>(end2 - begin2).count() << "ms" << std::endl;
 
 
-	NCopyFromGPUToHost(dev_c, c, arraySize * sizeof(float));
+
+	std::chrono::steady_clock::time_point begin4 = std::chrono::steady_clock::now();
 	NFree(dev_a);
 	NFree(dev_b);
 	NFree(dev_c);
+	std::chrono::steady_clock::time_point end4 = std::chrono::steady_clock::now();
+	std::cout << "Time difference5 = " << std::chrono::duration_cast<std::chrono::milliseconds>(end4 - begin4).count() << "ms" << std::endl;
 
-	printf("{1,2,3,4,5} + {10,20,30,40,50} = {%f,%f,%f,%f,%f}\n",
-		c[0], c[1], c[2], c[3], c[4]);
 
 	auto cudaStatus = cudaDeviceReset();
 	if (cudaStatus != cudaSuccess) {
@@ -167,27 +175,10 @@ int main()
 }
 
 
-__global__ void addSingleArrays2Kernel(float* c, const float* a, const float* b, int size)
-{
-	int i = blockIdx.x * blockDim.x + threadIdx.x;
-	if (i < size)
-		c[i] = a[i] + b[i];
-}
-
-inline void addWithCuda(float* c, const float* a, const float* b, unsigned int size)
-{
-	int th = prop.maxThreadsPerBlock;
-
-	if (size < th)
-		th = size;
-
-	addSingleArrays2Kernel <<<(size + th - 1) / th, th >>> (c, a, b, size);
-}
-
 
 inline void addWithCublas(cublasHandle_t* h ,float* c, const float* a, const float* b, unsigned int size)
 {
 	float alpha = 1;
 	cublasSaxpy(*h, arraySize, &alpha, a, 1, c, 1);
-	//cublasSaxpy(*h, arraySize, &alpha, b, 1, c, 1);
+	cublasSaxpy(*h, arraySize, &alpha, b, 1, c, 1);
 }

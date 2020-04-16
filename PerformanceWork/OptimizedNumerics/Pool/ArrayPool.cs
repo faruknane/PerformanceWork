@@ -33,7 +33,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public void* Rent(int minlength, out int length, Data.Type t)
+        public void* Rent(int minlength, out int length, DataType.Type t)
         {
             lock (Mutex)
             {
@@ -51,9 +51,9 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                 {
                     length = minlength + BucketSize;
                     if (OnGPU)
-                        return NCuda.Allocate(length * Data.GetByteSize(t), DeviceId);
+                        return NCuda.Allocate(length * DataType.GetByteSize(t), DeviceId);
                     else
-                        return MKL.MKL_malloc(length * Data.GetByteSize(t), 32);
+                        return MKL.MKL_malloc(length * DataType.GetByteSize(t), 32);
                 }
             }
         }

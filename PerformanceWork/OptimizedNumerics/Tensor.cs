@@ -7,97 +7,10 @@ using System.Text;
 
 namespace PerformanceWork.OptimizedNumerics
 {
-    public static class Data
-    {
-        /// <summary>
-        /// Data type of an array.
-        /// </summary>
-        public enum Type
-        {
-            Double,
-            Float,
-            Int32
-        }
-
-        /// <summary>
-        /// Returns the byte size of the data type given.
-        /// </summary>
-        /// <param name="t">Data Type</param>
-        /// <returns>Byte Size of the data type</returns>
-        public static int GetByteSize(Type t)
-        {
-            if (t == Type.Double) return 8;
-            else if (t == Type.Float | t == Type.Int32) return 4;
-            throw new Exception("Undefined data type");
-        }
-    }
-
-    public enum DeviceType
-    {
-        Host,
-        Gpu
-    }
-
-    public struct DeviceIndicator
-    {
-        public DeviceType Type { get; set; }
-        public int DeviceID { get; set; }
-
-        public DeviceIndicator(DeviceType dev, int devid)
-        {
-            this.Type = dev;
-            this.DeviceID = devid;
-        }
-
-        public static DeviceIndicator Gpu(int devid)
-        {
-            return new DeviceIndicator(DeviceType.Gpu, devid);
-        }
-        public static DeviceIndicator Host()
-        {
-            return new DeviceIndicator(DeviceType.Host, -1);
-        }
-
-        public static bool operator ==(DeviceIndicator b1, DeviceIndicator b2)
-        {
-            return b1.Type == b2.Type && (b1.Type == DeviceType.Host || b1.DeviceID == b2.DeviceID);
-        }
-
-        public static bool operator !=(DeviceIndicator b1, DeviceIndicator b2)
-        {
-            return b1.Type != b2.Type || (b1.Type != DeviceType.Host && b1.DeviceID != b2.DeviceID);
-        }
-    }
-
-    public static class TensorPool
-    {
-        public static ArrayPool Host = ArrayPool.Create(30000000, 300000);
-        public static List<ArrayPool> Gpu = new List<ArrayPool>();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static ArrayPool GetDevicePool(DeviceIndicator device)
-        {
-            if (device.Type == DeviceType.Gpu)
-                return GetGpuPool(device.DeviceID);
-            else if (device.Type == DeviceType.Host)
-                return Host;
-            else
-                throw new Exception("Unsupported Device!");
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static ArrayPool GetGpuPool(int deviceId)
-        {
-            for (int i = Gpu.Count; i <= deviceId; i++)
-                Gpu.Add(ArrayPool.Create(30000000, 300000, true, i));
-            return Gpu[deviceId];
-        }
-    }
-
     public unsafe class Tensor : IDisposable
     {
         public Shape Shape { get; private set; }
-        public Data.Type Type;
+        public DataType.Type Type;
         public DeviceIndicator Device;
 
         public void* Array;
@@ -106,7 +19,7 @@ namespace PerformanceWork.OptimizedNumerics
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private Tensor(Shape s, void* ptr, Data.Type type, DeviceIndicator device)
+        private Tensor(Shape s, void* ptr, DataType.Type type, DeviceIndicator device)
         {
             this.Shape = s;
             this.Array = ptr;
@@ -116,36 +29,36 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor(Shape s, Data.Type type, DeviceIndicator device)
+        public Tensor(Shape s, DataType.Type type, DeviceIndicator device)
         {
             Initialize(s, type, device);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2) a, Data.Type type, DeviceIndicator device)
+        public Tensor((int d1, int d2) a, DataType.Type type, DeviceIndicator device)
         {
             Initialize(Shape.NewShape(a.d1, a.d2), type, device);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2, int d3) a, Data.Type type, DeviceIndicator device)
+        public Tensor((int d1, int d2, int d3) a, DataType.Type type, DeviceIndicator device)
         {
             Initialize(Shape.NewShape(a.d1, a.d2, a.d3), type, device);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2, int d3, int d4) a, Data.Type type, DeviceIndicator device)
+        public Tensor((int d1, int d2, int d3, int d4) a, DataType.Type type, DeviceIndicator device)
         {
             Initialize(Shape.NewShape(a.d1, a.d2, a.d3, a.d4), type, device);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2, int d3, int d4, int d5) a, Data.Type type, DeviceIndicator device)
+        public Tensor((int d1, int d2, int d3, int d4, int d5) a, DataType.Type type, DeviceIndicator device)
         {
             Initialize(Shape.NewShape(a.d1, a.d2, a.d3, a.d4, a.d5), type, device);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private void Initialize(Shape s, Data.Type type, DeviceIndicator device)
+        private void Initialize(Shape s, DataType.Type type, DeviceIndicator device)
         {
             this.Shape = s;
             this.Device = device;
@@ -159,7 +72,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             if (this.Device.Type == DeviceType.Host)
             {
-                if (this.Type == Data.Type.Float)
+                if (this.Type == DataType.Type.Float)
                 {
                     VectorizationFloat.ElementWiseSetValueAVX((float*)Array, value, Shape.TotalSize);
                 }
@@ -182,7 +95,7 @@ namespace PerformanceWork.OptimizedNumerics
 
             if (this.Device.Type == DeviceType.Host)
             {
-                if (this.Type == Data.Type.Float)
+                if (this.Type == DataType.Type.Float)
                 {
                     VectorizationFloat.ElementWiseAssignAVX((float*)Array, (float*)value.Array, Shape.TotalSize);
                 }
@@ -198,7 +111,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             if (this.Device.Type == DeviceType.Host)
             {
-                if (this.Type == Data.Type.Float)
+                if (this.Type == DataType.Type.Float)
                 {
                     VectorizationFloat.MakeNegativeAVX((float*)Array, (float*)Array, Shape.Multiplied[0]);
                 }
@@ -220,7 +133,7 @@ namespace PerformanceWork.OptimizedNumerics
 
             if (this.Device.Type == DeviceType.Host)
             {
-                if (this.Type == Data.Type.Float)
+                if (this.Type == DataType.Type.Float)
                 {
                     VectorizationFloat.ElementWiseAddAVX((float*)this.Array, (float*)value.Array, (float*)this.Array, this.Shape.TotalSize);
                 }
@@ -236,7 +149,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             if (this.Device.Type == DeviceType.Host)
             {
-                if (this.Type == Data.Type.Float)
+                if (this.Type == DataType.Type.Float)
                 {
                     VectorizationFloat.ElementWiseMultiplyAVX((float*)this.Array, x, (float*)this.Array, this.Shape.TotalSize);
                 }
@@ -252,7 +165,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             if (this.Device.Type == DeviceType.Host)
             {
-                if (this.Type == Data.Type.Float)
+                if (this.Type == DataType.Type.Float)
                 {
                     VectorizationFloat.ElementWiseMultiplyAVX((float*)this.Array, 1 / x, (float*)this.Array, this.Shape.TotalSize);
                 }
@@ -268,7 +181,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             if (m.Device.Type == DeviceType.Host)
             {
-                if (m.Type == Data.Type.Float)
+                if (m.Type == DataType.Type.Float)
                 {
                     Tensor n = new Tensor(m.Shape.Clone(), m.Type, m.Device);
                     VectorizationFloat.ElementWiseAssignAVX((float*)n.Array, (float*)m.Array, n.Shape.TotalSize);
@@ -320,10 +233,10 @@ namespace PerformanceWork.OptimizedNumerics
         /// <param name="s">The shape of the identity tensor.</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public unsafe static Tensor DerivativeIdentity(Shape s, Data.Type dtype, DeviceIndicator device)
+        public unsafe static Tensor DerivativeIdentity(Shape s, DataType.Type dtype, DeviceIndicator device)
         {
             Tensor t = new Tensor(s.Clone(), dtype, device);
-            if (t.Type == Data.Type.Float)
+            if (t.Type == DataType.Type.Float)
                 t.SetFloat(1.0f);
             else 
                 throw new Exception("Unsupported data type!");
@@ -336,7 +249,16 @@ namespace PerformanceWork.OptimizedNumerics
             if (end - begin != s.TotalSize)
                 throw new Exception("Cant convert it into the shape");
 
-            return new Tensor(s, (void*)((long)(data.Array) + begin * Data.GetByteSize(data.Type)), data.Type, data.Device);
+            return new Tensor(s, (void*)((long)(data.Array) + begin * DataType.GetByteSize(data.Type)), data.Type, data.Device);
+        }
+
+        //change name and explain it is created in host
+        public static unsafe Tensor LoadFloatToHost(float* data, int begin, int end, Shape s)
+        {
+            if (end - begin != s.TotalSize)
+                throw new Exception("Cant convert it into the shape");
+
+            return new Tensor(s, (void*)((long)data + begin * DataType.GetByteSize(DataType.Type.Float)), DataType.Type.Float, DeviceIndicator.Host());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -350,7 +272,7 @@ namespace PerformanceWork.OptimizedNumerics
 
             if (a.Device.Type == DeviceType.Host)
             {
-                if (a.Type == Data.Type.Float)
+                if (a.Type == DataType.Type.Float)
                 {
 
                     if (a.Shape.N != 2 || b.Shape.N != 2 || a.Shape[1] != b.Shape[0])
@@ -385,7 +307,7 @@ namespace PerformanceWork.OptimizedNumerics
 
             if (t1.Device.Type == DeviceType.Host)
             {
-                if (t1.Type == Data.Type.Float)
+                if (t1.Type == DataType.Type.Float)
                 {
                     VectorizationFloat.ElementWiseAddAVX((float*)t1.Array, (float*)t2.Array, (float*)res.Array, t1.Shape.TotalSize);
                 }
@@ -416,7 +338,7 @@ namespace PerformanceWork.OptimizedNumerics
 
             if (t1.Device.Type == DeviceType.Host)
             {
-                if (t1.Type == Data.Type.Float)
+                if (t1.Type == DataType.Type.Float)
                 {
                     VectorizationFloat.ElementWiseSubtractAVX((float*)t1.Array, (float*)t2.Array, (float*)res.Array, t1.Shape.TotalSize);
                 }

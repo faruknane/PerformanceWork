@@ -22,8 +22,8 @@ namespace PerformanceWork.OptimizedNumerics
             {
                 s.ArrayReturned = false;
                 s.N = n;
-                s.Dimensions = (int*)ArrayPool.Rent(s.N, out s.Length1, Data.Type.Int32);
-                s.Multiplied = (int*)ArrayPool.Rent(s.N + 1, out s.Length2, Data.Type.Int32);
+                s.Dimensions = (int*)ArrayPool.Rent(s.N, out s.Length1, DataType.Type.Int32);
+                s.Multiplied = (int*)ArrayPool.Rent(s.N + 1, out s.Length2, DataType.Type.Int32);
             }
             return s;
         }
@@ -104,8 +104,8 @@ namespace PerformanceWork.OptimizedNumerics
         public Shape(int n)
         {
             this.N = n;
-            Dimensions = (int*)ArrayPool.Rent(N, out Length1, Data.Type.Int32);
-            Multiplied = (int*)ArrayPool.Rent(N+1, out Length2, Data.Type.Int32);
+            Dimensions = (int*)ArrayPool.Rent(N, out Length1, DataType.Type.Int32);
+            Multiplied = (int*)ArrayPool.Rent(N+1, out Length2, DataType.Type.Int32);
         }
 
 
@@ -117,8 +117,8 @@ namespace PerformanceWork.OptimizedNumerics
 
             N = dims.Length;
 
-            Dimensions = (int*)ArrayPool.Rent(N, out Length1, Data.Type.Int32);
-            Multiplied = (int*)ArrayPool.Rent(N+1, out Length2, Data.Type.Int32);
+            Dimensions = (int*)ArrayPool.Rent(N, out Length1, DataType.Type.Int32);
+            Multiplied = (int*)ArrayPool.Rent(N+1, out Length2, DataType.Type.Int32);
             Multiplied[N] = 1;
             for (int i = N - 1; i >= 0; i--)
             {

@@ -24,7 +24,7 @@ namespace PerformanceWork.OptimizedNumerics
                 i.Shape = shape;
                 i.ArrayReturned = false;
                 i.N = shape.N;
-                i.Indices = (int*)ArrayPool.Rent(i.N, out i.Length1, Data.Type.Int32);
+                i.Indices = (int*)ArrayPool.Rent(i.N, out i.Length1, DataType.Type.Int32);
             }
             return i;
         }
@@ -55,7 +55,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             this.Shape = s;
             this.N = s.N;
-            Indices = (int*)ArrayPool.Rent(this.N, out Length1, Data.Type.Int32);
+            Indices = (int*)ArrayPool.Rent(this.N, out Length1, DataType.Type.Int32);
         }
 
         public void Add(int x)
