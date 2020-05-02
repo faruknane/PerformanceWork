@@ -1,4 +1,5 @@
 ﻿using PerformanceWork;
+using PerformanceWork.DeepLearning.Kernels.Cpu;
 using PerformanceWork.OptimizedNumerics;
 using PerformanceWork.OptimizedNumerics.Pool;
 using System;
@@ -37,52 +38,24 @@ namespace PerformanceWorkTests
 
         static unsafe void Main(string[] args)
         {
-            Shape s = Shape.NewShape(2, 3, 5, 7);
-            Index a = Index.NewIndex(s);
-            a.SetZero();
+            float[] vdata = new float[] { 0.1f, -0.2f, 2, 3, -1, 2, -5, -10, 9, -8 };
+            float[] graddata = new float[] { 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f };
 
-            for (int i = 0; i < s.TotalSize; i++)
+            fixed (float* ptr_v = vdata, ptr_grad = graddata)
             {
-                Console.WriteLine(a);
-                a.Add(1);
+                Tensor v = Tensor.LoadFloatArrayToTensorHost(ptr_v, 0, vdata.Length, Shape.NewShape(vdata.Length));
+                Tensor grad = Tensor.LoadFloatArrayToTensorHost(ptr_grad, 0, graddata.Length, Shape.NewShape(graddata.Length));
+
+                Tensor reluv = CpuKernels.ReluFloat(v);
+                Tensor relugrad = CpuKernels.ReluFloat_GetGradient_0(grad, v);
+
+                Console.WriteLine("v: " + v);
+                Console.WriteLine("reluv: " + reluv);
+                Console.WriteLine("grad: " + grad);
+                Console.WriteLine("relugrad: " + relugrad);
+
             }
-            //for (int i = 0; i < 100; i++)
-            //{
-            //    Index index = Index.NewIndex(s1);
-            //    index.Indexes[0] = i;
-            //    index.Indexes[1] = i + 1;
-            //    Console.WriteLine($"{index[0]}, {index[1]}");
-            //    Index.Return(index);
-            //}
-            //Shape.Return(s1);
 
-            //Console.WriteLine(Index.ObjectPool.Count);
-            //Console.WriteLine(Index.ObjectPool.UnreturnedCount);
-            //Console.WriteLine(Index.IndexPool.UnreturnedArrayCount);
-
-
-            //int size = 1000;
-            //Tensor<float> t = new Tensor<float>((size, size), false, 0);
-            //Tensor<float> t2 = new Tensor<float>((size, size), false, 0);
-
-            //for (int i = 0; i < t.Shape[0]; i++)
-            //    for (int j = 0; j < t.Shape[1]; j++)
-            //    {
-            //        ((float*)t.Array)[t.Shape.Index(i, j)] = j;
-            //        ((float*)t2.Array)[t2.Shape.Index(i, j)] = i;
-            //    }
-
-            //Stopwatch s = new Stopwatch();
-            //s.Start();
-            //for (int i = 0; i < 50; i++)
-            //{
-            //    var t3 = Tensor<float>.Sum(t, t2);
-            //    t3.Dispose();
-            //}
-            //s.Stop();
-            //Console.WriteLine(s.ElapsedMilliseconds);
-            //t.Dispose();    
-            //t2.Dispose();
             //Console.WriteLine(Tensor<float>.Host.UnreturnedArrayCount);
             ////Tensor<float>.GetDevicePool(0).ClearMemory();
             //return;

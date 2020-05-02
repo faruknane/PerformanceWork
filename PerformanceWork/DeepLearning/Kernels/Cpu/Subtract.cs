@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +10,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
 {
     public unsafe static partial class CpuKernels
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor SubtractFloat(Tensor t1, Tensor t2)
         {
             Tensor res = new Tensor(t1.Shape.Clone(), t1.Type, t1.Device);
@@ -16,11 +18,13 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
             return res;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor SubtractFloat_GetGradient_0(Tensor m, Tensor t1, Tensor t2)
         {
             return m;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor SubtractFloat_GetGradient_1(Tensor m, Tensor t1, Tensor t2)
         {
             Tensor res = new Tensor(m.Shape.Clone(), m.Type, m.Device);

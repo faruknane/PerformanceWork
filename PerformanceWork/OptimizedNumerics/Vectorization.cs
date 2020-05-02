@@ -11,7 +11,79 @@ namespace PerformanceWork.OptimizedNumerics
     {
         #region Working Properly
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private static unsafe void ElementWiseDivideAVX(float val, float* ptr_a, float* ptr_res, int length)
+        public static unsafe void ReluFloatGradientCalculation(float* ptr_grad, float* ptr_v, float* ptr_res, int length)
+        {
+            float val = 0;
+            float* ptr_val = &val;
+            Vector128<float> zeros = Avx2.BroadcastScalarToVector128(ptr_val);
+
+            for (long i = 0; i < length / Vector128<float>.Count * Vector128<float>.Count; i += Vector128<float>.Count)
+            {
+                Vector128<float> v1 = Avx2.LoadVector128(&ptr_v[i]);
+                Vector128<float> r1 = Avx2.CompareGreaterThan(v1, zeros);
+                Vector128<float> grad = Avx2.LoadVector128(&ptr_grad[i]);
+                Vector128<float> r2 = Avx2.And(grad, r1);
+                Avx2.Store(&ptr_res[i], r2);
+            }
+
+            for (long i = length / Vector128<float>.Count * Vector128<float>.Count; i < length; i++)
+            {
+                if (ptr_v[i] <= 0)
+                    ptr_res[i] = 0;
+                else
+                    ptr_res[i] = ptr_grad[i];
+            }
+        }
+
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void FilterNegativeNumbers(float* ptr_a, float* ptr_res, int length)
+        {
+            float val = 0;
+            float* ptr_val = &val;
+            Vector256<float> zeros = Avx2.BroadcastScalarToVector256(ptr_val);
+
+            for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+            {
+                Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                Vector256<float> r1 = Avx2.Max(v1, zeros);
+                Avx2.Store(&ptr_res[i], r1);
+            }
+
+            for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+            {
+                if (ptr_a[i] <= 0)
+                    ptr_res[i] = 0;
+                else
+                    ptr_res[i] = ptr_a[i];
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void FilterPositiveNumbers(float* ptr_a, float* ptr_res, int length)
+        {
+            float val = 0;
+            float* ptr_val = &val;
+            Vector256<float> zeros = Avx2.BroadcastScalarToVector256(ptr_val);
+
+            for (long i = 0; i < length / Vector256<float>.Count * Vector256<float>.Count; i += Vector256<float>.Count)
+            {
+                Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                Vector256<float> r1 = Avx2.Min(v1, zeros);
+                Avx2.Store(&ptr_res[i], r1);
+            }
+
+            for (long i = length / Vector256<float>.Count * Vector256<float>.Count; i < length; i++)
+            {
+                if (ptr_a[i] <= 0)
+                    ptr_res[i] = ptr_a[i];
+                else
+                    ptr_res[i] = 0;
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void ElementWiseDivideAVX(float val, float* ptr_a, float* ptr_res, int length)
         {
             float* ptr_val = &val;
             Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_val);
@@ -28,7 +100,7 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private static unsafe void ElementWiseDivideAVX(float* ptr_a, float val, float* ptr_res, int length)
+        public static unsafe void ElementWiseDivideAVX(float* ptr_a, float val, float* ptr_res, int length)
         {
             float* ptr_val = &val;
             Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_val);

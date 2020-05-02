@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PerformanceWork;
+using PerformanceWork.DeepLearning.Kernels.Cpu;
 using PerformanceWork.OptimizedNumerics;
 using System;
 using System.Collections.Generic;
@@ -12,8 +14,8 @@ namespace PerformanceWorkTests
         [TestMethod]
         public void SumTensorsCPU()
         {
-            Tensor t = new Tensor((3, 5), Data.Type.Float, DeviceIndicator.Host());
-            Tensor t2 = new Tensor((3, 5), Data.Type.Float, DeviceIndicator.Host());
+            Tensor t = new Tensor((3, 5), DataType.Type.Float, DeviceIndicator.Host());
+            Tensor t2 = new Tensor((3, 5), DataType.Type.Float, DeviceIndicator.Host());
             unsafe
             {
                 for (int i = 0; i < t.Shape[0]; i++)
@@ -47,9 +49,9 @@ namespace PerformanceWorkTests
                 int m = r.Next(2, 30);
                 int p = r.Next(2, 30);
 
-                Tensor a = new Tensor((n, m), Data.Type.Float, DeviceIndicator.Host());
-                Tensor b = new Tensor((m, p), Data.Type.Float, DeviceIndicator.Host());
-                Tensor res = new Tensor((n, p), Data.Type.Float, DeviceIndicator.Host());
+                Tensor a = new Tensor((n, m), DataType.Type.Float, DeviceIndicator.Host());
+                Tensor b = new Tensor((m, p), DataType.Type.Float, DeviceIndicator.Host());
+                Tensor res = new Tensor((n, p), DataType.Type.Float, DeviceIndicator.Host());
 
                 res.SetFloat(0);
 
@@ -106,6 +108,26 @@ namespace PerformanceWorkTests
             for (int i = 0; i < res.N; i++)
                 if (res.Dimensions[i] != res2.Dimensions[i])
                     throw new Exception("Hata");
+        }
+
+
+        [TestMethod]
+        public unsafe void ReluFloatCpu()
+        {
+            float[] vdata = new float[] { 0.1f, -0.2f, 2, 3, -1, 2, -5, -10, 9, -8 };
+            float[] graddata = new float[] { 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f };
+
+            fixed (float* ptr_v = vdata, ptr_grad = graddata)
+            {
+                Tensor v = Tensor.LoadFloatArrayToTensorHost(ptr_v, 0, vdata.Length, Shape.NewShape(vdata.Length));
+                Tensor grad = Tensor.LoadFloatArrayToTensorHost(ptr_grad, 0, graddata.Length, Shape.NewShape(graddata.Length));
+
+                Tensor reluv = CpuKernels.ReluFloat(v);
+                Tensor relugrad = CpuKernels.ReluFloat_GetGradient_0(grad, v);
+
+                //todo make checks
+
+            }
         }
     }
 }

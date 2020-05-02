@@ -244,6 +244,14 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         //todo create unit test for Cut
+        /// <summary>
+        /// Slices the tensor data between begin and end indices into the shape s. It assumes that the sliced tensor is already returned. So, It won't do anything if the sliced tensor gets disposed.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="begin"></param>
+        /// <param name="end"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public static unsafe Tensor Cut(Tensor data, int begin, int end, Shape s)
         {
             if (end - begin != s.TotalSize)
@@ -252,13 +260,39 @@ namespace PerformanceWork.OptimizedNumerics
             return new Tensor(s, (void*)((long)(data.Array) + begin * DataType.GetByteSize(data.Type)), data.Type, data.Device);
         }
 
-        //change name and explain it is created in host
-        public static unsafe Tensor LoadFloatToHost(float* data, int begin, int end, Shape s)
+        /// <summary>
+        /// Coverts the float array into a float tensor on host. It assumes that the float tensor is already returned. So, It won't do anything if the tensor gets disposed.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="begin"></param>
+        /// <param name="end"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static unsafe Tensor LoadFloatArrayToTensorHost(float* data, int begin, int end, Shape s)
         {
             if (end - begin != s.TotalSize)
                 throw new Exception("Cant convert it into the shape");
 
             return new Tensor(s, (void*)((long)data + begin * DataType.GetByteSize(DataType.Type.Float)), DataType.Type.Float, DeviceIndicator.Host());
+        }
+
+        /// <summary>
+        /// Coverts the float array into a float tensor on host. It assumes that the float tensor is already returned. So, It won't do anything if the tensor gets disposed.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="begin"></param>
+        /// <param name="end"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static unsafe Tensor LoadFloatArrayToTensorHost(float[] array, int begin, int end, Shape s)
+        {
+            fixed (float* data = array)
+            {
+                if (end - begin != s.TotalSize)
+                    throw new Exception("Cant convert it into the shape");
+
+                return new Tensor(s, (void*)((long)data + begin * DataType.GetByteSize(DataType.Type.Float)), DataType.Type.Float, DeviceIndicator.Host());
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

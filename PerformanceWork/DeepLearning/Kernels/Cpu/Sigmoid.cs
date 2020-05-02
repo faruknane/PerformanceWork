@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +10,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
 {
     public unsafe partial class CpuKernels
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor SigmoidFloat(Tensor v)
         {
             Tensor sigmo = new Tensor(v.Shape.Clone(), DataType.Type.Float, DeviceIndicator.Host());
@@ -16,6 +18,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
             return sigmo;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor SigmoidFloat_GetGradient_0(Tensor s, Tensor sigmo)
         {
             Tensor combined = new Tensor(s.Shape.Clone(), DataType.Type.Float, DeviceIndicator.Host());
