@@ -71,6 +71,20 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
+        public void Add(Shape x)
+        {
+            //no error handling for performance issues
+            for (int i = 0; i < this.N; i++)
+                Indices[i] += x[i];
+        }
+
+        public void Subtract(Shape x)
+        {
+            //no error handling for performance issues
+            for (int i = 0; i < this.N; i++)
+                Indices[i] -= x[i];
+        }
+
         public void SetZero()
         {
             for (int i = 0; i < N; i++)
@@ -95,6 +109,17 @@ namespace PerformanceWork.OptimizedNumerics
             for (int i = 0; i < N; i++)
                 res += Indices[i] + ", ";
             return res;
+        }
+
+        public static Index operator +(Index a, Shape b)
+        {
+            a.Add(b);
+            return a;
+        }
+        public static Index operator -(Index a, Shape b)
+        {
+            a.Subtract(b);
+            return a;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

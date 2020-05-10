@@ -250,6 +250,7 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSubtractAVX(float* ptr_left, float* ptr_right, float* ptr_res, long length)
         {
@@ -264,6 +265,23 @@ namespace PerformanceWork.OptimizedNumerics
             for (long i = l; i < length; i++)
             {
                 ptr_res[i] = ptr_left[i] - ptr_right[i];
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void ElementWiseSubtractAVX(float* ptr_left, float val, float* ptr_res, long length)
+        {
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
+            Vector256<float> v2 = Avx2.BroadcastScalarToVector256(&val);
+            for (long i = 0; i < l; i += Vector256<float>.Count)
+            {
+                Vector256<float> v1 = Avx2.LoadVector256(&ptr_left[i]);
+                Vector256<float> res = Avx2.Subtract(v1, v2);
+                Avx2.Store(&ptr_res[i], res);
+            }
+            for (long i = l; i < length; i++)
+            {
+                ptr_res[i] = ptr_left[i] - val;
             }
         }
         /// <summary>

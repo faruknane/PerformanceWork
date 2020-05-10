@@ -38,24 +38,14 @@ namespace PerformanceWorkTests
 
         static unsafe void Main(string[] args)
         {
-            float[] vdata = new float[] { 0.1f, -0.2f, 2, 3, -1, 2, -5, -10, 9, -8 };
-            float[] graddata = new float[] { 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f };
+            float[] a = new[] { 1f, -10f, 5f, 3.2f, -5.5f, -3.9f, -12.3f, 4.1f };
+            float[] res = new float[a.Length];
 
-            fixed (float* ptr_v = vdata, ptr_grad = graddata)
+            fixed(float* ptr_data = a, ptr_res = res)
             {
-                Tensor v = Tensor.LoadFloatArrayToTensorHost(ptr_v, 0, vdata.Length, Shape.NewShape(vdata.Length));
-                Tensor grad = Tensor.LoadFloatArrayToTensorHost(ptr_grad, 0, graddata.Length, Shape.NewShape(graddata.Length));
-
-                Tensor reluv = CpuKernels.ReluFloat(v);
-                Tensor relugrad = CpuKernels.ReluFloat_GetGradient_0(grad, v);
-
-                Console.WriteLine("v: " + v);
-                Console.WriteLine("reluv: " + reluv);
-                Console.WriteLine("grad: " + grad);
-                Console.WriteLine("relugrad: " + relugrad);
-
+                VectorizationFloat.Softmax(ptr_data, ptr_res, a.Length, a.Length);
+                Console.WriteLine(float.PositiveInfinity);
             }
-
             //Console.WriteLine(Tensor<float>.Host.UnreturnedArrayCount);
             ////Tensor<float>.GetDevicePool(0).ClearMemory();
             //return;

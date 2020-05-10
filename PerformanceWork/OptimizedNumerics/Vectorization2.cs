@@ -126,12 +126,33 @@ namespace PerformanceWork.OptimizedNumerics
 
         public static unsafe void Softmax(float* source, float* res, int groupsize, int length)
         {
-            Exponential(source, res, length);
-            for(long j = 0; j < length; j += groupsize)
+            for (long j = 0; j < length; j += groupsize)
             {
+                float maxelement = FindMaxElement(source + j, groupsize);
+                ElementWiseSubtractAVX(source + j, maxelement, res + j, groupsize);
+                Exponential(res + j, res + j, groupsize);
                 float sum = SumOfVector(res + j, groupsize);
                 ElementWiseDivideAVX(res + j, sum, res + j, groupsize);
             }
+        }
+
+        private static unsafe float FindMaxElement(float* source, int length)
+        {
+            float maxel = float.MinValue;
+            for (int i = 0; i < length; i++)
+            {
+                float val = source[i];
+                if (maxel < val)
+                    maxel = val;
+            }
+            return maxel;
+        }
+
+        public static unsafe void Print(float* a, int l)
+        {
+            for (int i = 0; i < l; i++)
+                Console.Write(a[i] + (i == l - 1 ? "" : ", "));
+            Console.WriteLine();
         }
 
     }
