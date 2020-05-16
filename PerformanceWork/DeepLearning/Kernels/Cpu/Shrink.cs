@@ -20,7 +20,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
             float* ptrres = (float*)res.Array;
             float* ptrv = (float*)v.Array;
 
-            Index iterator = Index.NewIndex(term0);
+            Index iterator =  new Index(term0);
 
             for (int i = 0; i < iterator.N; i++)
                 iterator.Indices[i] = 0;
@@ -41,7 +41,6 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
                 ptrres[indexs] += ptrv[h];
                 iterator.Indices[iterator.N - 1]++;
             }
-            Index.Return(iterator);
 
             return res;
         }

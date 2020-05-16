@@ -38,17 +38,6 @@ namespace PerformanceWorkTests
 
         static unsafe void Main(string[] args)
         {
-            float[] a = new[] { 1f, -10f, 5f, 3.2f, -5.5f, -3.9f, -12.3f, 4.1f };
-            float[] res = new float[a.Length];
-
-            fixed(float* ptr_data = a, ptr_res = res)
-            {
-                VectorizationFloat.Softmax(ptr_data, ptr_res, a.Length, a.Length);
-                Console.WriteLine(float.PositiveInfinity);
-            }
-            //Console.WriteLine(Tensor<float>.Host.UnreturnedArrayCount);
-            ////Tensor<float>.GetDevicePool(0).ClearMemory();
-            //return;
 
         }
 

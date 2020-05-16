@@ -36,7 +36,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
             }
             else
             {
-                Index iterator = Index.NewIndex(thisShape);
+                Index iterator = new Index(thisShape);
 
                 iterator.SetZero();
 
@@ -58,7 +58,6 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
                     ptrcombined[indexs] += ptrs[h];
                     iterator.Indices[iterator.N - 1]++;
                 }
-                Index.Return(iterator);
             }
 
             return combined;
@@ -89,7 +88,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
             else
             {
 
-                Index iterator = Index.NewIndex(res.Shape);
+                Index iterator = new Index(res.Shape);
 
                 for (int i = 0; i < iterator.N; i++)
                     iterator.Indices[i] = 0;
@@ -110,7 +109,6 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
                     ptrres[h] = ptrv[indexs];
                     iterator.Indices[iterator.N - 1]++;
                 }
-                Index.Return(iterator);
             }
             return res;
         }
