@@ -34,13 +34,8 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor Power2Float(Tensor res)
         {
-            //todo optimize here
             Tensor m = new Tensor(res.Shape.Clone(), DataType.Type.Float, DeviceIndicator.Host());
-
-            VectorizationFloat.ElementWiseAssignAVX((float*)m.Array, (float*)res.Array, res.Shape.TotalSize);
-
-            for (int n = 0; n < 1; n++)
-                VectorizationFloat.ElementWiseMultiplyAVX((float*)m.Array, (float*)res.Array, (float*)m.Array, m.Shape.TotalSize);
+            VectorizationFloat.ElementWiseSquareAVX((float*)res.Array, (float*)m.Array, m.Shape.TotalSize);
             return m;
         }
     }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
     public unsafe partial class CpuKernels
     {
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor MultiplyFloat(Tensor a, Tensor b)
         {
             Tensor res = new Tensor(a.Shape.Clone(), DataType.Type.Float, DeviceIndicator.Host());
@@ -17,6 +19,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
             return res;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor MultiplyFloat_GetGradient_0(Tensor s, Tensor a, Tensor b)
         {
             Tensor res = new Tensor(s.Shape.Clone(), DataType.Type.Float, DeviceIndicator.Host());
@@ -24,6 +27,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
             return res;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor MultiplyFloat_GetGradient_1(Tensor s, Tensor a, Tensor b)
         {
             Tensor res = new Tensor(s.Shape.Clone(), DataType.Type.Float, DeviceIndicator.Host());

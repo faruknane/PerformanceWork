@@ -557,6 +557,26 @@ namespace PerformanceWork.OptimizedNumerics
                 }
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void ElementWiseSquareAVX(float* ptr_a, float* ptr_res, long length)
+        {
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
+            {
+                for (long i = 0; i < l; i += Vector256<float>.Count)
+                {
+                    Vector256<float> v = Avx2.LoadVector256(&ptr_a[i]);
+                    Vector256<float> res = Avx2.Multiply(v, v);
+                    Avx2.Store(&ptr_res[i], res);
+                }
+                for (long i = l; i < length; i++)
+                {
+                    ptr_res[i] = ptr_a[i] * ptr_a[i];
+                }
+            }
+        }
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe float ElementWiseMultiplyAndReturnSum(float* ptr_a, float* ptr_b, float* ptr_res, long length)
         {
