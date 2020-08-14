@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -31,7 +33,6 @@ namespace PerformanceWork.OptimizedNumerics.Pool
             DeviceId = devid;
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void* Rent(int minlength, out int length, DataType.Type t)
         {
@@ -51,9 +52,15 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                 {
                     length = minlength + BucketSize;
                     if (OnGPU)
+                    {
+                        GC.AddMemoryPressure(length * DataType.GetByteSize(t));
                         return NCuda.Allocate(length * DataType.GetByteSize(t), DeviceId);
+                    }
                     else
+                    {
+                        GC.AddMemoryPressure(length * DataType.GetByteSize(t));
                         return MKL.MKL_malloc(length * DataType.GetByteSize(t), 32);
+                    }
                 }
             }
         }
@@ -76,6 +83,45 @@ namespace PerformanceWork.OptimizedNumerics.Pool
             }
         }
 
+        public void EraseAll()
+        {
+            lock (Mutex)
+            {
+                if (OnGPU)
+                    for (int i = 0; i < Stacks.Length; i++)
+                    {
+                        Stack<PointerArray> s = Stacks[i];
+                        if (s != null)
+                        {
+                            foreach (var arr in s)
+                            {
+                                NCuda.Free(arr.Ptr, this.DeviceId);
+                            }
+                            s.Clear();
+                        }
+                    }
+                else
+                    for (int i = 0; i < Stacks.Length; i++)
+                    {
+                        Stack<PointerArray> s = Stacks[i];
+                        if (s != null)
+                        {
+                            foreach (var arr in s)
+                            {
+                                MKL.MKL_free(arr.Ptr);
+                            }
+                            s.Clear();
+                        }
+                    }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public void Dispose()
+        {
+            EraseAll();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static ArrayPool Create(int MaxLength, int BucketCount)
         { 
@@ -88,10 +134,6 @@ namespace PerformanceWork.OptimizedNumerics.Pool
             return new ArrayPool(MaxLength, BucketCount, OnGPU, DeviceId);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public void Dispose()
-        {
-            throw new NotImplementedException();//Deallocation
-        }
+     
     }
 }

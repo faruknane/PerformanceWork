@@ -32,7 +32,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor MatrixMultiplyFloat(Tensor a, Tensor b)
         {
-            Shape sc = Shape.NewShape(a.Shape[0], b.Shape[1]);
+            Shape sc = new Shape((a.Shape[0], b.Shape[1]));
             Tensor c = new Tensor(sc, a.Type, a.Device);
             VectorizationFloat.MatrixMultiply(a, b, c);
             return c;

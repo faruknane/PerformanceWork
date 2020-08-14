@@ -7,107 +7,113 @@ using System.Text;
 
 namespace PerformanceWork.OptimizedNumerics
 {
-    public unsafe class Shape : IDisposable
+    public unsafe class Shape
     {
-        public static ArrayPool ArrayPool = ArrayPool.Create(10, 10);
-        public static ObjectPool<Shape> ObjectPool = new ObjectPool<Shape>();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Shape NewShapeN(int n)
-        {
-            Shape s = ObjectPool.Rent();
-            if (s == null)
-                s = new Shape(n);
-            else
-            {
-                s.ArrayReturned = false;
-                s.N = n;
-                s.Dimensions = (int*)ArrayPool.Rent(s.N, out s.Length1, DataType.Type.Int32);
-                s.Multiplied = (int*)ArrayPool.Rent(s.N + 1, out s.Length2, DataType.Type.Int32);
-            }
-            return s;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Shape NewShape(int x0)
-        {
-            Shape s = Shape.NewShapeN(1);
-            s.Dimensions[0] = x0;
-            s.CalculateMultiplied();
-            return s;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Shape NewShape(int x0, int x1)
-        {
-            Shape s = Shape.NewShapeN(2);
-            s.Dimensions[0] = x0;
-            s.Dimensions[1] = x1;
-            s.CalculateMultiplied();
-            return s;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Shape NewShape(int x0, int x1, int x2)
-        {
-            Shape s = Shape.NewShapeN(3);
-            s.Dimensions[0] = x0;
-            s.Dimensions[1] = x1;
-            s.Dimensions[2] = x2;
-            s.CalculateMultiplied();
-            return s;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Shape NewShape(int x0, int x1, int x2, int x3)
-        {
-            Shape s = Shape.NewShapeN(4);
-            s.Dimensions[0] = x0;
-            s.Dimensions[1] = x1;
-            s.Dimensions[2] = x2;
-            s.Dimensions[3] = x3;
-            s.CalculateMultiplied();
-            return s;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Shape NewShape(int x0, int x1, int x2, int x3, int x4)
-        {
-            Shape s = Shape.NewShapeN(5);
-            s.Dimensions[0] = x0;
-            s.Dimensions[1] = x1;
-            s.Dimensions[2] = x2;
-            s.Dimensions[3] = x3;
-            s.Dimensions[4] = x4;
-            s.CalculateMultiplied();
-            return s;
-        }
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static void Return(Shape s)
-        {
-            if (!s.ArrayReturned)
-                s.Dispose();
-            ObjectPool.Return(s);
-        }
-
-
-        public int* Dimensions;
-        public int* Multiplied;
+        public int[] Dimensions;
+        public int[] Multiplied;
 
         public int N { get; private set; }
         public int TotalSize { get => Multiplied[0]; }
 
-        private int Length1;
-        private int Length2;
-        private bool ArrayReturned = false;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public Shape(int n)
         {
             this.N = n;
-            Dimensions = (int*)ArrayPool.Rent(N, out Length1, DataType.Type.Int32);
-            Multiplied = (int*)ArrayPool.Rent(N+1, out Length2, DataType.Type.Int32);
+            Dimensions = new int[N];
+            Multiplied = new int[N + 1];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public Shape((int x1, bool rastgele) a)
+        {
+            this.N = 1;
+            Dimensions = new int[N];
+            Multiplied = new int[N + 1];
+            Multiplied[N] = 1;
+
+            Dimensions[0] = a.x1;
+            Multiplied[0] = a.x1 * Multiplied[1];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public Shape((int x1, int x2) a)
+        {
+            this.N = 2;
+            Dimensions = new int[N];
+            Multiplied = new int[N + 1];
+            Multiplied[N] = 1;
+
+            Dimensions[1] = a.x2;
+            Multiplied[1] = a.x2 * Multiplied[2];
+
+            Dimensions[0] = a.x1;
+            Multiplied[0] = a.x1 * Multiplied[1];
+
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public Shape((int x1, int x2, int x3) a)
+        {
+            this.N = 3;
+            Dimensions = new int[N];
+            Multiplied = new int[N + 1];
+            Multiplied[N] = 1;
+
+            Dimensions[2] = a.x3;
+            Multiplied[2] = a.x3 * Multiplied[3];
+
+            Dimensions[1] = a.x2;
+            Multiplied[1] = a.x2 * Multiplied[2];
+
+            Dimensions[0] = a.x1;
+            Multiplied[0] = a.x1 * Multiplied[1];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public Shape((int x1, int x2, int x3, int x4) a)
+        {
+            this.N = 4;
+            Dimensions = new int[N];
+            Multiplied = new int[N + 1];
+            Multiplied[N] = 1;
+
+            Dimensions[3] = a.x4;
+            Multiplied[3] = a.x4 * Multiplied[4];
+
+            Dimensions[2] = a.x3;
+            Multiplied[2] = a.x3 * Multiplied[3];
+
+            Dimensions[1] = a.x2;
+            Multiplied[1] = a.x2 * Multiplied[2];
+
+            Dimensions[0] = a.x1;
+            Multiplied[0] = a.x1 * Multiplied[1];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public Shape((int x1, int x2, int x3, int x4, int x5) a)
+        {
+            this.N = 5;
+            Dimensions = new int[N];
+            Multiplied = new int[N + 1];
+            Multiplied[N] = 1;
+
+            Dimensions[4] = a.x5;
+            Multiplied[4] = a.x5 * Multiplied[5];
+
+            Dimensions[3] = a.x4;
+            Multiplied[3] = a.x4 * Multiplied[4];
+
+            Dimensions[2] = a.x3;
+            Multiplied[2] = a.x3 * Multiplied[3];
+
+            Dimensions[1] = a.x2;
+            Multiplied[1] = a.x2 * Multiplied[2];
+
+            Dimensions[0] = a.x1;
+            Multiplied[0] = a.x1 * Multiplied[1];
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public Shape(params int[] dims)
@@ -117,8 +123,8 @@ namespace PerformanceWork.OptimizedNumerics
 
             N = dims.Length;
 
-            Dimensions = (int*)ArrayPool.Rent(N, out Length1, DataType.Type.Int32);
-            Multiplied = (int*)ArrayPool.Rent(N+1, out Length2, DataType.Type.Int32);
+            Dimensions = new int[N];
+            Multiplied = new int[N + 1];
             Multiplied[N] = 1;
             for (int i = N - 1; i >= 0; i--)
             {
@@ -170,6 +176,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             return x1 * Multiplied[1] + x2 * Multiplied[2];
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public int Index(int x1, int x2, int x3)
         {
@@ -195,7 +202,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public Shape Clone()
         {
-            Shape s = Shape.NewShapeN(this.N);
+            Shape s = new Shape(this.N);
             for (int i = 0; i < s.N; i++)
             {
                 s.Dimensions[i] = this.Dimensions[i];
@@ -224,21 +231,9 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public void Dispose()
-        {
-            if (ArrayReturned)
-                throw new Exception("The shape object is already returned!");
-            ArrayReturned = true;
-
-            ArrayPool.Return(Dimensions, Length1);
-            ArrayPool.Return(Multiplied, Length2);
-            GC.SuppressFinalize(this);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Shape Combine(Shape s1, Shape s2)
         {
-            Shape c = Shape.NewShapeN(s1.N + s2.N);
+            Shape c = new Shape(s1.N + s2.N);
             for (int i = 0; i < s1.N + s2.N; i++)
             {
                 if (i < s1.N)
@@ -261,7 +256,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Shape SwapTail(Shape s1, Shape s2, Shape s3)
         {
-            Shape c = Shape.NewShapeN(s1.N - s2.N + s3.N);
+            Shape c = new Shape(s1.N - s2.N + s3.N);
 
             for (int i = 0; i < s1.N - s2.N; i++)
                 c.Dimensions[i] = s1.Dimensions[i];
@@ -279,7 +274,7 @@ namespace PerformanceWork.OptimizedNumerics
             if (s1.N != s2.N)
                 throw new Exception("dimensions incompatibility!");
 
-            Shape res = Shape.NewShapeN(s1.N);
+            Shape res = new Shape(s1.N);
             for (int i = 0; i < res.N; i++)
                 res.Dimensions[i] = s1[i] / s2[i];
             res.CalculateMultiplied();
@@ -294,7 +289,7 @@ namespace PerformanceWork.OptimizedNumerics
             if (s1.N != s2.N)
                 throw new Exception("dimensions incompatibility!");
 
-            Shape res = Shape.NewShapeN(s1.N);
+            Shape res = new Shape(s1.N);
             for (int i = 0; i < res.N; i++)
                 res.Dimensions[i] = s1[i] * s2[i];
             res.CalculateMultiplied();
@@ -305,7 +300,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Shape RemoveLastDimension(Shape s)
         {
-            Shape res = Shape.NewShapeN(s.N - 1);
+            Shape res = new Shape(s.N - 1);
 
             for (int i = 0; i < res.N; i++)
                 res.Dimensions[i] = s.Dimensions[i];
@@ -316,13 +311,6 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        ~Shape()
-        {
-            if (!this.ArrayReturned)
-            {
-                this.Dispose();
-            }
-        }
+    
     }
 }

@@ -19,28 +19,22 @@ namespace PerformanceWorkTests
 {
     public unsafe class Program
     {
-        public static int Size = 5000;
-
-        private static void MatrixMultiply()
+        static void f()
         {
-            //Vectorization.MatrixMultiply(ref a, ref b, ref c);
-            //MKL.cblas_sgemm(MKL.ORDER.RowMajor, MKL.TRANSPOSE.NoTrans, MKL.TRANSPOSE.NoTrans, a.D1, b.D2, b.D1, 1.0f, a.GetPointer(), b.D1, b.GetPointer(), b.D2, 0.0f, c.GetPointer(), b.D2);
-        }
-
-        public static bool ArrayEqual<T>(T[] v1, T[] v2)
-        {
-            if (v1.Length != v2.Length) return false;
-            for (int i = 0; i < v1.Length; i++)
-                if (!v1[i].Equals(v2[i]))
-                    return false;
-            return true;
+            for (int i = 0; i < 1500; i++)
+            {
+                //4mb
+                Tensor a = new Tensor(new Shape((1024 * 1024, true)), DataType.Type.Float, DeviceIndicator.Host());
+                a.Dispose();
+            }
         }
 
         static unsafe void Main(string[] args)
         {
-
+            f();
+            TensorPool.GetDevicePool(DeviceIndicator.Host()).EraseAll();
+            Console.WriteLine(Tensor.DisposedCount);
+            Thread.Sleep(3000);
         }
-
-
     }
 }

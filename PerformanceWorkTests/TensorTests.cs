@@ -119,12 +119,17 @@ namespace PerformanceWorkTests
 
             fixed (float* ptr_v = vdata, ptr_grad = graddata)
             {
-                Tensor v = Tensor.LoadFloatArrayToTensorHost(ptr_v, 0, vdata.Length, Shape.NewShape(vdata.Length));
-                Tensor grad = Tensor.LoadFloatArrayToTensorHost(ptr_grad, 0, graddata.Length, Shape.NewShape(graddata.Length));
+                Tensor v = Tensor.LoadFloatArray(vdata, new Shape((vdata.Length, true)));
+                Tensor grad = Tensor.LoadFloatArray(graddata, new Shape((graddata.Length, true)));
 
                 Tensor reluv = CpuKernels.ReluFloat(v);
                 Tensor relugrad = CpuKernels.ReluFloat_GetGradient_0(grad, v);
 
+                Console.WriteLine(v);
+                Console.WriteLine(grad);
+
+                Console.WriteLine(reluv);
+                Console.WriteLine(relugrad);
                 //todo make checks
 
             }

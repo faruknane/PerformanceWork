@@ -1,6 +1,7 @@
 ﻿using PerformanceWork.OptimizedNumerics.Pool;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -25,7 +26,7 @@ namespace PerformanceWork.OptimizedNumerics
             this.Array = ptr;
             this.Type = type;
             this.Device = device;
-            ArrayReturned = true; //means that the shape and array wont be returned to the pool.
+            ArrayReturned = true; //means that the array wont be returned to the pool.
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -37,24 +38,25 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public Tensor((int d1, int d2) a, DataType.Type type, DeviceIndicator device)
         {
-            Initialize(Shape.NewShape(a.d1, a.d2), type, device);
+            Initialize(new Shape((a.d1, a.d2)), type, device);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public Tensor((int d1, int d2, int d3) a, DataType.Type type, DeviceIndicator device)
         {
-            Initialize(Shape.NewShape(a.d1, a.d2, a.d3), type, device);
+            Initialize(new Shape((a.d1, a.d2, a.d3)), type, device);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public Tensor((int d1, int d2, int d3, int d4) a, DataType.Type type, DeviceIndicator device)
         {
-            Initialize(Shape.NewShape(a.d1, a.d2, a.d3, a.d4), type, device);
+            Initialize(new Shape((a.d1, a.d2, a.d3, a.d4)), type, device);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public Tensor((int d1, int d2, int d3, int d4, int d5) a, DataType.Type type, DeviceIndicator device)
         {
-            Initialize(Shape.NewShape(a.d1, a.d2, a.d3, a.d4, a.d5), type, device);
+            Initialize(new Shape((a.d1, a.d2, a.d3, a.d4, a.d5)), type, device);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -104,7 +106,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
             else
                 throw new Exception("Unsupported Platform!");
-        } 
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void MakeNegative()
@@ -197,29 +199,67 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void Dispose()
         {
-            if (ArrayReturned)
-                throw new Exception("The Tensor is already disposed!");
+            Dispose(false);
+        }
 
-            ArrayReturned = true;
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public void Dispose(bool gc)
+        {
+            if (!gc && ArrayReturned)
+            {
+                System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
+                Console.WriteLine("StackTrace: '{0}'", Environment.StackTrace);
+                throw new Exception("The tensor is already disposed!");
+            }
 
-            Shape.Return(this.Shape);
+            if (!ArrayReturned)
+            {
+                ArrayReturned = true;
+                TensorPool.GetDevicePool(this.Device).Return(Array, LengthOfArray);
+                if (!gc)
+                    GC.SuppressFinalize(this);
+                DisposedCount++;
+            }
+        }
 
-            TensorPool.GetDevicePool(this.Device).Return(Array, LengthOfArray);
-            GC.SuppressFinalize(this);
+        public static int DisposedCount = 0;
+
+        ~Tensor()
+        {
+            Dispose(true);
         }
 
         public override string ToString()
         {
             if (this.Device.Type == DeviceType.Host)
             {
-                StringBuilder a = new StringBuilder();
-                float* ptr = (float*)Array;
-                for (int i = 0; i < Shape.TotalSize; i++)
-                    a.Append(ptr[i] + ", ");
-                string res = a.ToString();
-                a.Clear();
+                if (this.Type == DataType.Type.Float)
+                {
+                    StringBuilder a = new StringBuilder();
+                    float* ptr = (float*)Array;
 
-                return res;
+                    if (this.Shape.N == 2)
+                    {
+                        for (int i = 0; i < Shape[0]; i++)
+                        {
+                            for (int j = 0; j < Shape[1]; j++)
+                                a.Append($"{ptr[Shape.Index(i,j)]}" + (j == Shape[1] - 1 ? "": ", "));
+                            a.Append("\n");
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < Shape.TotalSize; i++)
+                            a.Append(ptr[i] + ", ");
+                    }
+
+                    string res = a.ToString();
+                    a.Clear();
+
+                    return res;
+                }
+                else
+                    throw new Exception("Unsupported Data Type!");
             }
             else
                 throw new Exception("Unsupported Platform!");
@@ -264,35 +304,40 @@ namespace PerformanceWork.OptimizedNumerics
         /// Coverts the float array into a float tensor on host. It assumes that the float tensor is already returned. So, It won't do anything if the tensor gets disposed.
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="begin"></param>
-        /// <param name="end"></param>
         /// <param name="s"></param>
         /// <returns></returns>
-        public static unsafe Tensor LoadFloatArrayToTensorHost(float* data, int begin, int end, Shape s)
+        public static unsafe Tensor LoadFloatArray(Array data, Shape s, DeviceIndicator dev)
         {
-            if (end - begin != s.TotalSize)
+            if (data.LongLength != s.TotalSize)
                 throw new Exception("Cant convert it into the shape");
 
-            return new Tensor(s, (void*)((long)data + begin * DataType.GetByteSize(DataType.Type.Float)), DataType.Type.Float, DeviceIndicator.Host());
+            if (data.GetType().GetElementType() == typeof(float))
+            {
+                fixed (float* ptr = (float[])data)
+                    return new Tensor(s, (void*)ptr, DataType.Type.Float, dev);
+            }
+            else
+                throw new Exception("unsupported bla bla");
         }
 
-        /// <summary>
-        /// Coverts the float array into a float tensor on host. It assumes that the float tensor is already returned. So, It won't do anything if the tensor gets disposed.
-        /// </summary>
-        /// <param name="array"></param>
-        /// <param name="begin"></param>
-        /// <param name="end"></param>
-        /// <param name="s"></param>
-        /// <returns></returns>
-        public static unsafe Tensor LoadFloatArrayToTensorHost(float[] array, int begin, int end, Shape s)
+        public static unsafe Tensor LoadFloatArray(Array data, Shape s)
         {
-            fixed (float* data = array)
-            {
-                if (end - begin != s.TotalSize)
-                    throw new Exception("Cant convert it into the shape");
+            if (data.LongLength != s.TotalSize)
+                throw new Exception("Cant convert it into the shape");
 
-                return new Tensor(s, (void*)((long)data + begin * DataType.GetByteSize(DataType.Type.Float)), DataType.Type.Float, DeviceIndicator.Host());
+            if (data.GetType().GetElementType() == typeof(float))
+            {
+                if(data is float[])
+                    fixed (float* ptr = (float[])data)
+                        return new Tensor(s, (void*)ptr, DataType.Type.Float, DeviceIndicator.Host());
+                else if (data is float[,])
+                    fixed (float* ptr = (float[,])data)
+                        return new Tensor(s, (void*)ptr, DataType.Type.Float, DeviceIndicator.Host());
+                else
+                    throw new Exception("unsupported bla bla");
             }
+            else
+                throw new Exception("unsupported bla bla");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -312,7 +357,7 @@ namespace PerformanceWork.OptimizedNumerics
                     if (a.Shape.N != 2 || b.Shape.N != 2 || a.Shape[1] != b.Shape[0])
                         throw new Exception("Shape error!");
 
-                    Shape sc = Shape.NewShape(a.Shape[0], b.Shape[1]);
+                    Shape sc = new Shape((a.Shape[0], b.Shape[1]));
                     Tensor c = new Tensor(sc, a.Type, a.Device);
                     VectorizationFloat.MatrixMultiply(a, b, c);
                     return c;
