@@ -10,61 +10,63 @@ namespace PerformanceWork.OptimizedNumerics.Pool
 {
     public unsafe class ArrayPool : IDisposable
     {
+        public unsafe struct PointerArray
+        {
+            public void* Ptr;
+        }
+
         public int MaxLength { get; private set; }
-        public int BucketCount { get; private set; }
-        public int BucketSize { get; private set; }
         public int UnreturnedArrayCount { get; private set; } = 0;      
 
         public Stack<PointerArray>[] Stacks;
 
-        public int DeviceId { get; private set; }
-        public bool OnGPU { get; private set; }
+        public DeviceConfig DevConfig;
 
-        private object Mutex = new object();
-        //todo deviceindicator
+        private readonly object Mutex = new object();
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public ArrayPool(int MaxLength, int BucketCount,  bool gpu = false, int devid = -1)
+        public ArrayPool(int MaxLength, DeviceConfig devconf)
         {
             this.MaxLength = MaxLength;
-            this.BucketCount = BucketCount;
-            this.BucketSize = (MaxLength + BucketCount - 1) / BucketCount;
-            Stacks = new Stack<PointerArray>[BucketCount + 1];
-            OnGPU = gpu;
-            DeviceId = devid;
+            Stacks = new Stack<PointerArray>[MaxLength];
+            DevConfig = devconf;
         }
 
+        //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        //public void* Rent(int length)
+        //{
+        //    return Rent(length, DevConfig.GetByteLength());
+        //}
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public void* Rent(int minlength, out int length, DataType.Type t)
+        public void* Rent(int length, int unitlength)
         {
             lock (Mutex)
             {
                 UnreturnedArrayCount++;
-                // 0 -> 0, BucketSize - 1
-                // 1 -> BucketSize, 2*BucketSize-1
-                int bucketno = minlength / BucketSize + 1;
-                if (Stacks[bucketno] != null && Stacks[bucketno].Count > 0)
+
+                if (Stacks[length] != null && Stacks[length].Count > 0)
                 {
-                    PointerArray sr = Stacks[bucketno].Pop();
-                    length = sr.Length;
+                    PointerArray sr = Stacks[length].Pop();
                     return sr.Ptr;
                 }
                 else
                 {
-                    length = minlength + BucketSize;
-                    if (OnGPU)
+                    if (this.DevConfig.DevType == DeviceConfig.DeviceType.NvidiaGPU)
                     {
-                        GC.AddMemoryPressure(length * DataType.GetByteSize(t));
-                        return NCuda.Allocate(length * DataType.GetByteSize(t), DeviceId);
+                        GC.AddMemoryPressure(length * unitlength);
+                        return NCuda.Allocate(length * unitlength, DevConfig.DeviceID);
+                    }
+                    else if (this.DevConfig.DevType == DeviceConfig.DeviceType.Host)
+                    {
+                        GC.AddMemoryPressure(length * unitlength);
+                        return MKL.MKL_malloc(length * unitlength, 32);
                     }
                     else
-                    {
-                        GC.AddMemoryPressure(length * DataType.GetByteSize(t));
-                        return MKL.MKL_malloc(length * DataType.GetByteSize(t), 32);
-                    }
+                        throw new Exception("Uknown Device in ArrayPool!");
                 }
             }
         }
-
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void Return(void* arr, int length)
@@ -73,12 +75,9 @@ namespace PerformanceWork.OptimizedNumerics.Pool
             {
                 PointerArray sr = new PointerArray();
                 sr.Ptr = arr;
-                sr.Length = length;
-                int bucketno = length / BucketSize;
 
-                if (Stacks[bucketno] == null)
-                    Stacks[bucketno] = new Stack<PointerArray>();
-                Stacks[bucketno].Push(sr);
+                (Stacks[length] ?? (Stacks[length] = new Stack<PointerArray>())).Push(sr);
+
                 UnreturnedArrayCount--;
             }
         }
@@ -87,7 +86,8 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         {
             lock (Mutex)
             {
-                if (OnGPU)
+                if (this.DevConfig.DevType == DeviceConfig.DeviceType.NvidiaGPU)
+                {
                     for (int i = 0; i < Stacks.Length; i++)
                     {
                         Stack<PointerArray> s = Stacks[i];
@@ -95,12 +95,14 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                         {
                             foreach (var arr in s)
                             {
-                                NCuda.Free(arr.Ptr, this.DeviceId);
+                                NCuda.Free(arr.Ptr, DevConfig.DeviceID);
                             }
                             s.Clear();
                         }
                     }
-                else
+                }
+                else if (this.DevConfig.DevType == DeviceConfig.DeviceType.Host)
+                {
                     for (int i = 0; i < Stacks.Length; i++)
                     {
                         Stack<PointerArray> s = Stacks[i];
@@ -113,6 +115,9 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                             s.Clear();
                         }
                     }
+                }
+                else
+                    throw new Exception("Uknown Device in ArrayPool!");
             }
         }
 
@@ -122,18 +127,5 @@ namespace PerformanceWork.OptimizedNumerics.Pool
             EraseAll();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static ArrayPool Create(int MaxLength, int BucketCount)
-        { 
-            return new ArrayPool(MaxLength, BucketCount);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static ArrayPool Create(int MaxLength, int BucketCount, bool OnGPU, int DeviceId)
-        {
-            return new ArrayPool(MaxLength, BucketCount, OnGPU, DeviceId);
-        }
-
-     
     }
 }

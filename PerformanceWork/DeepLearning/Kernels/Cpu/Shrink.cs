@@ -14,13 +14,13 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor ShrinkFloat(Tensor v, Shape thisShape, Shape term0, Shape Divisor)
         {
-            Tensor res = new Tensor(thisShape.Clone(), DataType.Type.Float, DeviceIndicator.Host());
+            Tensor res = new Tensor(thisShape.Clone(), DeviceConfig.Host_Float);
             res.SetFloat(0);
 
             float* ptrres = (float*)res.Array;
             float* ptrv = (float*)v.Array;
 
-            Index iterator =  new Index(term0);
+            Index iterator = new Index(term0);
 
             for (int i = 0; i < iterator.N; i++)
                 iterator.Indices[i] = 0;

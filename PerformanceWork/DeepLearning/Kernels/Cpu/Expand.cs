@@ -20,7 +20,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor ExpandFloat_GetGradient_0(Tensor s, Shape thisShape, Shape term0, Shape Multiplier)
         {
-            Tensor combined = new Tensor(term0.Clone(), DataType.Type.Float, DeviceIndicator.Host());
+            Tensor combined = new Tensor(term0.Clone(), DeviceConfig.Host_Float);
             combined.SetFloat(0);
 
             float* ptrcombined = (float*)combined.Array;
@@ -72,7 +72,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor ExpandFloat(Tensor v, Shape thisShape, Shape term0, Shape Multiplier)
         {
-            Tensor res = new Tensor(thisShape.Clone(), DataType.Type.Float, DeviceIndicator.Host());
+            Tensor res = new Tensor(thisShape.Clone(), DeviceConfig.Host_Float);
 
             float* ptrres = (float*)res.Array;
             float* ptrv = (float*)v.Array;

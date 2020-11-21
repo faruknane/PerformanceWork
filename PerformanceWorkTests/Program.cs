@@ -13,7 +13,6 @@ using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Index = PerformanceWork.OptimizedNumerics.Index;
 
 namespace PerformanceWorkTests
 {
@@ -24,15 +23,16 @@ namespace PerformanceWorkTests
             for (int i = 0; i < 1500; i++)
             {
                 //4mb
-                Tensor a = new Tensor(new Shape((1024 * 1024, true)), DataType.Type.Float, DeviceIndicator.Host());
+                Tensor a = new Tensor(new Shape(1024 * 1024), DeviceConfig.Host_Float);
                 a.Dispose();
             }
         }
 
         static unsafe void Main(string[] args)
         {
-            f();
-            TensorPool.GetDevicePool(DeviceIndicator.Host()).EraseAll();
+            
+
+            TensorPool.GetDevicePool(DeviceConfig.Host_Unkown).EraseAll();
             Console.WriteLine(Tensor.DisposedCount);
             Thread.Sleep(3000);
         }

@@ -54,14 +54,14 @@ namespace PerformanceWorkTests
         [TestMethod]
         public unsafe void Add()
         {
-            int l = 1000000;
+            int l = 10000;
             float[] v1 = new float[l];
             for (int i = 0; i < l; i++)
                 v1[i] = i;
             float[] v2 = new float[l];
             for (int i = 0; i < l; i++)
                 v2[i] = i;
-            float[] res = new float[3];
+            float[] res = new float[l];
             fixed (float* a = v1, b = v2, y = res)
                 VectorizationFloat.ElementWiseAddAVX(a, b, y, res.Length);
             float[] res2 = new float[l];
@@ -134,14 +134,14 @@ namespace PerformanceWorkTests
         [TestMethod]
         public unsafe void Multiply()
         {
-            int l = 1000000;
+            int l = 10000;
             float[] v1 = new float[l];
             for (int i = 0; i < l; i++)
                 v1[i] = i;
             float[] v2 = new float[l];
             for (int i = 0; i < l; i++)
                 v2[i] = i;
-            float[] res = new float[3];
+            float[] res = new float[l];
             fixed (float* a = v1, b = v2, y = res)
                 VectorizationFloat.ElementWiseMultiplyAVX(a, b, y, res.Length);
             float[] res2 = new float[l];
@@ -158,7 +158,7 @@ namespace PerformanceWorkTests
                 v1[i] = i;
 
             float v2 = 3;
-            float[] res = new float[3];
+            float[] res = new float[l];
             fixed (float* a = v1, y = res)
                 VectorizationFloat.ElementWiseMultiplyAVX(a, v2, y, res.Length);
             float[] res2 = new float[l];

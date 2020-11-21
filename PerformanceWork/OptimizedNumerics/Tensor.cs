@@ -11,189 +11,132 @@ namespace PerformanceWork.OptimizedNumerics
     public unsafe class Tensor : IDisposable
     {
         public Shape Shape { get; private set; }
-        public DataType.Type Type;
-        public DeviceIndicator Device;
+        public DeviceConfig Config;
 
         public void* Array;
-        private int LengthOfArray;
         public bool ArrayReturned;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private Tensor(Shape s, void* ptr, DataType.Type type, DeviceIndicator device)
+        private Tensor(Shape s, void* ptr, DeviceConfig devconfig)
         {
             this.Shape = s;
             this.Array = ptr;
-            this.Type = type;
-            this.Device = device;
+            this.Config = devconfig;
             ArrayReturned = true; //means that the array wont be returned to the pool.
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor(Shape s, DataType.Type type, DeviceIndicator device)
+        public Tensor(Shape s, DeviceConfig devconfig)
         {
-            Initialize(s, type, device);
+            Initialize(s, devconfig);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2) a, DataType.Type type, DeviceIndicator device)
+        public Tensor((int d1, int d2) a, DeviceConfig devconfig)
         {
-            Initialize(new Shape((a.d1, a.d2)), type, device);
+            Initialize(new Shape((a.d1, a.d2)), devconfig);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2, int d3) a, DataType.Type type, DeviceIndicator device)
+        public Tensor((int d1, int d2, int d3) a, DeviceConfig devconfig)
         {
-            Initialize(new Shape((a.d1, a.d2, a.d3)), type, device);
+            Initialize(new Shape((a.d1, a.d2, a.d3)), devconfig);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2, int d3, int d4) a, DataType.Type type, DeviceIndicator device)
+        public Tensor((int d1, int d2, int d3, int d4) a, DeviceConfig devconfig)
         {
-            Initialize(new Shape((a.d1, a.d2, a.d3, a.d4)), type, device);
+            Initialize(new Shape((a.d1, a.d2, a.d3, a.d4)), devconfig);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2, int d3, int d4, int d5) a, DataType.Type type, DeviceIndicator device)
+        public Tensor((int d1, int d2, int d3, int d4, int d5) a, DeviceConfig devconfig)
         {
-            Initialize(new Shape((a.d1, a.d2, a.d3, a.d4, a.d5)), type, device);
+            Initialize(new Shape((a.d1, a.d2, a.d3, a.d4, a.d5)), devconfig);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private void Initialize(Shape s, DataType.Type type, DeviceIndicator device)
+        private void Initialize(Shape s, DeviceConfig devconfig)
         {
             this.Shape = s;
-            this.Device = device;
-            this.Type = type;
+            this.Config = devconfig;
 
-            Array = TensorPool.GetDevicePool(this.Device).Rent(Shape.Multiplied[0], out LengthOfArray, this.Type);
+            Array = TensorPool.GetDevicePool(this.Config).Rent(Shape.Multiplied[0], this.Config.GetUnitLength());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void SetFloat(float value)
         {
-            if (this.Device.Type == DeviceType.Host)
-            {
-                if (this.Type == DataType.Type.Float)
-                {
-                    VectorizationFloat.ElementWiseSetValueAVX((float*)Array, value, Shape.TotalSize);
-                }
-                else
-                    throw new Exception("Unsupported data type!");
-            }
+            if (this.Config == DeviceConfig.Host_Float)
+                VectorizationFloat.ElementWiseSetValueAVX((float*)Array, value, Shape.TotalSize);
             else
-                throw new Exception("Unsupported Platform!");
-
+                throw new Exception("Unsupported Device Configuration!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void SetTensor(Tensor value)
         {
-            if (this.Type != value.Type)
-                throw new Exception("Data type is different!");
+            if (this.Config != value.Config)
+                throw new Exception("Device Configuration is different!");
 
-            if (this.Device != value.Device)
-                throw new Exception("Allocated memory is on different device!");
-
-            if (this.Device.Type == DeviceType.Host)
-            {
-                if (this.Type == DataType.Type.Float)
-                {
-                    VectorizationFloat.ElementWiseAssignAVX((float*)Array, (float*)value.Array, Shape.TotalSize);
-                }
-                else
-                    throw new Exception("Unsupported data type!");
-            }
+            if (this.Config == DeviceConfig.Host_Float)
+                VectorizationFloat.ElementWiseAssignAVX((float*)Array, (float*)value.Array, Shape.TotalSize);
             else
-                throw new Exception("Unsupported Platform!");
+                throw new Exception("Unsupported Device Configuration!");
+
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void MakeNegative()
         {
-            if (this.Device.Type == DeviceType.Host)
-            {
-                if (this.Type == DataType.Type.Float)
-                {
-                    VectorizationFloat.MakeNegativeAVX((float*)Array, (float*)Array, Shape.Multiplied[0]);
-                }
-                else
-                    throw new Exception("Unsupported data type!");
-            }
+            if (this.Config == DeviceConfig.Host_Float)
+                VectorizationFloat.MakeNegativeAVX((float*)Array, (float*)Array, Shape.Multiplied[0]);
             else
-                throw new Exception("Unsupported Platform!");
+                throw new Exception("Unsupported Device Configuration!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void AddTensor(Tensor value)
         {
-            if (this.Type != value.Type)
-                throw new Exception("Data type is different!");
+            if (this.Config != value.Config)
+                throw new Exception("Device Configuration is different!");
 
-            if (this.Device != value.Device)
-                throw new Exception("Allocated memory is on different device!");
-
-            if (this.Device.Type == DeviceType.Host)
-            {
-                if (this.Type == DataType.Type.Float)
-                {
+            if (this.Config == DeviceConfig.Host_Float)
                     VectorizationFloat.ElementWiseAddAVX((float*)this.Array, (float*)value.Array, (float*)this.Array, this.Shape.TotalSize);
-                }
-                else
-                    throw new Exception("Unsupported data type!");
-            }
             else
-                throw new Exception("Unsupported Platform!");
+                throw new Exception("Unsupported Device Configuration!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void MultiplyByFloat(float x)
         {
-            if (this.Device.Type == DeviceType.Host)
-            {
-                if (this.Type == DataType.Type.Float)
-                {
+            if (this.Config == DeviceConfig.Host_Float)
                     VectorizationFloat.ElementWiseMultiplyAVX((float*)this.Array, x, (float*)this.Array, this.Shape.TotalSize);
-                }
-                else
-                    throw new Exception("Unsupported data type!");
-            }
             else
-                throw new Exception("Unsupported Platform!");
+                throw new Exception("Unsupported Device Configuration!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void DivideByFloat(float x)
         {
-            if (this.Device.Type == DeviceType.Host)
-            {
-                if (this.Type == DataType.Type.Float)
-                {
+            if (this.Config == DeviceConfig.Host_Float)
                     VectorizationFloat.ElementWiseMultiplyAVX((float*)this.Array, 1 / x, (float*)this.Array, this.Shape.TotalSize);
-                }
-                else
-                    throw new Exception("Unsupported data type!");
-            }
             else
-                throw new Exception("Unsupported Platform!");
+                throw new Exception("Unsupported Device Configuration!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor Clone(Tensor m)
         {
-            if (m.Device.Type == DeviceType.Host)
+            if (m.Config == DeviceConfig.Host_Float)
             {
-                if (m.Type == DataType.Type.Float)
-                {
-                    Tensor n = new Tensor(m.Shape.Clone(), m.Type, m.Device);
-                    VectorizationFloat.ElementWiseAssignAVX((float*)n.Array, (float*)m.Array, n.Shape.TotalSize);
-                    return n;
-                }
-                else
-                    throw new Exception("Unsupported data type!");
+                Tensor n = new Tensor(m.Shape.Clone(), m.Config);
+                VectorizationFloat.ElementWiseAssignAVX((float*)n.Array, (float*)m.Array, n.Shape.TotalSize);
+                return n;
             }
             else
-                throw new Exception("Unsupported Platform!");
+                throw new Exception("Unsupported Device Configuration!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -215,7 +158,7 @@ namespace PerformanceWork.OptimizedNumerics
             if (!ArrayReturned)
             {
                 ArrayReturned = true;
-                TensorPool.GetDevicePool(this.Device).Return(Array, LengthOfArray);
+                TensorPool.GetDevicePool(this.Config).Return(Array, Shape.TotalSize);
                 if (!gc)
                     GC.SuppressFinalize(this);
                 DisposedCount++;
@@ -231,38 +174,36 @@ namespace PerformanceWork.OptimizedNumerics
 
         public override string ToString()
         {
-            if (this.Device.Type == DeviceType.Host)
+            if (this.Config == DeviceConfig.Host_Float)
             {
-                if (this.Type == DataType.Type.Float)
+                StringBuilder a = new StringBuilder();
+                float* ptr = (float*)Array;
+
+                if (this.Shape.N == 2)
                 {
-                    StringBuilder a = new StringBuilder();
-                    float* ptr = (float*)Array;
-
-                    if (this.Shape.N == 2)
+                    a.Append("[");
+                    for (int i = 0; i < Shape[0]; i++)
                     {
-                        for (int i = 0; i < Shape[0]; i++)
-                        {
-                            for (int j = 0; j < Shape[1]; j++)
-                                a.Append($"{ptr[Shape.Index(i,j)]}" + (j == Shape[1] - 1 ? "": ", "));
-                            a.Append("\n");
-                        }
+                        a.Append("[");
+                        for (int j = 0; j < Shape[1]; j++)
+                            a.Append($"{ptr[Shape.Index(i, j)]}" + (j == Shape[1] - 1 ? "" : ", "));
+                        a.Append("]");
                     }
-                    else
-                    {
-                        for (int i = 0; i < Shape.TotalSize; i++)
-                            a.Append(ptr[i] + ", ");
-                    }
-
-                    string res = a.ToString();
-                    a.Clear();
-
-                    return res;
+                    a.Append("]");
                 }
                 else
-                    throw new Exception("Unsupported Data Type!");
+                {
+                    for (int i = 0; i < Shape.TotalSize; i++)
+                        a.Append(ptr[i] + ", ");
+                }
+
+                string res = a.ToString();
+                a.Clear();
+
+                return res;
             }
             else
-                throw new Exception("Unsupported Platform!");
+                throw new Exception("Unsupported Device Configuration!");
         }
 
         #region Static Methods
@@ -273,13 +214,13 @@ namespace PerformanceWork.OptimizedNumerics
         /// <param name="s">The shape of the identity tensor.</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public unsafe static Tensor DerivativeIdentity(Shape s, DataType.Type dtype, DeviceIndicator device)
+        public unsafe static Tensor DerivativeIdentity(Shape s, DeviceConfig deviceConfig)
         {
-            Tensor t = new Tensor(s.Clone(), dtype, device);
-            if (t.Type == DataType.Type.Float)
+            Tensor t = new Tensor(s.Clone(), deviceConfig);
+            if (t.Config == DeviceConfig.Host_Float)
                 t.SetFloat(1.0f);
-            else 
-                throw new Exception("Unsupported data type!");
+            else
+                throw new Exception("Unsupported Device Configuration!");
             return t;
         }
 
@@ -292,144 +233,118 @@ namespace PerformanceWork.OptimizedNumerics
         /// <param name="end"></param>
         /// <param name="s"></param>
         /// <returns></returns>
-        public static unsafe Tensor Cut(Tensor data, int begin, int end, Shape s)
+        public static unsafe Tensor Cut(Tensor data, int begin, Shape s)
         {
-            if (end - begin != s.TotalSize)
-                throw new Exception("Cant convert it into the shape");
+            if (data.Shape.TotalSize < begin + s.TotalSize)
+                throw new Exception("data.Shape.TotalSize < begin + s.TotalSize!");
 
-            return new Tensor(s, (void*)((long)(data.Array) + begin * DataType.GetByteSize(data.Type)), data.Type, data.Device);
+            return new Tensor(s, (void*)((long)(data.Array) + begin * data.Config.GetUnitLength()), data.Config);
         }
 
         /// <summary>
-        /// Coverts the float array into a float tensor on host. It assumes that the float tensor is already returned. So, It won't do anything if the tensor gets disposed.
+        ///  It assumes that the new tensor is already returned. So, It won't do anything if the tensor gets disposed.
         /// </summary>
         /// <param name="data"></param>
         /// <param name="s"></param>
+        /// <param name="dev"></param>
         /// <returns></returns>
-        public static unsafe Tensor LoadFloatArray(Array data, Shape s, DeviceIndicator dev)
+        public static unsafe Tensor LoadArrayToDisposedTensor(Array data, Shape s, DeviceConfig dev)
         {
             if (data.LongLength != s.TotalSize)
-                throw new Exception("Cant convert it into the shape");
+                throw new Exception("Cant convert data into the given shape");
 
-            if (data.GetType().GetElementType() == typeof(float))
+            if (dev.NumType == DeviceConfig.NumberType.CPUFloat)
             {
-                fixed (float* ptr = (float[])data)
-                    return new Tensor(s, (void*)ptr, DataType.Type.Float, dev);
-            }
-            else
-                throw new Exception("unsupported bla bla");
-        }
-
-        public static unsafe Tensor LoadFloatArray(Array data, Shape s)
-        {
-            if (data.LongLength != s.TotalSize)
-                throw new Exception("Cant convert it into the shape");
-
-            if (data.GetType().GetElementType() == typeof(float))
-            {
-                if(data is float[])
+                if (data is float[])
                     fixed (float* ptr = (float[])data)
-                        return new Tensor(s, (void*)ptr, DataType.Type.Float, DeviceIndicator.Host());
+                        return new Tensor(s, ptr, dev);
                 else if (data is float[,])
                     fixed (float* ptr = (float[,])data)
-                        return new Tensor(s, (void*)ptr, DataType.Type.Float, DeviceIndicator.Host());
+                        return new Tensor(s, ptr, dev);
+                else if (data is float[,,])
+                    fixed (float* ptr = (float[,,])data)
+                        return new Tensor(s, ptr, dev);
+                else if (data is float[,,,])
+                    fixed (float* ptr = (float[,,,])data)
+                        return new Tensor(s, ptr, dev);
+                else if (data is float[,,,,])
+                    fixed (float* ptr = (float[,,,,])data)
+                        return new Tensor(s, ptr, dev);
+                else if (data is float[,,,,,])
+                    fixed (float* ptr = (float[,,,,,])data)
+                        return new Tensor(s, ptr, dev);
                 else
-                    throw new Exception("unsupported bla bla");
+                    throw new Exception("Unsupported Array Type");
             }
             else
-                throw new Exception("unsupported bla bla");
+                throw new Exception("Unsupported Device Configuration!");
         }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor MatrixMultiply(Tensor a, Tensor b)
         {
-            if (a.Type != b.Type)
-                throw new Exception("Data type is different!");
+            if (a.Shape.N != 2 || b.Shape.N != 2 || a.Shape[1] != b.Shape[0])
+                throw new Exception("Shape error!");
 
-            if (a.Device != b.Device)
-                throw new Exception("Allocated memory is on different device!");
+            if (a.Config != b.Config)
+                throw new Exception("Device Configurations are different!");
 
-            if (a.Device.Type == DeviceType.Host)
+            if (a.Config == DeviceConfig.Host_Float)
             {
-                if (a.Type == DataType.Type.Float)
-                {
-
-                    if (a.Shape.N != 2 || b.Shape.N != 2 || a.Shape[1] != b.Shape[0])
-                        throw new Exception("Shape error!");
-
-                    Shape sc = new Shape((a.Shape[0], b.Shape[1]));
-                    Tensor c = new Tensor(sc, a.Type, a.Device);
-                    VectorizationFloat.MatrixMultiply(a, b, c);
-                    return c;
-                }
-                else
-                    throw new Exception("Unsupported data type!");
+                Shape sc = new Shape((a.Shape[0], b.Shape[1]));
+                Tensor c = new Tensor(sc, a.Config);
+                VectorizationFloat.MatrixMultiply(a, b, c);
+                return c;
             }
             else
-                throw new Exception("Unsupported Platform!");
+                throw new Exception("Unsupported Device Configuration!");
 
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor Sum(Tensor t1, Tensor t2)
         {
-            if (t1.Type != t2.Type)
-                throw new Exception("Data type is different!");
-
-            if (t1.Device != t2.Device)
-                throw new Exception("Allocated memory is on different device!");
+            if (t1.Config != t2.Config)
+                throw new Exception("Device Configurations are different!");
 
             if (t1.Shape.TotalSize != t2.Shape.TotalSize)
                 throw new Exception("Size of Tensors are different!");
 
-            Tensor res = new Tensor(t1.Shape.Clone(), t1.Type, t1.Device);
+            Tensor res = new Tensor(t1.Shape.Clone(), t1.Config);
 
-            if (t1.Device.Type == DeviceType.Host)
+            if (t1.Config == DeviceConfig.Host_Float)
             {
-                if (t1.Type == DataType.Type.Float)
-                {
-                    VectorizationFloat.ElementWiseAddAVX((float*)t1.Array, (float*)t2.Array, (float*)res.Array, t1.Shape.TotalSize);
-                }
-                else
-                    throw new Exception("Unsupported data type!");
+                VectorizationFloat.ElementWiseAddAVX((float*)t1.Array, (float*)t2.Array, (float*)res.Array, t1.Shape.TotalSize);
             }
             else
-                throw new Exception("Unsupported Platform!");
+                throw new Exception("Unsupported Device Configuration!");
 
             return res;
         }
 
-      
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor Subtract(Tensor t1, Tensor t2)
         {
-            if(t1.Type != t2.Type)
-                throw new Exception("Data type is different!");
-
-            if (t1.Device != t2.Device)
-                throw new Exception("Allocated memory is on different device!");
+            if (t1.Config != t2.Config)
+                throw new Exception("Device Configurations are different!");
 
             if (t1.Shape.TotalSize != t2.Shape.TotalSize)
                 throw new Exception("Size of Tensors are different!");
 
+            Tensor res = new Tensor(t1.Shape.Clone(), t1.Config);
 
-            Tensor res = new Tensor(t1.Shape.Clone(), t1.Type, t1.Device);
-
-            if (t1.Device.Type == DeviceType.Host)
+            if (t1.Config == DeviceConfig.Host_Float)
             {
-                if (t1.Type == DataType.Type.Float)
-                {
-                    VectorizationFloat.ElementWiseSubtractAVX((float*)t1.Array, (float*)t2.Array, (float*)res.Array, t1.Shape.TotalSize);
-                }
-                else
-                    throw new Exception("Unsupported data type!");
+                VectorizationFloat.ElementWiseSubtractAVX((float*)t1.Array, (float*)t2.Array, (float*)res.Array, t1.Shape.TotalSize);
             }
             else
-                throw new Exception("Unsupported Platform!");
+                throw new Exception("Unsupported Device Configuration!");
 
             return res;
         }
-       
+
         #endregion
 
     }

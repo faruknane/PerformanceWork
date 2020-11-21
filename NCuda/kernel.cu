@@ -1,9 +1,8 @@
-
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "cuda_runtime.h"
 #include <stdio.h>
-//#include <cudnn.h>
+#include <cudnn.h>
 #include <chrono>
 
 // CUDA runtime
@@ -96,7 +95,7 @@ extern "C" __declspec(dllexport) void NDeviceSynchronize()
 	checkCudaErrors(cudaDeviceSynchronize());
 }
 
-const int arraySize = 100000;
+const int arraySize = 100000000;
 const float a[arraySize] = { 0.1f, 0.2f, 0.3f, 0.4f, 0.1f };
 const float b[arraySize] = { 0, 0, 0, 0, 0 };
 float c[arraySize] = { 1,2,3,4,5 };
@@ -115,36 +114,51 @@ inline void addWithCuda(float* a, float* b, float* c, int size, cudaStream_t& st
 	if (size < th)
 		th = size;
 
-	addSingleArrays2Kernel <<< (size + th - 1) / th, th, 0, stream>>> (a, b, c, size);
+	addSingleArrays2Kernel <<< (size + th - 1) / th, th, 0, stream >>> (a, b, c, size);
 }
 
 void addWithCublas(cublasHandle_t* h, float* c, const float* a, const float* b, unsigned int size);
 
 int main()
 {
-	float* dev_a = (float*)NAllocate(arraySize * sizeof(float), 0);
-	float* dev_b = (float*)NAllocate(arraySize * sizeof(float), 0);
-	float* dev_c = (float*)NAllocate(arraySize * sizeof(float), 0);
-
+	NSetDevice(0);
+	
+	float* dev_a = (float*)NAllocate(arraySize * sizeof(float), devid);
+	float* dev_b = (float*)NAllocate(arraySize * sizeof(float), devid);
+	float* dev_c = (float*)NAllocate(arraySize * sizeof(float), devid);
+	
 	std::chrono::steady_clock::time_point begin3 = std::chrono::steady_clock::now();
 	NCopyFromHostToGPU((void*)a, dev_a, arraySize * sizeof(float));
 	NCopyFromHostToGPU((void*)b, dev_b, arraySize * sizeof(float));
+	cout << "bitti1" << endl;
 	std::chrono::steady_clock::time_point end3 = std::chrono::steady_clock::now();
 	std::cout << "Time difference1 = " << std::chrono::duration_cast<std::chrono::milliseconds>(end3 - begin3).count() << "ms" << std::endl;
 
+	
+	
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-	cudaStream_t stream[1];
-	cudaStreamCreate(&stream[0]);
-	cout << "bitti1" << endl;
-	for (int i = 0; i < 100000; i++)
+	cudaStream_t stream1;
+	cudaStreamCreate(&stream1);
+	for (int i = 0; i < 1; i++)
 	{
-		addWithCuda(dev_c, dev_a, dev_c , arraySize, stream[0]);
+		addWithCuda(dev_a, dev_b, dev_c, arraySize, stream1);
+		cudaStreamSynchronize(stream1);
 	}
-	cudaStreamSynchronize(stream[0]);
-
 	cout << "bitti2" << endl;
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	std::cout << "Time difference2 = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+
+
+	std::chrono::steady_clock::time_point begin6 = std::chrono::steady_clock::now();
+	for (int i = 0; i < 1; i++)
+	{
+		addWithCuda(dev_c, dev_a, dev_c, arraySize, stream1);
+		cudaStreamSynchronize(stream1);
+	}
+	cout << "bitti6" << endl;
+	std::chrono::steady_clock::time_point end6 = std::chrono::steady_clock::now();
+	std::cout << "Time difference6 = " << std::chrono::duration_cast<std::chrono::milliseconds>(end6 - begin6).count() << "ms" << std::endl;
+
 
 
 	std::chrono::steady_clock::time_point begin2 = std::chrono::steady_clock::now();

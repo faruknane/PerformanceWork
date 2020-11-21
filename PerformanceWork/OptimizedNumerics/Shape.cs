@@ -17,23 +17,31 @@ namespace PerformanceWork.OptimizedNumerics
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Shape(int n)
-        {
-            this.N = n;
-            Dimensions = new int[N];
-            Multiplied = new int[N + 1];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Shape((int x1, bool rastgele) a)
+        public Shape(int x1)
         {
             this.N = 1;
             Dimensions = new int[N];
             Multiplied = new int[N + 1];
             Multiplied[N] = 1;
 
-            Dimensions[0] = a.x1;
-            Multiplied[0] = a.x1 * Multiplied[1];
+            Dimensions[0] = x1;
+            Multiplied[0] = x1 * Multiplied[1];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private Shape()
+        {
+
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static Shape DimensionOf(int n)
+        {
+            Shape s = new Shape();
+            s.N = n;
+            s.Dimensions = new int[n];
+            s.Multiplied = new int[n + 1];
+            return s;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -156,21 +164,22 @@ namespace PerformanceWork.OptimizedNumerics
             return res;
         }
 
-        //todo create unit test for index methods
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public int Index(Index ind)
-        {
-            int res = 0;
-            for (int i = 0; i < ind.N; i++)
-                res += ind[i] * Multiplied[i + 1];
-            return res;
-        }
+        ////todo create unit test for index methods
+        //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        //public int Index(Index ind)
+        //{
+        //    int res = 0;
+        //    for (int i = 0; i < ind.N; i++)
+        //        res += ind[i] * Multiplied[i + 1];
+        //    return res;
+        //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public int Index(int x1)
         {
             return x1 * Multiplied[1];
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public int Index(int x1, int x2)
         {
@@ -182,16 +191,19 @@ namespace PerformanceWork.OptimizedNumerics
         {
             return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3];
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public int Index(int x1, int x2, int x3, int x4)
         {
             return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3] + x4 * Multiplied[4];
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public int Index(int x1, int x2, int x3, int x4, int x5)
         {
             return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3] + x4 * Multiplied[4] + x5 * Multiplied[5];
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public int Index(int x1, int x2, int x3, int x4, int x5, int x6)
         {
@@ -202,7 +214,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public Shape Clone()
         {
-            Shape s = new Shape(this.N);
+            Shape s = Shape.DimensionOf(this.N);
             for (int i = 0; i < s.N; i++)
             {
                 s.Dimensions[i] = this.Dimensions[i];
@@ -233,7 +245,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Shape Combine(Shape s1, Shape s2)
         {
-            Shape c = new Shape(s1.N + s2.N);
+            Shape c = Shape.DimensionOf(s1.N + s2.N);
             for (int i = 0; i < s1.N + s2.N; i++)
             {
                 if (i < s1.N)
@@ -256,7 +268,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Shape SwapTail(Shape s1, Shape s2, Shape s3)
         {
-            Shape c = new Shape(s1.N - s2.N + s3.N);
+            Shape c = Shape.DimensionOf(s1.N - s2.N + s3.N);
 
             for (int i = 0; i < s1.N - s2.N; i++)
                 c.Dimensions[i] = s1.Dimensions[i];
@@ -274,7 +286,7 @@ namespace PerformanceWork.OptimizedNumerics
             if (s1.N != s2.N)
                 throw new Exception("dimensions incompatibility!");
 
-            Shape res = new Shape(s1.N);
+            Shape res = Shape.DimensionOf(s1.N);
             for (int i = 0; i < res.N; i++)
                 res.Dimensions[i] = s1[i] / s2[i];
             res.CalculateMultiplied();
@@ -289,7 +301,7 @@ namespace PerformanceWork.OptimizedNumerics
             if (s1.N != s2.N)
                 throw new Exception("dimensions incompatibility!");
 
-            Shape res = new Shape(s1.N);
+            Shape res = Shape.DimensionOf(s1.N);
             for (int i = 0; i < res.N; i++)
                 res.Dimensions[i] = s1[i] * s2[i];
             res.CalculateMultiplied();
@@ -300,7 +312,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Shape RemoveLastDimension(Shape s)
         {
-            Shape res = new Shape(s.N - 1);
+            Shape res = Shape.DimensionOf(s.N - 1);
 
             for (int i = 0; i < res.N; i++)
                 res.Dimensions[i] = s.Dimensions[i];

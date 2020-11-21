@@ -3,7 +3,7 @@
       <TieredCompilation>false</TieredCompilation>
     </PropertyGroup>
   <PropertyGroup>
-    <TargetFramework>netcoreapp5.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
 
