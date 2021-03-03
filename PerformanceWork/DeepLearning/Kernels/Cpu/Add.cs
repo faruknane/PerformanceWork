@@ -21,12 +21,24 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor AddFloat(params Tensor[] tensors)
         {
-            Tensor res = new Tensor(tensors[0].Shape.Clone(), DeviceConfig.Host_Float);
+            Tensor res = new Tensor(tensors[0].Shape.Clone(), DeviceConfig.Host_Float32);
             VectorizationFloat.ElementWiseAddAVX((float*)tensors[0].Array, (float*)tensors[1].Array, (float*)res.Array, res.Shape.TotalSize);
 
             for (int i = 2; i < tensors.Length; i++) //todo add Optimize here. 
                 VectorizationFloat.ElementWiseAddAVX((float*)res.Array, (float*)tensors[i].Array, (float*)res.Array, res.Shape.TotalSize);
             return res;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static void AddFloat(Tensor res, params Tensor[] tensors)
+        {
+            if (res.Config != tensors[0].Config)
+                throw new Exception("Tensor Configs are not compatible!");
+            
+            VectorizationFloat.ElementWiseAddAVX((float*)tensors[0].Array, (float*)tensors[1].Array, (float*)res.Array, res.Shape.TotalSize);
+
+            for (int i = 2; i < tensors.Length; i++) //todo add Optimize here. 
+                VectorizationFloat.ElementWiseAddAVX((float*)res.Array, (float*)tensors[i].Array, (float*)res.Array, res.Shape.TotalSize);
         }
 
     }

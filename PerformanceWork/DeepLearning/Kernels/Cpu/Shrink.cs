@@ -14,7 +14,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor ShrinkFloat(Tensor v, Shape thisShape, Shape term0, Shape Divisor)
         {
-            Tensor res = new Tensor(thisShape.Clone(), DeviceConfig.Host_Float);
+            Tensor res = new Tensor(thisShape.Clone(), DeviceConfig.Host_Float32);
             res.SetFloat(0);
 
             float* ptrres = (float*)res.Array;

@@ -8,6 +8,16 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon />
     <StartupObject />
+    <Authors>Akif Faruk NANE</Authors>
+    <Company />
+    <Description>Contains Deep Learning Kernels and necessary classes etc.</Description>
+    <Copyright></Copyright>
+    <PackageProjectUrl>https://github.com/faruknane/DeepLearningFramework</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/faruknane/DeepLearningFramework</RepositoryUrl>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -23,148 +33,146 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="compiler\libiomp5md.dll">
+    <None Remove="compiler\libiomp5md.dll" />
+    <None Remove="compiler\libiomp5md.pdb" />
+    <None Remove="compiler\libiompstubs5md.dll" />
+    <None Remove="mkl\1033\mkl_msg.dll" />
+    <None Remove="mkl\1041\mkl_msg.dll" />
+    <None Remove="mkl\libimalloc.dll" />
+    <None Remove="mkl\mkl_avx.dll" />
+    <None Remove="mkl\mkl_avx2.dll" />
+    <None Remove="mkl\mkl_avx512.dll" />
+    <None Remove="mkl\mkl_core.dll" />
+    <None Remove="mkl\mkl_def.dll" />
+    <None Remove="mkl\mkl_intel_thread.dll" />
+    <None Remove="mkl\mkl_mc.dll" />
+    <None Remove="mkl\mkl_mc3.dll" />
+    <None Remove="mkl\mkl_rt.dll" />
+    <None Remove="mkl\mkl_sequential.dll" />
+    <None Remove="mkl\mkl_tbb_thread.dll" />
+    <None Remove="mkl\mkl_vml_avx.dll" />
+    <None Remove="mkl\mkl_vml_avx2.dll" />
+    <None Remove="mkl\mkl_vml_avx512.dll" />
+    <None Remove="mkl\mkl_vml_cmpt.dll" />
+    <None Remove="mkl\mkl_vml_def.dll" />
+    <None Remove="mkl\mkl_vml_mc.dll" />
+    <None Remove="mkl\mkl_vml_mc2.dll" />
+    <None Remove="mkl\mkl_vml_mc3.dll" />
+    <None Remove="NCuda\NCuda.dll" />
+    <None Remove="tbb\vc14\tbb.dll" />
+    <None Remove="tbb\vc14\tbbmalloc.dll" />
+    <None Remove="tbb\vc14\tbbmalloc_proxy.dll" />
+    <None Remove="tbb\vc_mt\tbb.dll" />
+    <None Remove="tbb\vc_mt\tbbmalloc.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="compiler\libiomp5md.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="compiler\libiomp5md.pdb">
+    </Content>
+    <Content Include="compiler\libiomp5md.pdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="compiler\libiompstubs5md.dll">
+    </Content>
+    <Content Include="compiler\libiompstubs5md.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\1033\mkl_msg.dll">
+    </Content>
+    <Content Include="mkl\1033\mkl_msg.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\1041\mkl_msg.dll">
+    </Content>
+    <Content Include="mkl\1041\mkl_msg.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\libimalloc.dll">
+    </Content>
+    <Content Include="mkl\libimalloc.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_avx.dll">
+    </Content>
+    <Content Include="mkl\mkl_avx.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_avx2.dll">
+    </Content>
+    <Content Include="mkl\mkl_avx2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_avx512.dll">
+    </Content>
+    <Content Include="mkl\mkl_avx512.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_avx512_mic.dll">
+    </Content>
+    <Content Include="mkl\mkl_core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_blacs_ilp64.dll">
+    </Content>
+    <Content Include="mkl\mkl_def.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_blacs_intelmpi_ilp64.dll">
+    </Content>
+    <Content Include="mkl\mkl_intel_thread.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_blacs_intelmpi_lp64.dll">
+    </Content>
+    <Content Include="mkl\mkl_mc.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_blacs_lp64.dll">
+    </Content>
+    <Content Include="mkl\mkl_mc3.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_blacs_mpich2_ilp64.dll">
+    </Content>
+    <Content Include="mkl\mkl_rt.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_blacs_mpich2_lp64.dll">
+    </Content>
+    <Content Include="mkl\mkl_sequential.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_blacs_msmpi_ilp64.dll">
+    </Content>
+    <Content Include="mkl\mkl_tbb_thread.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_blacs_msmpi_lp64.dll">
+    </Content>
+    <Content Include="mkl\mkl_vml_avx.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_cdft_core.dll">
+    </Content>
+    <Content Include="mkl\mkl_vml_avx2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_core.dll">
+    </Content>
+    <Content Include="mkl\mkl_vml_avx512.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_def.dll">
+    </Content>
+    <Content Include="mkl\mkl_vml_cmpt.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_intel_thread.dll">
+    </Content>
+    <Content Include="mkl\mkl_vml_def.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_mc.dll">
+    </Content>
+    <Content Include="mkl\mkl_vml_mc.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_mc3.dll">
+    </Content>
+    <Content Include="mkl\mkl_vml_mc2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_msg.dll">
+    </Content>
+    <Content Include="mkl\mkl_vml_mc3.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_pgi_thread.dll">
+    </Content>
+    <Content Include="NCuda\NCuda.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_rt.dll">
+    </Content>
+    <Content Include="tbb\vc14\tbb.dll" />
+    <Content Include="tbb\vc14\tbbmalloc.dll" />
+    <Content Include="tbb\vc14\tbbmalloc_proxy.dll" />
+    <Content Include="tbb\vc_mt\tbb.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_scalapack_ilp64.dll">
+    </Content>
+    <Content Include="tbb\vc_mt\tbbmalloc.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_scalapack_lp64.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_sequential.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_tbb_thread.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_vml_avx.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_vml_avx2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_vml_avx512.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_vml_avx512_mic.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_vml_cmpt.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_vml_def.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_vml_mc.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_vml_mc2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MKL\mkl_vml_mc3.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="NCuda\NCuda.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="tbb\vc14\tbb.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="tbb\vc14\tbbmalloc.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="tbb\vc14\tbbmalloc_proxy.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="tbb\vc_mt\tbb.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="tbb\vc_mt\tbbmalloc.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="NCuda\" />
+    <Resource Include="tbb\vc14\tbb.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="tbb\vc14\tbbmalloc.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="tbb\vc14\tbbmalloc_proxy.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

@@ -15,19 +15,6 @@ namespace PerformanceWork.OptimizedNumerics
         public int N { get; private set; }
         public int TotalSize { get => Multiplied[0]; }
 
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Shape(int x1)
-        {
-            this.N = 1;
-            Dimensions = new int[N];
-            Multiplied = new int[N + 1];
-            Multiplied[N] = 1;
-
-            Dimensions[0] = x1;
-            Multiplied[0] = x1 * Multiplied[1];
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         private Shape()
         {
@@ -42,85 +29,6 @@ namespace PerformanceWork.OptimizedNumerics
             s.Dimensions = new int[n];
             s.Multiplied = new int[n + 1];
             return s;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Shape((int x1, int x2) a)
-        {
-            this.N = 2;
-            Dimensions = new int[N];
-            Multiplied = new int[N + 1];
-            Multiplied[N] = 1;
-
-            Dimensions[1] = a.x2;
-            Multiplied[1] = a.x2 * Multiplied[2];
-
-            Dimensions[0] = a.x1;
-            Multiplied[0] = a.x1 * Multiplied[1];
-
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Shape((int x1, int x2, int x3) a)
-        {
-            this.N = 3;
-            Dimensions = new int[N];
-            Multiplied = new int[N + 1];
-            Multiplied[N] = 1;
-
-            Dimensions[2] = a.x3;
-            Multiplied[2] = a.x3 * Multiplied[3];
-
-            Dimensions[1] = a.x2;
-            Multiplied[1] = a.x2 * Multiplied[2];
-
-            Dimensions[0] = a.x1;
-            Multiplied[0] = a.x1 * Multiplied[1];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Shape((int x1, int x2, int x3, int x4) a)
-        {
-            this.N = 4;
-            Dimensions = new int[N];
-            Multiplied = new int[N + 1];
-            Multiplied[N] = 1;
-
-            Dimensions[3] = a.x4;
-            Multiplied[3] = a.x4 * Multiplied[4];
-
-            Dimensions[2] = a.x3;
-            Multiplied[2] = a.x3 * Multiplied[3];
-
-            Dimensions[1] = a.x2;
-            Multiplied[1] = a.x2 * Multiplied[2];
-
-            Dimensions[0] = a.x1;
-            Multiplied[0] = a.x1 * Multiplied[1];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Shape((int x1, int x2, int x3, int x4, int x5) a)
-        {
-            this.N = 5;
-            Dimensions = new int[N];
-            Multiplied = new int[N + 1];
-            Multiplied[N] = 1;
-
-            Dimensions[4] = a.x5;
-            Multiplied[4] = a.x5 * Multiplied[5];
-
-            Dimensions[3] = a.x4;
-            Multiplied[3] = a.x4 * Multiplied[4];
-
-            Dimensions[2] = a.x3;
-            Multiplied[2] = a.x3 * Multiplied[3];
-
-            Dimensions[1] = a.x2;
-            Multiplied[1] = a.x2 * Multiplied[2];
-
-            Dimensions[0] = a.x1;
-            Multiplied[0] = a.x1 * Multiplied[1];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

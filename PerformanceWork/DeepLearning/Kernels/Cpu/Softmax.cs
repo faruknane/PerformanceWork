@@ -13,7 +13,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor SoftmaxFloat(Tensor v)
         {
-            Tensor sm = new Tensor(v.Shape.Clone(), DeviceConfig.Host_Float);
+            Tensor sm = new Tensor(v.Shape.Clone(), DeviceConfig.Host_Float32);
             VectorizationFloat.Softmax((float*)v.Array, (float*)sm.Array, v.Shape[v.Shape.N - 1], v.Shape.TotalSize);
             return sm;
         }

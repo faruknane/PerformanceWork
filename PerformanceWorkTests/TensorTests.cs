@@ -14,8 +14,8 @@ namespace PerformanceWorkTests
         [TestMethod]
         public void SumTensorsCPU()
         {
-            Tensor t = new Tensor((3, 5), DeviceConfig.Host_Float);
-            Tensor t2 = new Tensor((3, 5), DeviceConfig.Host_Float);
+            Tensor t = new Tensor((3, 5), DeviceConfig.Host_Float32);
+            Tensor t2 = new Tensor((3, 5), DeviceConfig.Host_Float32);
             unsafe
             {
                 for (int i = 0; i < t.Shape[0]; i++)
@@ -41,7 +41,7 @@ namespace PerformanceWorkTests
         public unsafe void MatrixMultiply()
         {
 
-            for (int kk = 0; kk < 10; kk++)
+            for (int kk = 0; kk < 1000; kk++)
             {
                 Random r = new Random();
 
@@ -49,9 +49,9 @@ namespace PerformanceWorkTests
                 int m = r.Next(2, 30);
                 int p = r.Next(2, 30);
 
-                Tensor a = new Tensor((n, m), DeviceConfig.Host_Float);
-                Tensor b = new Tensor((m, p), DeviceConfig.Host_Float);
-                Tensor res = new Tensor((n, p), DeviceConfig.Host_Float);
+                Tensor a = new Tensor((n, m), DeviceConfig.Host_Float32);
+                Tensor b = new Tensor((m, p), DeviceConfig.Host_Float32);
+                Tensor res = new Tensor((n, p), DeviceConfig.Host_Float32);
 
                 res.SetFloat(0);
 
@@ -68,7 +68,7 @@ namespace PerformanceWorkTests
                         for (int k = 0; k < b.Shape[1]; k++)
                             ((float*)res.Array)[res.Shape.Index(i, k)] += ((float*)a.Array)[a.Shape.Index(i, j)] * ((float*)b.Array)[b.Shape.Index(j, k)];
 
-                Tensor c = Tensor.MatrixMultiply(a, b);
+                Tensor c = PerformanceWork.DeepLearning.Kernels.Cpu.CpuKernels.MatrixMultiplyFloat(a, b);
 
                 if (!VectorizationFloat.ElementWiseIsEqualsAVX((float*)res.Array, (float*)c.Array, res.Shape.TotalSize))
                 {
@@ -119,8 +119,8 @@ namespace PerformanceWorkTests
 
             fixed (float* ptr_v = vdata, ptr_grad = graddata)
             {
-                Tensor v = Tensor.LoadArrayToDisposedTensor(vdata, new Shape(vdata.Length), DeviceConfig.Host_Float);
-                Tensor grad = Tensor.LoadArrayToDisposedTensor(graddata, new Shape(graddata.Length), DeviceConfig.Host_Float);
+                Tensor v = Tensor.LoadArrayToDisposedTensor(vdata, new Shape(vdata.Length), DeviceConfig.Host_Float32);
+                Tensor grad = Tensor.LoadArrayToDisposedTensor(graddata, new Shape(graddata.Length), DeviceConfig.Host_Float32);
 
                 Tensor reluv = CpuKernels.ReluFloat(v);
                 Tensor relugrad = CpuKernels.ReluFloat_GetGradient_0(grad, v);

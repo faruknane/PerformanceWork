@@ -13,7 +13,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor SigmoidFloat(Tensor v)
         {
-            Tensor sigmo = new Tensor(v.Shape.Clone(), DeviceConfig.Host_Float);
+            Tensor sigmo = new Tensor(v.Shape.Clone(), DeviceConfig.Host_Float32);
             VectorizationFloat.Sigmoid((float*)v.Array, (float*)sigmo.Array, sigmo.Shape.TotalSize);
             return sigmo;
         }
@@ -21,7 +21,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor SigmoidFloat_GetGradient_0(Tensor s, Tensor sigmo)
         {
-            Tensor combined = new Tensor(s.Shape.Clone(), DeviceConfig.Host_Float);
+            Tensor combined = new Tensor(s.Shape.Clone(), DeviceConfig.Host_Float32);
             VectorizationFloat.ElementWise_A_MultipliedBy_1_Minus_A_MultipliedByB((float*)sigmo.Array, (float*)s.Array, (float*)combined.Array, sigmo.Shape.TotalSize);
             return combined;
         }

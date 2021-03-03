@@ -14,7 +14,7 @@ namespace PerformanceWork
         public enum NumberType
         {
             CPUDouble,
-            CPUFloat,
+            CPUFloat32,
             CPUInt32,
             Uknown
         }
@@ -27,7 +27,7 @@ namespace PerformanceWork
         public static DeviceConfig Host_Unkown = new DeviceConfig(DeviceType.Host, 0, NumberType.Uknown);
         public static DeviceConfig NvidiaGPU_Unkown = new DeviceConfig(DeviceType.NvidiaGPU, 0, NumberType.Uknown);
         
-        public static DeviceConfig Host_Float = new DeviceConfig(DeviceType.Host, 0, NumberType.CPUFloat);
+        public static DeviceConfig Host_Float32 = new DeviceConfig(DeviceType.Host, 0, NumberType.CPUFloat32);
         public static DeviceConfig Host_Double = new DeviceConfig(DeviceType.Host, 0, NumberType.CPUDouble);
         public static DeviceConfig Host_Int32 = new DeviceConfig(DeviceType.Host, 0, NumberType.CPUInt32);
 
@@ -80,7 +80,7 @@ namespace PerformanceWork
         public static int GetUnitLength(NumberType t)
         {
             if (t == NumberType.CPUDouble) return 8;
-            else if (t == NumberType.CPUFloat | t == NumberType.CPUInt32) return 4;
+            else if (t == NumberType.CPUFloat32 | t == NumberType.CPUInt32) return 4;
             throw new Exception("Undefined Number Type!");
         }
     }

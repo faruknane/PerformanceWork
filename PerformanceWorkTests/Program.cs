@@ -20,18 +20,18 @@ namespace PerformanceWorkTests
     {
         static void f()
         {
-            for (int i = 0; i < 1500; i++)
+            for (int i = 0; i < 100; i++)
             {
                 //4mb
-                Tensor a = new Tensor(new Shape(1024 * 1024), DeviceConfig.Host_Float);
+                Tensor a = new Tensor(new Shape(1024 * 1024), DeviceConfig.Host_Float32);
                 a.Dispose();
             }
         }
 
         static unsafe void Main(string[] args)
         {
-            
-
+            f();
+            Console.WriteLine(Tensor.DisposedCount);
             TensorPool.GetDevicePool(DeviceConfig.Host_Unkown).EraseAll();
             Console.WriteLine(Tensor.DisposedCount);
             Thread.Sleep(3000);
