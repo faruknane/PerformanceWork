@@ -6,64 +6,105 @@ using System.Threading.Tasks;
 
 namespace PerformanceWork
 {
-    public struct DeviceConfig
+    /// <summary>
+    /// Data type.
+    /// </summary>
+    public enum NumberType
     {
-        /// <summary>
-        /// Data type.
-        /// </summary>
-        public enum NumberType
-        {
-            CPUDouble,
-            CPUFloat32,
-            CPUInt32,
-            Uknown
-        }
+        Float64,
+        Float32,
+        Float16,
+        Int32,
+        Int16,
+        Uknown
+    }
+    public enum DeviceType
+    {
+        Host,
+        NvidiaGPU,
+        AmdGPU
+    }
 
-        public enum DeviceType
-        {
-            Host,
-            NvidiaGPU
-        }
-        public static DeviceConfig Host_Unkown = new DeviceConfig(DeviceType.Host, 0, NumberType.Uknown);
-        public static DeviceConfig NvidiaGPU_Unkown = new DeviceConfig(DeviceType.NvidiaGPU, 0, NumberType.Uknown);
+    public struct Device
+    {
+        public static Device Host { get; } = new Device() { ID = 0, Type = DeviceType.Host };
+        public static Device Nvidia(int devid) => new Device() { ID = 0, Type = DeviceType.NvidiaGPU };
         
-        public static DeviceConfig Host_Float32 = new DeviceConfig(DeviceType.Host, 0, NumberType.CPUFloat32);
-        public static DeviceConfig Host_Double = new DeviceConfig(DeviceType.Host, 0, NumberType.CPUDouble);
-        public static DeviceConfig Host_Int32 = new DeviceConfig(DeviceType.Host, 0, NumberType.CPUInt32);
+        public int ID;
+        public DeviceType Type;
 
-        public NumberType NumType { get; set; }
-        public DeviceType DevType { get; set; }
-        public int DeviceID { get; set; }
-        public static DeviceConfig NvidiaGPU_Unknown { get; internal set; }
-
-        public DeviceConfig(DeviceType devicetype, int devid, NumberType datatype)
+        public static bool operator ==(Device b1, Device b2)
         {
-            NumType = datatype;
-            DeviceID = devid;
-            DevType = devicetype;
+            return b1.ID == b2.ID && b1.Type == b2.Type;
         }
 
-        public int GetUnitLength()
+        public static bool operator !=(Device b1, Device b2)
         {
-            return DeviceConfig.GetUnitLength(this.NumType);
-        }
-
-        public static bool operator ==(DeviceConfig b1, DeviceConfig b2)
-        {
-            return b1.NumType == b2.NumType && b1.DevType == b2.DevType && b1.DeviceID == b2.DeviceID;
-        }
-
-        public static bool operator !=(DeviceConfig b1, DeviceConfig b2)
-        {
-            return !(b1.NumType == b2.NumType && b1.DevType == b2.DevType && b1.DeviceID == b2.DeviceID);
+            return !(b1 == b2);
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is DeviceConfig d)
-            {
+            if (obj is Device d)
                 return this == d;
-            }
+            else
+                return false;
+        }
+    }
+
+    public struct TensorConfig
+    {
+        public static TensorConfig Host_Unkown = new TensorConfig(Device.Host, NumberType.Uknown);
+        public static TensorConfig NvidiaGPU_Unkown = new TensorConfig(Device.Nvidia(0), NumberType.Uknown);
+
+        public static TensorConfig Host_Float64 = new TensorConfig(Device.Host, NumberType.Float64);
+        public static TensorConfig Host_Float32 = new TensorConfig(Device.Host, NumberType.Float32);
+        public static TensorConfig Host_Int32 = new TensorConfig(Device.Host, NumberType.Int32);
+
+        public NumberType NumType;
+        public Device Device;
+
+        public TensorConfig(Device device, NumberType datatype)
+        {
+            Device = device;
+            NumType = datatype;
+        }
+
+        public TensorConfig(DeviceType devicetype, int devid, NumberType datatype)
+        {
+            Device = new Device();
+            Device.Type = devicetype;
+            Device.ID = devid;
+            NumType = datatype;
+        }
+
+        public TensorConfig(DeviceType devicetype, NumberType datatype)
+        {
+            Device = new Device();
+            Device.Type = devicetype;
+            Device.ID = 0;
+            NumType = datatype;
+        }
+
+        public int GetUnitLength()
+        {
+            return TensorConfig.GetUnitLength(this.NumType);
+        }
+
+        public static bool operator ==(TensorConfig b1, TensorConfig b2)
+        {
+            return b1.NumType == b2.NumType && b1.Device == b2.Device;
+        }
+
+        public static bool operator !=(TensorConfig b1, TensorConfig b2)
+        {
+            return !(b1 == b2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is TensorConfig d)
+                return this == d;
             else
                 return false;
         }
@@ -79,8 +120,9 @@ namespace PerformanceWork
         /// <returns>Byte Size of the data type</returns>
         public static int GetUnitLength(NumberType t)
         {
-            if (t == NumberType.CPUDouble) return 8;
-            else if (t == NumberType.CPUFloat32 | t == NumberType.CPUInt32) return 4;
+            if (t == NumberType.Float64) return 8;
+            else if (t == NumberType.Float32 | t == NumberType.Int32) return 4;
+            else if (t == NumberType.Int16 || t == NumberType.Float16) return 2;
             throw new Exception("Undefined Number Type!");
         }
     }

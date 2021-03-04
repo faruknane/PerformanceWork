@@ -14,7 +14,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor ReluFloat(Tensor v)
         {
-            Tensor res = new Tensor(v.Shape.Clone(), DeviceConfig.Host_Float32);
+            Tensor res = new Tensor(v.Shape.Clone(), TensorConfig.Host_Float32);
             VectorizationFloat.FilterNegativeNumbers((float*)v.Array, (float*)res.Array, res.Shape.TotalSize);
             return res;
         }
@@ -28,7 +28,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor ReluFloat_GetGradient_0(Tensor gradient, Tensor v)
         {
-            Tensor combined = new Tensor(gradient.Shape.Clone(), DeviceConfig.Host_Float32);
+            Tensor combined = new Tensor(gradient.Shape.Clone(), TensorConfig.Host_Float32);
             VectorizationFloat.ReluFloatGradientCalculation((float*)gradient.Array, (float*)v.Array, (float*)combined.Array, combined.Shape.TotalSize);
             return combined;
         }

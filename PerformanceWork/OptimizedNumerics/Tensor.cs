@@ -11,14 +11,14 @@ namespace PerformanceWork.OptimizedNumerics
     public unsafe class Tensor : IDisposable
     {
         public Shape Shape { get; private set; }
-        public DeviceConfig Config;
+        public TensorConfig Config;
 
         public void* Array;
         public bool ArrayReturned;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private Tensor(Shape s, void* ptr, DeviceConfig devconfig)
+        private Tensor(Shape s, void* ptr, TensorConfig devconfig)
         {
             this.Shape = s;
             this.Array = ptr;
@@ -27,48 +27,48 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor(Shape s, DeviceConfig devconfig)
+        public Tensor(Shape s, TensorConfig devconfig)
         {
             Initialize(s, devconfig);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2) a, DeviceConfig devconfig)
+        public Tensor((int d1, int d2) a, TensorConfig devconfig)
         {
             Initialize(new Shape(a.d1, a.d2), devconfig);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2, int d3) a, DeviceConfig devconfig)
+        public Tensor((int d1, int d2, int d3) a, TensorConfig devconfig)
         {
             Initialize(new Shape(a.d1, a.d2, a.d3), devconfig);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2, int d3, int d4) a, DeviceConfig devconfig)
+        public Tensor((int d1, int d2, int d3, int d4) a, TensorConfig devconfig)
         {
             Initialize(new Shape(a.d1, a.d2, a.d3, a.d4), devconfig);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Tensor((int d1, int d2, int d3, int d4, int d5) a, DeviceConfig devconfig)
+        public Tensor((int d1, int d2, int d3, int d4, int d5) a, TensorConfig devconfig)
         {
             Initialize(new Shape(a.d1, a.d2, a.d3, a.d4, a.d5), devconfig);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private void Initialize(Shape s, DeviceConfig devconfig)
+        private void Initialize(Shape s, TensorConfig devconfig)
         {
             this.Shape = s;
             this.Config = devconfig;
 
-            Array = TensorPool.GetDevicePool(this.Config).Rent(Shape.Multiplied[0], this.Config.GetUnitLength());
+            Array = TensorPool.GetDevicePool(this.Config.Device).Rent(Shape.Multiplied[0], this.Config.GetUnitLength());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void SetFloat(float value)
         {
-            if (this.Config == DeviceConfig.Host_Float32)
+            if (this.Config == TensorConfig.Host_Float32)
                 VectorizationFloat.ElementWiseSetValueAVX((float*)Array, value, Shape.TotalSize);
             else
                 throw new Exception("Unsupported Device Configuration!");
@@ -80,7 +80,7 @@ namespace PerformanceWork.OptimizedNumerics
             if (this.Config != value.Config)
                 throw new Exception("Device Configuration is different!");
 
-            if (this.Config == DeviceConfig.Host_Float32)
+            if (this.Config == TensorConfig.Host_Float32)
                 VectorizationFloat.ElementWiseAssignAVX((float*)Array, (float*)value.Array, Shape.TotalSize);
             else
                 throw new Exception("Unsupported Device Configuration!");
@@ -90,7 +90,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void MakeNegative()
         {
-            if (this.Config == DeviceConfig.Host_Float32)
+            if (this.Config == TensorConfig.Host_Float32)
                 VectorizationFloat.MakeNegativeAVX((float*)Array, (float*)Array, Shape.Multiplied[0]);
             else
                 throw new Exception("Unsupported Device Configuration!");
@@ -102,7 +102,7 @@ namespace PerformanceWork.OptimizedNumerics
             if (this.Config != value.Config)
                 throw new Exception("Device Configuration is different!");
 
-            if (this.Config == DeviceConfig.Host_Float32)
+            if (this.Config == TensorConfig.Host_Float32)
                     VectorizationFloat.ElementWiseAddAVX((float*)this.Array, (float*)value.Array, (float*)this.Array, this.Shape.TotalSize);
             else
                 throw new Exception("Unsupported Device Configuration!");
@@ -111,7 +111,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void MultiplyByFloat(float x)
         {
-            if (this.Config == DeviceConfig.Host_Float32)
+            if (this.Config == TensorConfig.Host_Float32)
                     VectorizationFloat.ElementWiseMultiplyAVX((float*)this.Array, x, (float*)this.Array, this.Shape.TotalSize);
             else
                 throw new Exception("Unsupported Device Configuration!");
@@ -120,7 +120,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void DivideByFloat(float x)
         {
-            if (this.Config == DeviceConfig.Host_Float32)
+            if (this.Config == TensorConfig.Host_Float32)
                     VectorizationFloat.ElementWiseMultiplyAVX((float*)this.Array, 1 / x, (float*)this.Array, this.Shape.TotalSize);
             else
                 throw new Exception("Unsupported Device Configuration!");
@@ -129,7 +129,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor Clone(Tensor m)
         {
-            if (m.Config == DeviceConfig.Host_Float32)
+            if (m.Config == TensorConfig.Host_Float32)
             {
                 Tensor n = new Tensor(m.Shape.Clone(), m.Config);
                 VectorizationFloat.ElementWiseAssignAVX((float*)n.Array, (float*)m.Array, n.Shape.TotalSize);
@@ -158,7 +158,7 @@ namespace PerformanceWork.OptimizedNumerics
             if (!ArrayReturned)
             {
                 ArrayReturned = true;
-                TensorPool.GetDevicePool(this.Config).Return(Array, Shape.TotalSize);
+                TensorPool.GetDevicePool(this.Config.Device).Return(Array, Shape.TotalSize, this.Config.GetUnitLength());
                 if (!gc)
                     GC.SuppressFinalize(this);
                 DisposedCount++;
@@ -174,7 +174,7 @@ namespace PerformanceWork.OptimizedNumerics
 
         public override string ToString()
         {
-            if (this.Config == DeviceConfig.Host_Float32)
+            if (this.Config == TensorConfig.Host_Float32)
             {
                 StringBuilder a = new StringBuilder();
                 float* ptr = (float*)Array;
@@ -214,10 +214,10 @@ namespace PerformanceWork.OptimizedNumerics
         /// <param name="s">The shape of the identity tensor.</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public unsafe static Tensor DerivativeIdentity(Shape s, DeviceConfig deviceConfig)
+        public unsafe static Tensor DerivativeIdentity(Shape s, TensorConfig deviceConfig)
         {
             Tensor t = new Tensor(s.Clone(), deviceConfig);
-            if (t.Config == DeviceConfig.Host_Float32)
+            if (t.Config == TensorConfig.Host_Float32)
                 t.SetFloat(1.0f);
             else
                 throw new Exception("Unsupported Device Configuration!");
@@ -248,12 +248,12 @@ namespace PerformanceWork.OptimizedNumerics
         /// <param name="s"></param>
         /// <param name="dev"></param>
         /// <returns></returns>
-        public static unsafe Tensor LoadArrayToDisposedTensor(Array data, Shape s, DeviceConfig dev)
+        public static unsafe Tensor LoadArrayToDisposedTensor(Array data, Shape s, TensorConfig dev)
         {
             if (data.LongLength != s.TotalSize)
                 throw new Exception("Cant convert data into the given shape");
 
-            if (dev.NumType == DeviceConfig.NumberType.CPUFloat32)
+            if (dev.NumType == NumberType.Float32)
             {
                 if (data is float[])
                     fixed (float* ptr = (float[])data)
@@ -290,7 +290,7 @@ namespace PerformanceWork.OptimizedNumerics
             if (a.Config != b.Config)
                 throw new Exception("Device Configurations are different!");
 
-            if (a.Config == DeviceConfig.Host_Float32)
+            if (a.Config == TensorConfig.Host_Float32)
             {
                 Shape sc = new Shape(a.Shape[0], b.Shape[1]);
                 Tensor c = new Tensor(sc, a.Config);
@@ -313,7 +313,7 @@ namespace PerformanceWork.OptimizedNumerics
 
             Tensor res = new Tensor(t1.Shape.Clone(), t1.Config);
 
-            if (t1.Config == DeviceConfig.Host_Float32)
+            if (t1.Config == TensorConfig.Host_Float32)
             {
                 VectorizationFloat.ElementWiseAddAVX((float*)t1.Array, (float*)t2.Array, (float*)res.Array, t1.Shape.TotalSize);
             }
@@ -335,7 +335,7 @@ namespace PerformanceWork.OptimizedNumerics
 
             Tensor res = new Tensor(t1.Shape.Clone(), t1.Config);
 
-            if (t1.Config == DeviceConfig.Host_Float32)
+            if (t1.Config == TensorConfig.Host_Float32)
             {
                 VectorizationFloat.ElementWiseSubtractAVX((float*)t1.Array, (float*)t2.Array, (float*)res.Array, t1.Shape.TotalSize);
             }

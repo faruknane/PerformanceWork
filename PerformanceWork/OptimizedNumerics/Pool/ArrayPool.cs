@@ -8,6 +8,9 @@ using System.Text;
 
 namespace PerformanceWork.OptimizedNumerics.Pool
 {
+    /// <summary>
+    /// Thread Safe Array Pool
+    /// </summary>
     public unsafe class ArrayPool : IDisposable
     {
         public unsafe struct PointerArray
@@ -20,16 +23,16 @@ namespace PerformanceWork.OptimizedNumerics.Pool
 
         public Stack<PointerArray>[] Stacks;
 
-        public DeviceConfig DevConfig;
+        public Device Device;
 
         private readonly object Mutex = new object();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public ArrayPool(int MaxLength, DeviceConfig devconf)
+        public ArrayPool(int MaxLength, Device dev)
         {
             this.MaxLength = MaxLength;
             Stacks = new Stack<PointerArray>[MaxLength];
-            DevConfig = devconf;
+            Device = dev;
         }
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -45,6 +48,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
             {
                 UnreturnedArrayCount++;
 
+                length *= unitlength;
                 if (Stacks[length] != null && Stacks[length].Count > 0)
                 {
                     PointerArray sr = Stacks[length].Pop();
@@ -52,15 +56,15 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                 }
                 else
                 {
-                    if (this.DevConfig.DevType == DeviceConfig.DeviceType.NvidiaGPU)
+                    if (this.Device.Type == DeviceType.NvidiaGPU)
                     {
-                        GC.AddMemoryPressure(length * unitlength);
-                        return NCuda.Allocate(length * unitlength, DevConfig.DeviceID);
+                        GC.AddMemoryPressure(length);
+                        return NCuda.Allocate(length, Device.ID);
                     }
-                    else if (this.DevConfig.DevType == DeviceConfig.DeviceType.Host)
+                    else if (this.Device.Type == DeviceType.Host)
                     {
-                        GC.AddMemoryPressure(length * unitlength);
-                        return MKL.MKL_malloc(length * unitlength, 32);
+                        GC.AddMemoryPressure(length);
+                        return MKL.MKL_malloc(length, 32);
                     }
                     else
                         throw new Exception("Uknown Device in ArrayPool!");
@@ -69,10 +73,11 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public void Return(void* arr, int length)
+        public void Return(void* arr, int length, int unitlength)
         {
             lock (Mutex)
             {
+                length *= unitlength;
                 PointerArray sr = new PointerArray();
                 sr.Ptr = arr;
 
@@ -86,7 +91,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         {
             lock (Mutex)
             {
-                if (this.DevConfig.DevType == DeviceConfig.DeviceType.NvidiaGPU)
+                if (this.Device.Type == DeviceType.NvidiaGPU)
                 {
                     for (int i = 0; i < Stacks.Length; i++)
                     {
@@ -95,13 +100,13 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                         {
                             foreach (var arr in s)
                             {
-                                NCuda.Free(arr.Ptr, DevConfig.DeviceID);
+                                NCuda.Free(arr.Ptr, this.Device.ID);
                             }
                             s.Clear();
                         }
                     }
                 }
-                else if (this.DevConfig.DevType == DeviceConfig.DeviceType.Host)
+                else if (this.Device.Type == DeviceType.Host)
                 {
                     for (int i = 0; i < Stacks.Length; i++)
                     {

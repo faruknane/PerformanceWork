@@ -23,7 +23,7 @@ namespace PerformanceWorkTests
             for (int i = 0; i < 100; i++)
             {
                 //4mb
-                Tensor a = new Tensor(new Shape(1024 * 1024), DeviceConfig.Host_Float32);
+                Tensor a = new Tensor(new Shape(1024 * 1024), TensorConfig.Host_Float32);
                 a.Dispose();
             }
         }
@@ -32,7 +32,7 @@ namespace PerformanceWorkTests
         {
             f();
             Console.WriteLine(Tensor.DisposedCount);
-            TensorPool.GetDevicePool(DeviceConfig.Host_Unkown).EraseAll();
+            TensorPool.GetDevicePool(Device.Host).EraseAll();
             Console.WriteLine(Tensor.DisposedCount);
             Thread.Sleep(3000);
         }

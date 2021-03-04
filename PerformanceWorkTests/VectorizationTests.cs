@@ -74,7 +74,7 @@ namespace PerformanceWorkTests
         {
             float[] v1 = { 1, 2, 3 };
             float v2 = 2;
-            float[] res = new float[3];
+            float[] res = new float[v1.Length];
             fixed (float* a = v1, y = res)
                 VectorizationFloat.ElementWiseAddAVX(a, v2, y, res.Length);
             float[] res2 = { 3, 4, 5 };
@@ -87,7 +87,7 @@ namespace PerformanceWorkTests
         public unsafe void MakeNegative()
         {
             float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3 };
-            float[] res = new float[3];
+            float[] res = new float[v1.Length];
             fixed (float* a = v1, y = res)
                 VectorizationFloat.MakeNegativeAVX(a, y, res.Length);
             float[] res2 = { -1, -2, -3, -1, -2, -3, -1, -2, -3, -1, -2, -3 };

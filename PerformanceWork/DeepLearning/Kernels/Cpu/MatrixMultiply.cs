@@ -14,7 +14,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor MatrixMultiplyFloat_GetGradient_0(Tensor s, Tensor B, Shape thisShape, Shape term0, Shape term1)
         {
-            var combinedleft = new Tensor(term0.Clone(), DeviceConfig.Host_Float32);
+            var combinedleft = new Tensor(term0.Clone(), TensorConfig.Host_Float32);
             float* ptr_left = (float*)combinedleft.Array, ptr_s = (float*)s.Array, ptr_b = (float*)B.Array;
             VectorizationFloat.TransposeBandMatrixMultiply(ptr_s, thisShape[0], thisShape[1], ptr_b, B.Shape[0], B.Shape[1], ptr_left);
             return combinedleft;
@@ -30,7 +30,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor MatrixMultiplyFloat_GetGradient_1(Tensor s, Tensor A, Shape thisShape, Shape term0, Shape term1)
         {
-            var combinedright = new Tensor(term1.Clone(), DeviceConfig.Host_Float32);
+            var combinedright = new Tensor(term1.Clone(), TensorConfig.Host_Float32);
             float* ptr_right = (float*)combinedright.Array, ptr_a = (float*)A.Array, ptr_s = (float*)s.Array;
             VectorizationFloat.TransposeAandMatrixMultiply(ptr_a, A.Shape[0], A.Shape[1], ptr_s, thisShape[0], thisShape[1], ptr_right);
             return combinedright;

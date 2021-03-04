@@ -9,17 +9,17 @@ namespace PerformanceWork.OptimizedNumerics.Pool
 {
     public static class TensorPool
     {
-        public static ArrayPool Host = new ArrayPool(30000000, DeviceConfig.Host_Unkown);
+        public static ArrayPool Host = new ArrayPool(30000000, Device.Host);
 
         public static List<ArrayPool> Gpu = new List<ArrayPool>();
 
         
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static ArrayPool GetDevicePool(DeviceConfig device)
+        public static ArrayPool GetDevicePool(Device device)
         {
-            if (device.DevType == DeviceConfig.DeviceType.NvidiaGPU)
-                return GetNvidiaGpuPool(device.DeviceID);
-            else if (device.DevType == DeviceConfig.DeviceType.Host)
+            if (device.Type == DeviceType.NvidiaGPU)
+                return GetNvidiaGpuPool(device.ID);
+            else if (device.Type == DeviceType.Host)
                 return Host;
             else
                 throw new Exception("Unsupported Device!");
@@ -29,7 +29,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         public static ArrayPool GetNvidiaGpuPool(int deviceId)
         {
             for (int i = Gpu.Count; i <= deviceId; i++)
-                Gpu.Add(new ArrayPool(30000000, DeviceConfig.NvidiaGPU_Unknown));
+                Gpu.Add(new ArrayPool(30000000, Device.Nvidia(Gpu.Count - 1)));
             return Gpu[deviceId];
         }
     }

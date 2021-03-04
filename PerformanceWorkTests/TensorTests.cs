@@ -14,8 +14,8 @@ namespace PerformanceWorkTests
         [TestMethod]
         public void SumTensorsCPU()
         {
-            Tensor t = new Tensor((3, 5), DeviceConfig.Host_Float32);
-            Tensor t2 = new Tensor((3, 5), DeviceConfig.Host_Float32);
+            Tensor t = new Tensor((3, 5), TensorConfig.Host_Float32);
+            Tensor t2 = new Tensor((3, 5), TensorConfig.Host_Float32);
             unsafe
             {
                 for (int i = 0; i < t.Shape[0]; i++)
@@ -49,9 +49,9 @@ namespace PerformanceWorkTests
                 int m = r.Next(2, 30);
                 int p = r.Next(2, 30);
 
-                Tensor a = new Tensor((n, m), DeviceConfig.Host_Float32);
-                Tensor b = new Tensor((m, p), DeviceConfig.Host_Float32);
-                Tensor res = new Tensor((n, p), DeviceConfig.Host_Float32);
+                Tensor a = new Tensor((n, m), TensorConfig.Host_Float32);
+                Tensor b = new Tensor((m, p), TensorConfig.Host_Float32);
+                Tensor res = new Tensor((n, p), TensorConfig.Host_Float32);
 
                 res.SetFloat(0);
 
@@ -119,8 +119,8 @@ namespace PerformanceWorkTests
 
             fixed (float* ptr_v = vdata, ptr_grad = graddata)
             {
-                Tensor v = Tensor.LoadArrayToDisposedTensor(vdata, new Shape(vdata.Length), DeviceConfig.Host_Float32);
-                Tensor grad = Tensor.LoadArrayToDisposedTensor(graddata, new Shape(graddata.Length), DeviceConfig.Host_Float32);
+                Tensor v = Tensor.LoadArrayToDisposedTensor(vdata, new Shape(vdata.Length), TensorConfig.Host_Float32);
+                Tensor grad = Tensor.LoadArrayToDisposedTensor(graddata, new Shape(graddata.Length), TensorConfig.Host_Float32);
 
                 Tensor reluv = CpuKernels.ReluFloat(v);
                 Tensor relugrad = CpuKernels.ReluFloat_GetGradient_0(grad, v);

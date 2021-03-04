@@ -5,6 +5,10 @@ using System.Text;
 
 namespace PerformanceWork.OptimizedNumerics.Pool
 {
+    /// <summary>
+    /// Thread Safe Object Pool
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public unsafe class ObjectPool<T> : IDisposable
     {
         public int ReturnedCount { get => Stack.Count; }
