@@ -12,9 +12,16 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
     public unsafe partial class CpuKernels
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor ShrinkFloat(Tensor v, Shape thisShape, Shape term0, Shape Divisor)
+        public static Tensor ShrinkFloat32(Tensor v, Shape thisShape, Shape term0, Shape Divisor)
         {
             Tensor res = new Tensor(thisShape.Clone(), TensorConfig.Host_Float32);
+            ShrinkFloat32(res, v, thisShape, term0, Divisor);
+            return res;
+        } 
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static void ShrinkFloat32(Tensor res, Tensor v, Shape thisShape, Shape term0, Shape Divisor)
+        {
             res.SetFloat(0);
 
             float* ptrres = (float*)res.Array;
@@ -41,8 +48,6 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
                 ptrres[indexs] += ptrv[h];
                 iterator.Indices[iterator.N - 1]++;
             }
-
-            return res;
         }
     }
 }

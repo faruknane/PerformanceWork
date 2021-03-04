@@ -11,15 +11,22 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
     public unsafe partial class CpuKernels
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor SoftmaxFloat(Tensor v)
+        public static Tensor SoftmaxFloat32(Tensor v)
         {
-            Tensor sm = new Tensor(v.Shape.Clone(), TensorConfig.Host_Float32);
-            VectorizationFloat.Softmax((float*)v.Array, (float*)sm.Array, v.Shape[v.Shape.N - 1], v.Shape.TotalSize);
-            return sm;
+            Tensor res = new Tensor(v.Shape.Clone(), TensorConfig.Host_Float32);
+            SoftmaxFloat32(res, v);
+            return res;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor SoftmaxFloat_GetGradient_0(Tensor s, Tensor sm)
+        public static void SoftmaxFloat32(Tensor res, Tensor v)
+        {
+            VectorizationFloat.Softmax((float*)v.Array, (float*)res.Array, v.Shape[v.Shape.N - 1], v.Shape.TotalSize);
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static Tensor SoftmaxFloat32_GetGradient_0(Tensor s, Tensor sm)
         {
             Tensor combined = Tensor.Clone(s);
             

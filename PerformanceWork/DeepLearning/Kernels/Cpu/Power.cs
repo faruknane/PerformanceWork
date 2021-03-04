@@ -17,12 +17,10 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         /// <param name="res"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor Power2Float_GetGradient_0(Tensor s, Tensor res)
+        public static Tensor Power2Float32_GetGradient_0(Tensor s, Tensor res)
         {
             Tensor combined = new Tensor(s.Shape.Clone(), TensorConfig.Host_Float32);
-            float* ptr_combined = (float*)combined.Array;
-            float* ptr_s = (float*)s.Array;
-            VectorizationFloat.ElementWise_A_MultipliedBy_B_MultipliedBy_C((float*)res.Array, ptr_s, 2, ptr_combined, res.Shape.TotalSize);
+            Power2Float32_GetGradient_0(combined, s, res);
             return combined;
         }
 
@@ -33,7 +31,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         /// <param name="res"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static void Power2Float_GetGradient_0(Tensor combined, Tensor s, Tensor res)
+        public static void Power2Float32_GetGradient_0(Tensor combined, Tensor s, Tensor res)
         {
             float* ptr_combined = (float*)combined.Array;
             float* ptr_s = (float*)s.Array;
@@ -43,14 +41,14 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         /// <summary>
         /// Calculates the power
         /// </summary>
-        /// <param name="res"></param>
+        /// <param name="input"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor Power2Float(Tensor res)
+        public static Tensor Power2Float32(Tensor input)
         {
-            Tensor m = new Tensor(res.Shape.Clone(), TensorConfig.Host_Float32);
-            VectorizationFloat.ElementWiseSquareAVX((float*)res.Array, (float*)m.Array, m.Shape.TotalSize);
-            return m;
+            Tensor res = new Tensor(input.Shape.Clone(), TensorConfig.Host_Float32);
+            Power2Float32(res, input);
+            return res;
         }
 
         /// <summary>
@@ -59,7 +57,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         /// <param name="input"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static void Power2Float(Tensor res, Tensor input)
+        public static void Power2Float32(Tensor res, Tensor input)
         {
             VectorizationFloat.ElementWiseSquareAVX((float*)input.Array, (float*)res.Array, res.Shape.TotalSize);
         }
