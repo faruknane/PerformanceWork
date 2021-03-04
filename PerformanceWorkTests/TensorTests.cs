@@ -68,7 +68,7 @@ namespace PerformanceWorkTests
                         for (int k = 0; k < b.Shape[1]; k++)
                             ((float*)res.Array)[res.Shape.Index(i, k)] += ((float*)a.Array)[a.Shape.Index(i, j)] * ((float*)b.Array)[b.Shape.Index(j, k)];
 
-                Tensor c = PerformanceWork.DeepLearning.Kernels.Cpu.CpuKernels.MatrixMultiplyFloat(a, b);
+                Tensor c = PerformanceWork.DeepLearning.Kernels.Cpu.CpuKernels.MatrixMultiplyFloat32(a, b);
 
                 if (!VectorizationFloat.ElementWiseIsEqualsAVX((float*)res.Array, (float*)c.Array, res.Shape.TotalSize))
                 {
@@ -122,8 +122,8 @@ namespace PerformanceWorkTests
                 Tensor v = Tensor.LoadArrayToDisposedTensor(vdata, new Shape(vdata.Length), TensorConfig.Host_Float32);
                 Tensor grad = Tensor.LoadArrayToDisposedTensor(graddata, new Shape(graddata.Length), TensorConfig.Host_Float32);
 
-                Tensor reluv = CpuKernels.ReluFloat(v);
-                Tensor relugrad = CpuKernels.ReluFloat_GetGradient_0(grad, v);
+                Tensor reluv = CpuKernels.ReluFloat32(v);
+                Tensor relugrad = CpuKernels.ReluFloat32_GetGradient_0(grad, v);
 
                 Console.WriteLine(v);
                 Console.WriteLine(grad);
