@@ -303,10 +303,18 @@ namespace PerformanceWorkTests
             //Assert.IsTrue(d);
         }
 
-
         public bool ArrayEqual(float[] v1, float[] v2)
         {
-            return VectorizationFloat.ElementWiseIsEqualsAVX(v1,v2,v1.Length);
+            return VectorizationFloat.ElementWiseIsEqualsAVX(v1, v2, v1.Length);
+        }
+        public unsafe bool ArrayEqual(float* v1, float* v2, int length)
+        {
+            return VectorizationFloat.ElementWiseIsEqualsAVX(v1, v2, length);
+        }
+        public unsafe bool ArrayEqual(float[] v1, float* v2, int length)
+        {
+            fixed(float* ptr = v1)
+                return VectorizationFloat.ElementWiseIsEqualsAVX(ptr, v2, length);
         }
     }
 }
