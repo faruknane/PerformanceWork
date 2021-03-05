@@ -313,7 +313,7 @@ namespace PerformanceWorkTests
         }
         public unsafe bool ArrayEqual(float[] v1, float* v2, int length)
         {
-            fixed(float* ptr = v1)
+            fixed (float* ptr = v1)
                 return VectorizationFloat.ElementWiseIsEqualsAVX(ptr, v2, length);
         }
     }
