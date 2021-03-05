@@ -19,18 +19,15 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         /// <param name="tensors">Tensors to be summed</param>
         /// <returns>The sum of tensors</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor AddFloat(params Tensor[] tensors)
+        public static Tensor AddFloat32(params Tensor[] tensors)
         {
             Tensor res = new Tensor(tensors[0].Shape.Clone(), TensorConfig.Host_Float32);
-            VectorizationFloat.ElementWiseAddAVX((float*)tensors[0].Array, (float*)tensors[1].Array, (float*)res.Array, res.Shape.TotalSize);
-
-            for (int i = 2; i < tensors.Length; i++) //todo add Optimize here. 
-                VectorizationFloat.ElementWiseAddAVX((float*)res.Array, (float*)tensors[i].Array, (float*)res.Array, res.Shape.TotalSize);
+            AddFloat32(res, tensors); 
             return res;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static void AddFloat(Tensor res, params Tensor[] tensors)
+        public static void AddFloat32(Tensor res, params Tensor[] tensors)
         {
             if (res.Config != tensors[0].Config)
                 throw new Exception("Tensor Configs are not compatible!");
