@@ -4,6 +4,32 @@ using System;
 
 namespace PerformanceWorkTests
 {
+    
+    [TestClass]
+    public class CpuTests
+    {
+        [TestMethod]
+        public void Add()
+        {
+            int[] dims33 = { 3, 3 };
+            int[] dims44 = { 4, 4 };
+            Tensor expected = new Tensor(new Shape(dims33), PerformanceWork.DeviceConfig.Host_Float32);
+            expected.SetFloat(15);
+            Tensor calculated = new Tensor(new Shape(dims33), PerformanceWork.DeviceConfig.Host_Float32);
+            calculated.SetFloat(0);
+            Tensor[] inputs = new Tensor[5];
+            for (int i = 0; i < 5; i++)
+            {
+                inputs[i] = new Tensor(new Shape(dims33), PerformanceWork.DeviceConfig.Host_Float32);
+                inputs[i].SetFloat(3);
+            }
+            PerformanceWork.DeepLearning.Kernels.Cpu.CpuKernels.AddFloat(calculated, inputs);
+            Assert.AreEqual(expected.ToString(), calculated.ToString());
+            Tensor calculated2 = PerformanceWork.DeepLearning.Kernels.Cpu.CpuKernels.AddFloat(inputs);
+            Assert.AreEqual(expected.ToString(), calculated2.ToString());
+        }
+    }
+
     [TestClass]
     public class VectorizationTests
     {
