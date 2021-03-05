@@ -1,8 +1,11 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PerformanceWork;
 using PerformanceWork.OptimizedNumerics;
 using System;
 
-namespace PerformanceWorkTests
+using PerformanceWork.DeepLearning.Kernels.Cpu;
+
+namespace PerformanceWorkTest
 {
     
     [TestClass]
@@ -11,22 +14,61 @@ namespace PerformanceWorkTests
         [TestMethod]
         public void Add()
         {
-            int[] dims33 = { 3, 3 };
-            int[] dims44 = { 4, 4 };
-            Tensor expected = new Tensor(new Shape(dims33), PerformanceWork.DeviceConfig.Host_Float32);
+            Tensor expected = new Tensor(new Shape(3, 3), TensorConfig.Host_Float32);
             expected.SetFloat(15);
-            Tensor calculated = new Tensor(new Shape(dims33), PerformanceWork.DeviceConfig.Host_Float32);
+            Tensor calculated = new Tensor(new Shape(3, 3), TensorConfig.Host_Float32);
             calculated.SetFloat(0);
             Tensor[] inputs = new Tensor[5];
             for (int i = 0; i < 5; i++)
             {
-                inputs[i] = new Tensor(new Shape(dims33), PerformanceWork.DeviceConfig.Host_Float32);
+                inputs[i] = new Tensor(new Shape(3, 3), TensorConfig.Host_Float32);
                 inputs[i].SetFloat(3);
             }
-            PerformanceWork.DeepLearning.Kernels.Cpu.CpuKernels.AddFloat(calculated, inputs);
+            CpuKernels.AddFloat32(calculated, inputs);
             Assert.AreEqual(expected.ToString(), calculated.ToString());
-            Tensor calculated2 = PerformanceWork.DeepLearning.Kernels.Cpu.CpuKernels.AddFloat(inputs);
+            Tensor calculated2 = CpuKernels.AddFloat32(inputs);
             Assert.AreEqual(expected.ToString(), calculated2.ToString());
+        }
+
+        public (float[], Tensor) CreateRandomTensor(int size = 9)
+        {
+            Random random = new Random();
+            float[] arr = new float[size];
+            for (int i = 0; i < size; i++)
+            {
+                arr[i] = (float)random.NextDouble();
+            }
+            Tensor tensor = Tensor.Clone(Tensor.LoadArrayToDisposedTensor(arr, new Shape(size), TensorConfig.Host_Float32));
+            return (arr, tensor);
+        }
+
+        [TestMethod]
+        public void AddRandom()
+        {
+            int arrSize = 5;
+            int tensorSize = 9;
+
+            // initialize test tensors
+            Tensor expected, calculated;
+            float[] expectedArr = new float[tensorSize];
+            (_, calculated) = CreateRandomTensor(tensorSize);
+            Tensor[] inputs = new Tensor[arrSize];
+            float[][] arrays = new float[arrSize][];
+            for(int i = 0; i < arrSize; i++)
+            {
+                (arrays[i], inputs[i]) = CreateRandomTensor(tensorSize);
+                for(int j=0;j< tensorSize; j++)
+                {
+                    expectedArr[j] += arrays[i][j];
+                }
+            }
+
+            // add tensors
+            expected = Tensor.LoadArrayToDisposedTensor(expectedArr, new Shape(tensorSize), TensorConfig.Host_Float32);
+
+
+            CpuKernels.AddFloat32(calculated, inputs);
+            Assert.AreEqual(expected.ToString(), calculated.ToString());
         }
     }
 
