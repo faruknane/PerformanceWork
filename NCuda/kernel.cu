@@ -2,7 +2,7 @@
 #include "device_launch_parameters.h"
 #include "cuda_runtime.h"
 #include <stdio.h>
-#include <cudnn.h>
+//#include <cudnn.h>
 #include <chrono>
 
 // CUDA runtime
@@ -85,15 +85,6 @@ extern "C" __declspec(dllexport) void NCopyFromGPUToHost(void* src, void* dst, i
 	checkCudaErrors(cudaMemcpy(dst, src, bytesize, cudaMemcpyDeviceToHost));
 }
 
-extern "C" __declspec(dllexport) void NCheckError()
-{
-	checkCudaErrors(cudaGetLastError());
-}
-
-extern "C" __declspec(dllexport) void NDeviceSynchronize()
-{
-	checkCudaErrors(cudaDeviceSynchronize());
-}
 
 const int arraySize = 100000000;
 const float a[arraySize] = { 0.1f, 0.2f, 0.3f, 0.4f, 0.1f };
