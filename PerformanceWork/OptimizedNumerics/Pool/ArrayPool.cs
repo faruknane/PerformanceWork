@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PerformanceWork.NCuda;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -59,7 +60,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                     if (this.Device.Type == DeviceType.NvidiaGPU)
                     {
                         GC.AddMemoryPressure(length);
-                        return NCuda.Allocate(length, Device.ID);
+                        return CudaManagement.Allocate(length, Device.ID);
                     }
                     else if (this.Device.Type == DeviceType.Host)
                     {
@@ -100,7 +101,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                         {
                             foreach (var arr in s)
                             {
-                                NCuda.Free(arr.Ptr, this.Device.ID);
+                                CudaManagement.Free(arr.Ptr);
                             }
                             s.Clear();
                         }

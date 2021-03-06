@@ -42,21 +42,15 @@ using namespace std;
 #define checkCudaErrors2(val) check((val), #val, __FILE__, __LINE__)
 
 
-cudaDeviceProp prop;
-int devid = -1;
-
 extern "C" __declspec(dllexport) void NSetDevice(int gpuid)
 {
-	if (devid != gpuid)
-	{
-		devid = gpuid;
-		checkCudaErrors(cudaGetDeviceProperties(&prop, devid));
-		checkCudaErrors(cudaSetDevice(gpuid));
-	}
+	checkCudaErrors(cudaSetDevice(gpuid));
 }
 
 extern "C" __declspec(dllexport) int NGetDevice()
 {
+	int devid;
+	checkCudaErrors(cudaGetDevice(&devid));
 	return devid;
 }
 
@@ -75,18 +69,13 @@ extern "C" __declspec(dllexport) void NFree(void* arr)
 	checkCudaErrors(cudaFree(arr));
 }
 
-extern "C" __declspec(dllexport) void NCopyFromHostToGPU(void* src, void* dst, int bytesize)
+extern "C" __declspec(dllexport) void NCopyArray(void* src, void* dst, int bytesize)
 {
-	checkCudaErrors(cudaMemcpy(dst, src, bytesize, cudaMemcpyHostToDevice));
-}
-
-extern "C" __declspec(dllexport) void NCopyFromGPUToHost(void* src, void* dst, int bytesize)
-{
-	checkCudaErrors(cudaMemcpy(dst, src, bytesize, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(dst, src, bytesize, cudaMemcpyDefault));
 }
 
 
-const int arraySize = 100000000;
+const int arraySize = 10000000;
 const float a[arraySize] = { 0.1f, 0.2f, 0.3f, 0.4f, 0.1f };
 const float b[arraySize] = { 0, 0, 0, 0, 0 };
 float c[arraySize] = { 1,2,3,4,5 };
@@ -98,29 +87,20 @@ __global__ void addSingleArrays2Kernel(const float* a, const float* b, float* c,
 		c[i] = a[i] + b[i];
 }
 
-inline void addWithCuda(float* a, float* b, float* c, int size, cudaStream_t& stream)
-{
-	int th = prop.maxThreadsPerBlock;
-
-	if (size < th)
-		th = size;
-
-	addSingleArrays2Kernel <<< (size + th - 1) / th, th, 0, stream >>> (a, b, c, size);
-}
 
 void addWithCublas(cublasHandle_t* h, float* c, const float* a, const float* b, unsigned int size);
 
 int main()
 {
 	NSetDevice(0);
-	
+	int devid = NGetDevice();
 	float* dev_a = (float*)NAllocate(arraySize * sizeof(float), devid);
 	float* dev_b = (float*)NAllocate(arraySize * sizeof(float), devid);
 	float* dev_c = (float*)NAllocate(arraySize * sizeof(float), devid);
 	
 	std::chrono::steady_clock::time_point begin3 = std::chrono::steady_clock::now();
-	NCopyFromHostToGPU((void*)a, dev_a, arraySize * sizeof(float));
-	NCopyFromHostToGPU((void*)b, dev_b, arraySize * sizeof(float));
+	NCopyArray((void*)a, dev_a, arraySize * sizeof(float));
+	NCopyArray((void*)b, dev_b, arraySize * sizeof(float));
 	cout << "bitti1" << endl;
 	std::chrono::steady_clock::time_point end3 = std::chrono::steady_clock::now();
 	std::cout << "Time difference1 = " << std::chrono::duration_cast<std::chrono::milliseconds>(end3 - begin3).count() << "ms" << std::endl;
@@ -132,7 +112,6 @@ int main()
 	cudaStreamCreate(&stream1);
 	for (int i = 0; i < 1; i++)
 	{
-		addWithCuda(dev_a, dev_b, dev_c, arraySize, stream1);
 		cudaStreamSynchronize(stream1);
 	}
 	cout << "bitti2" << endl;
@@ -143,7 +122,6 @@ int main()
 	std::chrono::steady_clock::time_point begin6 = std::chrono::steady_clock::now();
 	for (int i = 0; i < 1; i++)
 	{
-		addWithCuda(dev_c, dev_a, dev_c, arraySize, stream1);
 		cudaStreamSynchronize(stream1);
 	}
 	cout << "bitti6" << endl;
@@ -153,7 +131,7 @@ int main()
 
 
 	std::chrono::steady_clock::time_point begin2 = std::chrono::steady_clock::now();
-	NCopyFromGPUToHost(dev_c, c, arraySize * sizeof(float));
+	NCopyArray(dev_c, c, arraySize * sizeof(float));
 	printf("{1,2,3,4,5} + {10,20,30,40,50} = {%f,%f,%f,%f,%f}\n",
 		c[0], c[1], c[2], c[3], c[4]);
 	

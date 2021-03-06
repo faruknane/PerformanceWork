@@ -57,6 +57,8 @@ namespace PerformanceWork
         public static TensorConfig Host_Unkown = new TensorConfig(Device.Host, NumberType.Uknown);
         public static TensorConfig NvidiaGPU_Unkown = new TensorConfig(Device.Nvidia(0), NumberType.Uknown);
 
+        public static TensorConfig NvidiaGPU_Float32 = new TensorConfig(Device.Nvidia(0), NumberType.Float32);
+
         public static TensorConfig Host_Float64 = new TensorConfig(Device.Host, NumberType.Float64);
         public static TensorConfig Host_Float32 = new TensorConfig(Device.Host, NumberType.Float32);
         public static TensorConfig Host_Int32 = new TensorConfig(Device.Host, NumberType.Int32);

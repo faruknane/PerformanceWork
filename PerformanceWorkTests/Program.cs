@@ -23,7 +23,7 @@ namespace PerformanceWorkTests
             for (int i = 0; i < 100; i++)
             {
                 //4mb
-                Tensor a = new Tensor(new Shape(1024 * 1024), TensorConfig.Host_Float32);
+                Tensor a = new Tensor(new Shape(1024 * 1024), TensorConfig.NvidiaGPU_Unkown);
                 a.Dispose();
             }
         }
@@ -33,6 +33,7 @@ namespace PerformanceWorkTests
             f();
             Console.WriteLine(Tensor.DisposedCount);
             TensorPool.GetDevicePool(Device.Host).EraseAll();
+            TensorPool.GetDevicePool(Device.Nvidia(0)).EraseAll();
             Console.WriteLine(Tensor.DisposedCount);
             Thread.Sleep(3000);
         }

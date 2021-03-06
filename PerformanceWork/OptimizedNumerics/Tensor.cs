@@ -127,19 +127,6 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor Clone(Tensor m)
-        {
-            if (m.Config == TensorConfig.Host_Float32)
-            {
-                Tensor n = new Tensor(m.Shape.Clone(), m.Config);
-                VectorizationFloat.ElementWiseAssignAVX((float*)n.Array, (float*)m.Array, n.Shape.TotalSize);
-                return n;
-            }
-            else
-                throw new Exception("Unsupported Device Configuration!");
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void Dispose()
         {
             Dispose(false);
@@ -174,27 +161,29 @@ namespace PerformanceWork.OptimizedNumerics
 
         public override string ToString()
         {
-            if (this.Config == TensorConfig.Host_Float32)
+            static string ptrToString(Tensor x)
             {
                 StringBuilder a = new StringBuilder();
-                float* ptr = (float*)Array;
+                float* ptr = (float*)x.Array;
 
-                if (this.Shape.N == 2)
+                if (x.Shape.N == 2)
                 {
                     a.Append("[");
-                    for (int i = 0; i < Shape[0]; i++)
+                    for (int i = 0; i < x.Shape[0]; i++)
                     {
                         a.Append("[");
-                        for (int j = 0; j < Shape[1]; j++)
-                            a.Append($"{ptr[Shape.Index(i, j)]}" + (j == Shape[1] - 1 ? "" : ", "));
+                        for (int j = 0; j < x.Shape[1]; j++)
+                            a.Append($"{ptr[x.Shape.Index(i, j)]}" + (j == x.Shape[1] - 1 ? "" : ", "));
                         a.Append("]");
                     }
                     a.Append("]");
                 }
                 else
                 {
-                    for (int i = 0; i < Shape.TotalSize; i++)
-                        a.Append(ptr[i] + ", ");
+                    a.Append("[");
+                    for (int i = 0; i < x.Shape[0]; i++)
+                        a.Append($"{ptr[x.Shape.Index(i)]}" + (i == x.Shape[0] - 1 ? "" : ", "));
+                    a.Append("]");
                 }
 
                 string res = a.ToString();
@@ -202,11 +191,31 @@ namespace PerformanceWork.OptimizedNumerics
 
                 return res;
             }
+            if (this.Config == TensorConfig.Host_Float32)
+                return ptrToString(this);
+            else if(this.Config == TensorConfig.NvidiaGPU_Float32)
+            {
+                throw new Exception("Unsupported Tensor Configuration!");
+                return ptrToString(this);
+            }
             else
-                throw new Exception("Unsupported Device Configuration!");
+                throw new Exception("Unsupported Tensor Configuration!");
         }
 
         #region Static Methods
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static Tensor Clone(Tensor m)
+        {
+            if (m.Config == TensorConfig.Host_Float32)
+            {
+                Tensor n = new Tensor(m.Shape.Clone(), m.Config);
+                VectorizationFloat.ElementWiseAssignAVX((float*)n.Array, (float*)m.Array, n.Shape.TotalSize);
+                return n;
+            }
+            else
+                throw new Exception("Unsupported Device Configuration!");
+        }
 
         /// <summary>
         /// Creates an Identity Tensor using the double of the shape.
