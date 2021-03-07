@@ -165,7 +165,7 @@ namespace PerformanceWorkTests
             Tensor a = Tensor.LoadArrayToDisposedTensor(f, new Shape(size), TensorConfig.NvidiaGPU_Float32);
             Tensor b = Tensor.CopyTo(a, Device.Host);
             //Console.WriteLine(b);
-            b.Dispose();
+            b.Dispose(); 
         }
 
 
