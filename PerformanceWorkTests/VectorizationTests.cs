@@ -11,6 +11,18 @@ namespace PerformanceWorkTest
     [TestClass]
     public class CpuTests
     {
+        public (float[], Tensor) CreateRandomTensor(int size = 9)
+        {
+            Random random = new Random();
+            float[] arr = new float[size];
+            for (int i = 0; i < size; i++)
+            {
+                arr[i] = (float)random.NextDouble();
+            }
+            Tensor tensor = Tensor.Clone(Tensor.ToDisposedTensor(arr, new Shape(size), NumberType.Float32));
+            return (arr, tensor);
+        }
+
         [TestMethod]
         public void Add()
         {
@@ -28,18 +40,6 @@ namespace PerformanceWorkTest
             Assert.AreEqual(expected.ToString(), calculated.ToString());
             Tensor calculated2 = CpuKernels.AddFloat32(inputs);
             Assert.AreEqual(expected.ToString(), calculated2.ToString());
-        }
-
-        public (float[], Tensor) CreateRandomTensor(int size = 9)
-        {
-            Random random = new Random();
-            float[] arr = new float[size];
-            for (int i = 0; i < size; i++)
-            {
-                arr[i] = (float)random.NextDouble();
-            }
-            Tensor tensor = Tensor.Clone(Tensor.ToDisposedTensor(arr, new Shape(size), NumberType.Float32));
-            return (arr, tensor);
         }
 
         [TestMethod]
@@ -68,7 +68,31 @@ namespace PerformanceWorkTest
 
 
             CpuKernels.AddFloat32(calculated, inputs);
-            Assert.AreEqual(expected.ToString(), calculated.ToString());
+
+            Console.WriteLine(calculated.ToString());
+            Console.WriteLine(expected.ToString());
+
+            Assert.AreEqual(calculated.ToString(), expected.ToString());
+        }
+
+        [TestMethod]
+        public void MultiplyRandom()
+        {
+            Tensor m1, m2, calculated, result;
+            float[] arr1, arr2, arr_expected;
+            (arr1, m1) = CreateRandomTensor();
+            (arr2, m2) = CreateRandomTensor();
+            arr_expected = new float[9];
+
+            VectorizationFloat.ElementWiseMultiplyAVX(arr1, arr2, arr_expected, 9);
+            result = Tensor.ToDisposedTensor(arr_expected, new Shape(3,3), NumberType.Float32);
+
+            calculated = CpuKernels.MultiplyFloat32(m1, m2);
+
+            Console.WriteLine(calculated.ToString());
+            Console.WriteLine(result.ToString());
+
+            Assert.AreEqual(calculated.ToString(), result.ToString());
         }
     }
 
