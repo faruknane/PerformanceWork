@@ -206,6 +206,15 @@ namespace PerformanceWork.OptimizedNumerics
                 throw new Exception("Unsupported Tensor Configuration!");
         }
 
+        public Tensor CopyTo(Device dev)
+        {
+            return Tensor.CopyTo(this, dev);
+        }
+        public Tensor Clone()
+        {
+            return Tensor.Clone(this);
+        }
+
         #region Static Methods
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -311,7 +320,7 @@ namespace PerformanceWork.OptimizedNumerics
                     throw new Exception("Unsupported Array Type");
             }
             else
-                throw new Exception("Unsupported Device Configuration!");
+                throw new Exception("Unsupported NumberType!");
         }
 
         

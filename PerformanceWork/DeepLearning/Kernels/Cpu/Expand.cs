@@ -55,7 +55,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
                 for (int h = 0; h < thisShape.TotalSize; h++)
                 {
 
-                    int indexs = 0;
+                    long indexs = 0;
 
                     for (int i = iterator.N - 1; i >= 0; i--)
                     {
@@ -118,7 +118,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
 
                 for (int h = 0; h < res.Shape.TotalSize; h++)
                 {
-                    int indexs = 0;
+                    long indexs = 0;
 
                     for (int i = iterator.N - 1; i >= 0; i--)
                     {

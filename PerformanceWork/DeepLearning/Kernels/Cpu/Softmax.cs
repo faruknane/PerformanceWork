@@ -30,9 +30,9 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         {
             Tensor combined = Tensor.Clone(s);
             
-            int groupsize = sm.Shape[sm.Shape.N - 1];
+            long groupsize = sm.Shape[sm.Shape.N - 1];
 
-            for (int start = 0; start < combined.Shape.TotalSize; start += groupsize)
+            for (long start = 0; start < combined.Shape.TotalSize; start += groupsize)
             {
                 float averageK = VectorizationFloat.SumOfProduction((float*)s.Array + start, (float*)sm.Array + start, groupsize);
                 VectorizationFloat.ElementWiseAddAVX((float*)combined.Array + start, -averageK, (float*)combined.Array + start, groupsize);

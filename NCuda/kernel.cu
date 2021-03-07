@@ -44,7 +44,7 @@ extern "C" __declspec(dllexport) int NGetDevice()
 	return devid;
 }
 
-extern "C" __declspec(dllexport) void* NAllocate(int bytesize, int gpuid)
+extern "C" __declspec(dllexport) void* NAllocate(size_t bytesize, int gpuid)
 {
 	NSetDevice(gpuid);
 	void* a = 0;
@@ -59,26 +59,25 @@ extern "C" __declspec(dllexport) void NFree(void* arr)
 	CheckCudaError(cudaFree(arr), "Free");
 }
 
-extern "C" __declspec(dllexport) void NCopyArray(void* src, void* dst, int bytesize)
+extern "C" __declspec(dllexport) void NCopyArray(void* src, void* dst, size_t bytesize)
 {
 	CheckCudaError(cudaMemcpy(dst, src, bytesize, cudaMemcpyDefault), "memcpy");
 }
 
 
-const int arraySize = 10000000;
+const size_t arraySize = 10000000;
 const float a[arraySize] = { 0.1f, 0.2f, 0.3f, 0.4f, 0.1f };
 const float b[arraySize] = { 0, 0, 0, 0, 0 };
 float c[arraySize] = { 1,2,3,4,5 };
 
-__global__ void addSingleArrays2Kernel(const float* a, const float* b, float* c, int size)
+__global__ void addSingleArrays2Kernel(const float* a, const float* b, float* c, size_t size)
 {
-	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	size_t i = blockIdx.x * blockDim.x + threadIdx.x;
 	if (i < size)
 		c[i] = a[i] + b[i];
 }
 
 
-void addWithCublas(cublasHandle_t* h, float* c, const float* a, const float* b, unsigned int size);
 
 int main()
 {
@@ -145,13 +144,4 @@ int main()
 	}
 
 	return 0;
-}
-
-
-
-inline void addWithCublas(cublasHandle_t* h ,float* c, const float* a, const float* b, unsigned int size)
-{
-	float alpha = 1;
-	cublasSaxpy(*h, arraySize, &alpha, a, 1, c, 1);
-	cublasSaxpy(*h, arraySize, &alpha, b, 1, c, 1);
 }

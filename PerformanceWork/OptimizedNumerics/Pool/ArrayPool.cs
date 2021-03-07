@@ -19,7 +19,6 @@ namespace PerformanceWork.OptimizedNumerics.Pool
             public void* Ptr;
         }
 
-        public int MaxLength { get; private set; }
         public int UnreturnedArrayCount { get; private set; } = 0;
 
         private Hashtable HashTable;
@@ -29,21 +28,14 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         private readonly object Mutex = new object();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public ArrayPool(int MaxLength, Device dev)
+        public ArrayPool(Device dev)
         {
-            this.MaxLength = MaxLength;
             HashTable = new Hashtable();
             Device = dev;
         }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        //public void* Rent(int length)
-        //{
-        //    return Rent(length, DevConfig.GetByteLength());
-        //}
-
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public void* Rent(int length, int unitlength)
+        public void* Rent(long length, long unitlength)
         {
             lock (Mutex)
             {
@@ -62,6 +54,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                         GC.AddMemoryPressure(length);
                         CudaManagement.SetDevice(this.Device.ID);
                         return CudaManagement.Allocate(length, Device.ID);
+                        //TODO: length should be long edit allocate method
                     }
                     else if (this.Device.Type == DeviceType.Host)
                     {
@@ -75,7 +68,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public void Return(void* arr, int length, int unitlength)
+        public void Return(void* arr, long length, long unitlength)
         {
             lock (Mutex)
             {
@@ -95,7 +88,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
             {
                 foreach (DictionaryEntry item in HashTable)
                 {
-                    Stack<PointerArray> s = item.Key as Stack<PointerArray>;
+                    Stack<PointerArray> s = item.Value as Stack<PointerArray>;
                     if (s != null)
                     {
                         foreach (var arr in s)
@@ -106,7 +99,10 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                                 CudaManagement.Free(arr.Ptr);
                             }
                             else if (this.Device.Type == DeviceType.Host)
+                            {
+                                GC.RemoveMemoryPressure((long)item.Key);
                                 MKL.MKL_free(arr.Ptr);
+                            }
                             else
                                 throw new Exception("Uknown Device in ArrayPool!");
                         }

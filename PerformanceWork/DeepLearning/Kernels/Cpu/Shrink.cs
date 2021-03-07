@@ -34,7 +34,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
 
             for (int h = 0; h < term0.TotalSize; h++)
             {
-                int indexs = 0;
+                long indexs = 0;
 
                 for (int i = iterator.N - 1; i >= 0; i--)
                 {

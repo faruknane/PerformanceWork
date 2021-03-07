@@ -18,26 +18,26 @@ namespace PerformanceWork.OptimizedNumerics
         }
      
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void MatrixMultiply(float* a, int ad1, int ad2, float* b, int bd1, int bd2, float* c)
+        public static unsafe void MatrixMultiply(float* a, long ad1, long ad2, float* b, long bd1, long bd2, float* c)
         {
             MKL.cblas_sgemm(MKL.ORDER.RowMajor, MKL.TRANSPOSE.NoTrans, MKL.TRANSPOSE.NoTrans, ad1, bd2, bd1, 1.0f, a, bd1, b, bd2, 0.0f, c, bd2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void Exponential(float* inp, float* outp, int length)
+        public static unsafe void Exponential(float* inp, float* outp, long length)
         {
             MKL.vmsExp(length, inp, outp, Mode);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void Sigmoid(float* inp, float* outp, int length)
+        public static unsafe void Sigmoid(float* inp, float* outp, long length)
         {
             VectorizationFloat.ElementWiseMultiplyAVX(inp, -1, outp, length);
             MKL.vmsExp(length, outp, outp, Mode);
             VectorizationFloat.ElementWise_A_DividedBy_B_Plus_Vector(1, 1, outp, outp, length);
         }
 
-        public static unsafe void ElementWise_A_DividedBy_B_Plus_Vector(float a, float b, float* vector, float* ptr_res, int length)
+        public static unsafe void ElementWise_A_DividedBy_B_Plus_Vector(float a, float b, float* vector, float* ptr_res, long length)
         {
             float* ptr_vala = &a;
             float* ptr_valb = &b;
@@ -57,18 +57,17 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void TransposeBandMatrixMultiply(float* a, int ad1, int ad2, float* b, int bd1, int bd2, float* c)
+        public static unsafe void TransposeBandMatrixMultiply(float* a, long ad1, long ad2, float* b, long bd1, long bd2, float* c)
         {
             MKL.cblas_sgemm(MKL.ORDER.RowMajor, MKL.TRANSPOSE.NoTrans, MKL.TRANSPOSE.Trans, ad1, bd1, bd2, 1.0f, a, bd2, b, bd2, 0.0f, c, bd1);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void TransposeAandMatrixMultiply(float* a, int ad1, int ad2, float* b, int bd1, int bd2, float* c)
+        public static unsafe void TransposeAandMatrixMultiply(float* a, long ad1, long ad2, float* b, long bd1, long bd2, float* c)
         {
             MKL.cblas_sgemm(MKL.ORDER.RowMajor, MKL.TRANSPOSE.Trans, MKL.TRANSPOSE.NoTrans, ad2, bd2, bd1, 1.0f, a, ad2, b, bd2, 0.0f, c, bd2);
         }
 
-
-        public static unsafe void ElementWise_A_MultipliedBy_B_MultipliedBy_C(float* ptr_a, float* ptr_b, float c, float* ptr_res, int length)
+        public static unsafe void ElementWise_A_MultipliedBy_B_MultipliedBy_C(float* ptr_a, float* ptr_b, float c, float* ptr_res, long length)
         {
             float* ptr_c = &c;
             long l = length / Vector256<float>.Count * Vector256<float>.Count;
@@ -124,7 +123,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
-        public static unsafe void Softmax(float* source, float* res, int groupsize, int length)
+        public static unsafe void Softmax(float* source, float* res, long groupsize, long length)
         {
             for (long j = 0; j < length; j += groupsize)
             {
@@ -136,10 +135,10 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
-        private static unsafe float FindMaxElement(float* source, int length)
+        private static unsafe float FindMaxElement(float* source, long length)
         {
             float maxel = float.MinValue;
-            for (int i = 0; i < length; i++)
+            for (long i = 0; i < length; i++)
             {
                 float val = source[i];
                 if (maxel < val)

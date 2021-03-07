@@ -11,7 +11,7 @@ namespace PerformanceWork.OptimizedNumerics
     {
         #region Working Properly
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void ReluFloatGradientCalculation(float* ptr_grad, float* ptr_v, float* ptr_res, int length)
+        public static unsafe void ReluFloatGradientCalculation(float* ptr_grad, float* ptr_v, float* ptr_res, long length)
         {
             float val = 0;
             float* ptr_val = &val;
@@ -38,7 +38,7 @@ namespace PerformanceWork.OptimizedNumerics
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void FilterNegativeNumbers(float* ptr_a, float* ptr_res, int length)
+        public static unsafe void FilterNegativeNumbers(float* ptr_a, float* ptr_res, long length)
         {
             float val = 0;
             float* ptr_val = &val;
@@ -61,7 +61,7 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void FilterPositiveNumbers(float* ptr_a, float* ptr_res, int length)
+        public static unsafe void FilterPositiveNumbers(float* ptr_a, float* ptr_res, long length)
         {
             float val = 0;
             float* ptr_val = &val;
@@ -82,8 +82,9 @@ namespace PerformanceWork.OptimizedNumerics
                     ptr_res[i] = 0;
             }
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void ElementWiseDivideAVX(float val, float* ptr_a, float* ptr_res, int length)
+        public static unsafe void ElementWiseDivideAVX(float val, float* ptr_a, float* ptr_res, long length)
         {
             float* ptr_val = &val;
             Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_val);
@@ -100,7 +101,7 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void ElementWiseDivideAVX(float* ptr_a, float val, float* ptr_res, int length)
+        public static unsafe void ElementWiseDivideAVX(float* ptr_a, float val, float* ptr_res, long length)
         {
             float* ptr_val = &val;
             Vector256<float> v2 = Avx2.BroadcastScalarToVector256(ptr_val);

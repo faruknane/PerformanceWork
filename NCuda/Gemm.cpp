@@ -9,14 +9,14 @@
 #include <cuda_runtime.h>
 
 
-extern "C" __declspec(dllexport) void MatrixMultiplyFloat32_Handle(void* handle, float* A, float* B, float* C, int dim1, int dim2, int dim3, float alpha, float beta)
+extern "C" __declspec(dllexport) void MatrixMultiplyFloat32_Handle(void* handle, float* A, float* B, float* C, size_t dim1, size_t dim2, size_t dim3, float alpha, float beta)
 {
     CheckCublasError(cublasSgemm(*((cublasHandle_t*)handle), CUBLAS_OP_N, CUBLAS_OP_N, dim3, dim1, dim2,
         &alpha, B,
         dim3, A, dim2, &beta, C, dim3), "cublasSgemm");
 }
 
-extern "C" __declspec(dllexport) void MatrixMultiplyFloat32(float* A, float* B, float* C, int dim1, int dim2, int dim3, float alpha, float beta)
+extern "C" __declspec(dllexport) void MatrixMultiplyFloat32(float* A, float* B, float* C, size_t dim1, size_t dim2, size_t dim3, float alpha, float beta)
 {
     cublasHandle_t handle;
 

@@ -10,15 +10,15 @@
 
 
 template<typename T>
-__global__ void AddVector_Kernel1(T* res, T* a, T* b, int length)
+__global__ void AddVector_Kernel1(T* res, T* a, T* b, size_t length)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t i = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (i < length)
         res[i] = a[i] + b[i];
 }
 
-extern "C" __declspec(dllexport) void AddFloat32(float* res, float* a, float* b, int length)
+extern "C" __declspec(dllexport) void AddFloat32(float* res, float* a, float* b, size_t length)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -27,7 +27,7 @@ extern "C" __declspec(dllexport) void AddFloat32(float* res, float* a, float* b,
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AddVector_Kernel1<float> << <(length + th - 1) / th, th, 0, stream >> > (res, a, b, length);
@@ -35,7 +35,7 @@ extern "C" __declspec(dllexport) void AddFloat32(float* res, float* a, float* b,
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AddFloat64(double* res, double* a, double* b, int length)
+extern "C" __declspec(dllexport) void AddFloat64(double* res, double* a, double* b, size_t length)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -44,7 +44,7 @@ extern "C" __declspec(dllexport) void AddFloat64(double* res, double* a, double*
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AddVector_Kernel1<double> << <(length + th - 1) / th, th, 0, stream >> > (res, a, b, length);
@@ -54,7 +54,7 @@ extern "C" __declspec(dllexport) void AddFloat64(double* res, double* a, double*
 
 
 
-extern "C" __declspec(dllexport) void AddInt16(short* res, short* a, short* b, int length)
+extern "C" __declspec(dllexport) void AddInt16(short* res, short* a, short* b, size_t length)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -63,7 +63,7 @@ extern "C" __declspec(dllexport) void AddInt16(short* res, short* a, short* b, i
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AddVector_Kernel1<short> << <(length + th - 1) / th, th, 0, stream >> > (res, a, b, length);
@@ -72,7 +72,7 @@ extern "C" __declspec(dllexport) void AddInt16(short* res, short* a, short* b, i
 }
 
 
-extern "C" __declspec(dllexport) void AddInt32(int* res, int* a, int* b, int length)
+extern "C" __declspec(dllexport) void AddInt32(int* res, int* a, int* b, size_t length)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -81,7 +81,7 @@ extern "C" __declspec(dllexport) void AddInt32(int* res, int* a, int* b, int len
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AddVector_Kernel1<int> << <(length + th - 1) / th, th, 0, stream >> > (res, a, b, length);
@@ -90,7 +90,7 @@ extern "C" __declspec(dllexport) void AddInt32(int* res, int* a, int* b, int len
 }
 
 
-extern "C" __declspec(dllexport) void AddInt64(long long int* res, long long int* a, long long int* b, int length)
+extern "C" __declspec(dllexport) void AddInt64(long long int* res, long long int* a, long long int* b, size_t length)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -99,7 +99,7 @@ extern "C" __declspec(dllexport) void AddInt64(long long int* res, long long int
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AddVector_Kernel1<long long int> << <(length + th - 1) / th, th, 0, stream >> > (res, a, b, length);
@@ -109,15 +109,15 @@ extern "C" __declspec(dllexport) void AddInt64(long long int* res, long long int
 
 
 template<typename T>
-__global__ void AddVector_Kernel2(T* res, T* a, T* b, int length, T cofa, T cofb, T cofadd)
+__global__ void AddVector_Kernel2(T* res, T* a, T* b, size_t length, T cofa, T cofb, T cofadd)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t i = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (i < length)
         res[i] = a[i] * cofa + b[i] * cofb + cofadd;
 }
 
-extern "C" __declspec(dllexport) void AddFloat32_Coefficients(float* res, float* a, float* b, int length, float cofa, float cofb, float cofadd)
+extern "C" __declspec(dllexport) void AddFloat32_Coefficients(float* res, float* a, float* b, size_t length, float cofa, float cofb, float cofadd)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -126,7 +126,7 @@ extern "C" __declspec(dllexport) void AddFloat32_Coefficients(float* res, float*
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AddVector_Kernel2<float> << <(length + th - 1) / th, th, 0, stream >> > (res, a, b, length, cofa, cofb, cofadd);
@@ -134,7 +134,7 @@ extern "C" __declspec(dllexport) void AddFloat32_Coefficients(float* res, float*
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AddFloat64_Coefficients(double* res, double* a, double* b, int length, double cofa, double cofb, double cofadd)
+extern "C" __declspec(dllexport) void AddFloat64_Coefficients(double* res, double* a, double* b, size_t length, double cofa, double cofb, double cofadd)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -143,7 +143,7 @@ extern "C" __declspec(dllexport) void AddFloat64_Coefficients(double* res, doubl
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AddVector_Kernel2<double> << <(length + th - 1) / th, th, 0, stream >> > (res, a, b, length, cofa, cofb, cofadd);
@@ -151,7 +151,7 @@ extern "C" __declspec(dllexport) void AddFloat64_Coefficients(double* res, doubl
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AddInt16_Coefficients(short* res, short* a, short* b, int length, short cofa, short cofb, short cofadd)
+extern "C" __declspec(dllexport) void AddInt16_Coefficients(short* res, short* a, short* b, size_t length, short cofa, short cofb, short cofadd)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -160,7 +160,7 @@ extern "C" __declspec(dllexport) void AddInt16_Coefficients(short* res, short* a
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AddVector_Kernel2<short> << <(length + th - 1) / th, th, 0, stream >> > (res, a, b, length, cofa, cofb, cofadd);
@@ -168,7 +168,7 @@ extern "C" __declspec(dllexport) void AddInt16_Coefficients(short* res, short* a
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AddInt32_Coefficients(int* res, int* a, int* b, int length, int cofa, int cofb, int cofadd)
+extern "C" __declspec(dllexport) void AddInt32_Coefficients(int* res, int* a, int* b, size_t length, int cofa, int cofb, int cofadd)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -177,7 +177,7 @@ extern "C" __declspec(dllexport) void AddInt32_Coefficients(int* res, int* a, in
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AddVector_Kernel2<int> << <(length + th - 1) / th, th, 0, stream >> > (res, a, b, length, cofa, cofb, cofadd);
@@ -185,7 +185,7 @@ extern "C" __declspec(dllexport) void AddInt32_Coefficients(int* res, int* a, in
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AddInt64_Coefficients(long long int* res, long long int* a, long long int* b, int length, long long int cofa, long long int cofb, long long int cofadd)
+extern "C" __declspec(dllexport) void AddInt64_Coefficients(long long int* res, long long int* a, long long int* b, size_t length, long long int cofa, long long int cofb, long long int cofadd)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -194,7 +194,7 @@ extern "C" __declspec(dllexport) void AddInt64_Coefficients(long long int* res, 
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AddVector_Kernel2<long long int> << <(length + th - 1) / th, th, 0, stream >> > (res, a, b, length, cofa, cofb, cofadd);
@@ -204,14 +204,14 @@ extern "C" __declspec(dllexport) void AddInt64_Coefficients(long long int* res, 
 
 
 template<typename T>
-__global__ void AssignVector_Kernel1(T* res, T* a, int length)
+__global__ void AssignVector_Kernel1(T* res, T* a, size_t length)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < length)
         res[i] = a[i];
 }
 
-extern "C" __declspec(dllexport) void AssignFloat32(float* res, float* a, int length)
+extern "C" __declspec(dllexport) void AssignFloat32(float* res, float* a, size_t length)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -220,7 +220,7 @@ extern "C" __declspec(dllexport) void AssignFloat32(float* res, float* a, int le
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AssignVector_Kernel1<float> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length);
@@ -228,7 +228,7 @@ extern "C" __declspec(dllexport) void AssignFloat32(float* res, float* a, int le
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AssignFloat64(double* res, double* a, int length)
+extern "C" __declspec(dllexport) void AssignFloat64(double* res, double* a, size_t length)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -237,7 +237,7 @@ extern "C" __declspec(dllexport) void AssignFloat64(double* res, double* a, int 
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AssignVector_Kernel1<double> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length);
@@ -245,7 +245,7 @@ extern "C" __declspec(dllexport) void AssignFloat64(double* res, double* a, int 
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AssignInt16(short* res, short* a, int length)
+extern "C" __declspec(dllexport) void AssignInt16(short* res, short* a, size_t length)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -254,7 +254,7 @@ extern "C" __declspec(dllexport) void AssignInt16(short* res, short* a, int leng
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AssignVector_Kernel1<short> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length);
@@ -263,7 +263,7 @@ extern "C" __declspec(dllexport) void AssignInt16(short* res, short* a, int leng
 }
 
 
-extern "C" __declspec(dllexport) void AssignInt32(int* res, int* a, int length)
+extern "C" __declspec(dllexport) void AssignInt32(int* res, int* a, size_t length)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -272,7 +272,7 @@ extern "C" __declspec(dllexport) void AssignInt32(int* res, int* a, int length)
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AssignVector_Kernel1<int> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length);
@@ -281,7 +281,7 @@ extern "C" __declspec(dllexport) void AssignInt32(int* res, int* a, int length)
 }
 
 
-extern "C" __declspec(dllexport) void AssignInt64(long long int* res, long long int* a, int length)
+extern "C" __declspec(dllexport) void AssignInt64(long long int* res, long long int* a, size_t length)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -290,7 +290,7 @@ extern "C" __declspec(dllexport) void AssignInt64(long long int* res, long long 
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AssignVector_Kernel1<long long int> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length);
@@ -299,14 +299,14 @@ extern "C" __declspec(dllexport) void AssignInt64(long long int* res, long long 
 }
 
 template<typename T>
-__global__ void AssignVector_Kernel2(T* res, T* a, int length, T alpha, T beta)
+__global__ void AssignVector_Kernel2(T* res, T* a, size_t length, T alpha, T beta)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < length)
         res[i] = a[i] * alpha + beta;
 }
 
-extern "C" __declspec(dllexport) void AssignFloat32_Coefficients(float* res, float* a, int length, float alpha, float beta)
+extern "C" __declspec(dllexport) void AssignFloat32_Coefficients(float* res, float* a, size_t length, float alpha, float beta)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -315,7 +315,7 @@ extern "C" __declspec(dllexport) void AssignFloat32_Coefficients(float* res, flo
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AssignVector_Kernel2<float> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length, alpha, beta);
@@ -323,7 +323,7 @@ extern "C" __declspec(dllexport) void AssignFloat32_Coefficients(float* res, flo
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AssignFloat64_Coefficients(double* res, double* a, int length, double alpha, double beta)
+extern "C" __declspec(dllexport) void AssignFloat64_Coefficients(double* res, double* a, size_t length, double alpha, double beta)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -332,7 +332,7 @@ extern "C" __declspec(dllexport) void AssignFloat64_Coefficients(double* res, do
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AssignVector_Kernel2<double> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length, alpha, beta);
@@ -340,7 +340,7 @@ extern "C" __declspec(dllexport) void AssignFloat64_Coefficients(double* res, do
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AssignInt16_Coefficients(short* res, short* a, int length, short alpha, short beta)
+extern "C" __declspec(dllexport) void AssignInt16_Coefficients(short* res, short* a, size_t length, short alpha, short beta)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -349,7 +349,7 @@ extern "C" __declspec(dllexport) void AssignInt16_Coefficients(short* res, short
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AssignVector_Kernel2<short> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length, alpha, beta);
@@ -357,7 +357,7 @@ extern "C" __declspec(dllexport) void AssignInt16_Coefficients(short* res, short
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AssignInt32_Coefficients(int* res, int* a, int length, int alpha, int beta)
+extern "C" __declspec(dllexport) void AssignInt32_Coefficients(int* res, int* a, size_t length, int alpha, int beta)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -366,7 +366,7 @@ extern "C" __declspec(dllexport) void AssignInt32_Coefficients(int* res, int* a,
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AssignVector_Kernel2<int> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length, alpha, beta);
@@ -374,7 +374,7 @@ extern "C" __declspec(dllexport) void AssignInt32_Coefficients(int* res, int* a,
     CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
 }
 
-extern "C" __declspec(dllexport) void AssignInt64_Coefficients(long long int* res, long long int* a, int length, long long int alpha, long long int beta)
+extern "C" __declspec(dllexport) void AssignInt64_Coefficients(long long int* res, long long int* a, size_t length, long long int alpha, long long int beta)
 {
     int devid;
     CheckCudaError(cudaGetDevice(&devid), "GetDevice");
@@ -383,7 +383,7 @@ extern "C" __declspec(dllexport) void AssignInt64_Coefficients(long long int* re
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
-    int th = prop.maxThreadsPerBlock;
+    size_t th = prop.maxThreadsPerBlock;
     if (length < th)
         th = length;
     AssignVector_Kernel2<long long int> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length, alpha, beta);

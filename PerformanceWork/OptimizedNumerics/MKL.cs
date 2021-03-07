@@ -13,13 +13,13 @@ namespace PerformanceWork.OptimizedNumerics
         [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
                 ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
         public static extern void cblas_sgemm(
-               int Order, int TransA, int TransB, int M, int N, int K,
-               float alpha, float* A, int lda, float* B, int ldb,
-               float beta, float* C, int ldc);
+               int Order, int TransA, int TransB, long M, long N, long K,
+               float alpha, float* A, long lda, float* B, long ldb,
+               float beta, float* C, long ldc);
 
         [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
                 ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
-        public static extern void* MKL_malloc(int size, int alignment);
+        public static extern void* MKL_malloc(long size, int alignment);
 
         [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
                 ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
@@ -30,40 +30,24 @@ namespace PerformanceWork.OptimizedNumerics
 
         [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
                         ExactSpelling = true, SetLastError = false)]
-        public static extern void* vsExp(int n, float* x, float* y);
+        public static extern void* vsExp(long n, float* x, float* y);
 
         [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
                         ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurityAttribute]
-        public static extern void* vmsExp(int n, float* x, float* y, long m);
+        public static extern void* vmsExp(long n, float* x, float* y, long m);
 
 
         [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
                         ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
-        public static extern void* vmsAdd(int n, float* a, float* b, float* y, long m);
+        public static extern void* vmsAdd(long n, float* a, float* b, float* y, long m);
 
         [SuppressUnmanagedCodeSecurityAttribute]
 
         [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
                      ExactSpelling = true, SetLastError = false)]
-        public static extern void* vmsMul(int n, float* a, float* b, float* y, long m);
+        public static extern void* vmsMul(long n, float* a, float* b, float* y, long m);
 
-
-        [SuppressUnmanagedCodeSecurityAttribute]
-
-        [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
-                        ExactSpelling = true, SetLastError = false)]
-        public static extern void mkl_simatcopy(char ordering, char trans, int rows, int cols, float alpha, float* AB, int lda, int ldb);
-
-
-        [SuppressUnmanagedCodeSecurityAttribute]
-        [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
-                        ExactSpelling = true, SetLastError = false)]
-        public static extern void pslacpy(char* uplo, int* m, int* n, float* a, int* ia, int* ja, int* desca, float* b, int* ib, int* jb, int* descb);
-
-        //[SuppressUnmanagedCodeSecurityAttribute]
-        //[DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
-        //                ExactSpelling = true, SetLastError = false)]
-        //public static extern void mkl_set_num_threads(int nt);
+  
 
         public sealed class ORDER
         {

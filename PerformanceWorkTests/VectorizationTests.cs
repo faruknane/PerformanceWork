@@ -7,7 +7,6 @@ using PerformanceWork.DeepLearning.Kernels.Cpu;
 
 namespace PerformanceWorkTests
 {
-    
     [TestClass]
     public class CpuTests
     {
@@ -271,7 +270,7 @@ namespace PerformanceWorkTests
             float[] v1 = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
             float[] res = new float[9];
             fixed (float* ptr_v1 = v1, ptr_res = res)
-                VectorizationFloat.Sigmoid(ptr_v1, ptr_res, v1.Length);
+                VectorizationFloat.Sigmoid(ptr_v1, ptr_res, v1.LongLength);
             float[] res2 = { 0.731058359f, 0.8807941f, 0.95257f, 0.731058359f, 0.8807941f, 0.95257f, 0.731058359f, 0.8807941f, 0.95257f };
             Assert.IsTrue(ArrayEqual(res, res2));
         }

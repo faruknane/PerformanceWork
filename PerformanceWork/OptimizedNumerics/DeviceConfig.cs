@@ -88,7 +88,7 @@ namespace PerformanceWork
             NumType = datatype;
         }
 
-        public int GetUnitLength()
+        public long GetUnitLength()
         {
             return TensorConfig.GetUnitLength(this.NumType);
         }
@@ -120,7 +120,7 @@ namespace PerformanceWork
         /// </summary>
         /// <param name="t">Data Type</param>
         /// <returns>Byte Size of the data type</returns>
-        public static int GetUnitLength(NumberType t)
+        public static long GetUnitLength(NumberType t)
         {
             if (t == NumberType.Float64) return 8;
             else if (t == NumberType.Float32 | t == NumberType.Int32) return 4;

@@ -9,7 +9,6 @@ namespace PerformanceWork.OptimizedNumerics
 {
     public static class TensorExtension
     {
-
         /// <summary>
         ///  Creates a tensor on Host Device. It assumes that the new tensor is already returned. So, It won't do anything if the tensor gets disposed.
         /// </summary>
@@ -22,5 +21,67 @@ namespace PerformanceWork.OptimizedNumerics
             return Tensor.ToDisposedTensor(data, s, type);
         }
 
+
+        /// <summary>
+        ///  Creates a tensor on Host Device. It assumes that the new tensor is already returned. So, It won't do anything if the tensor gets disposed.
+        /// </summary>
+        /// <param name="s">Shape for the tensor to be created.</param>
+        /// <param name="type">NumberType for the tensor to be created.</param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe Tensor ToDisposedTensor(this float[] data, Shape s)
+        {
+            return Tensor.ToDisposedTensor(data, s, NumberType.Float32);
+        }
+
+        /// <summary>
+        ///  Creates a tensor on Host Device. It assumes that the new tensor is already returned. So, It won't do anything if the tensor gets disposed.
+        /// </summary>
+        /// <param name="s">Shape for the tensor to be created.</param>
+        /// <param name="type">NumberType for the tensor to be created.</param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe Tensor ToDisposedTensor(this float[,] data, Shape s)
+        {
+            return Tensor.ToDisposedTensor(data, s, NumberType.Float32);
+        }
+
+        /// <summary>
+        ///  Creates a tensor on Host Device. It assumes that the new tensor is already returned. So, It won't do anything if the tensor gets disposed.
+        /// </summary>
+        /// <param name="s">Shape for the tensor to be created.</param>
+        /// <param name="type">NumberType for the tensor to be created.</param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe Tensor ToDisposedTensor(this float[,,] data, Shape s)
+        {
+            return Tensor.ToDisposedTensor(data, s, NumberType.Float32);
+        }
+        
+        /// <summary>
+        ///  Creates a tensor on Host Device. It assumes that the new tensor is already returned. So, It won't do anything if the tensor gets disposed.
+        /// </summary>
+        /// <param name="s">Shape for the tensor to be created.</param>
+        /// <param name="type">NumberType for the tensor to be created.</param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe Tensor ToDisposedTensor(this float[,,,] data, Shape s)
+        {
+            return Tensor.ToDisposedTensor(data, s, NumberType.Float32);
+        }
+        
+        /// <summary>
+         ///  Creates a tensor on Host Device. It assumes that the new tensor is already returned. So, It won't do anything if the tensor gets disposed.
+         /// </summary>
+         /// <param name="s">Shape for the tensor to be created.</param>
+         /// <param name="type">NumberType for the tensor to be created.</param>
+         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe Tensor ToDisposedTensor(this float[,,,,] data, Shape s)
+        {
+            return Tensor.ToDisposedTensor(data, s, NumberType.Float32);
+        }
+    
+    
     }
 }

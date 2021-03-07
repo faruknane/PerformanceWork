@@ -26,7 +26,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         public static void MatrixMultiplyFloat32_GetGradient_0(Tensor combinedleft, Tensor s, Tensor B, Shape thisShape, Shape term0, Shape term1)
         {
             float* ptr_left = (float*)combinedleft.Array, ptr_s = (float*)s.Array, ptr_b = (float*)B.Array;
-            VectorizationFloat.TransposeBandMatrixMultiply(ptr_s, thisShape[0], thisShape[1], ptr_b, B.Shape[0], B.Shape[1], ptr_left);
+            VectorizationFloat.TransposeBandMatrixMultiply(ptr_s, (int)thisShape[0], (int)thisShape[1], ptr_b, (int)B.Shape[0], (int)B.Shape[1], ptr_left);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

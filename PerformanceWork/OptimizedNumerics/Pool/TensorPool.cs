@@ -9,9 +9,8 @@ namespace PerformanceWork.OptimizedNumerics.Pool
 {
     public static class TensorPool
     {
-        public const int PoolSize = 10000000*4+1;
 
-        public static ArrayPool Host = new ArrayPool(PoolSize, Device.Host);
+        public static ArrayPool Host = new ArrayPool(Device.Host);
 
         public static List<ArrayPool> Gpu = new List<ArrayPool>();
 
@@ -31,7 +30,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         public static ArrayPool GetNvidiaGpuPool(int deviceId)
         {
             for (int i = Gpu.Count; i <= deviceId; i++)
-                Gpu.Add(new ArrayPool(PoolSize, Device.Nvidia(Gpu.Count)));
+                Gpu.Add(new ArrayPool(Device.Nvidia(Gpu.Count)));
             return Gpu[deviceId];
         }
     }

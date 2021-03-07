@@ -9,11 +9,11 @@ namespace PerformanceWork.OptimizedNumerics
 {
     public unsafe class Shape
     {
-        public int[] Dimensions;
-        public int[] Multiplied;
+        public long[] Dimensions;
+        public long[] Multiplied;
 
         public int N { get; private set; }
-        public int TotalSize { get => Multiplied[0]; }
+        public long TotalSize { get => Multiplied[0]; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         private Shape()
@@ -26,21 +26,21 @@ namespace PerformanceWork.OptimizedNumerics
         {
             Shape s = new Shape();
             s.N = n;
-            s.Dimensions = new int[n];
-            s.Multiplied = new int[n + 1];
+            s.Dimensions = new long[n];
+            s.Multiplied = new long[n + 1];
             return s;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public Shape(params int[] dims)
+        public Shape(params long[] dims)
         {
             if (dims.Length == 0)
                 throw new Exception("The array has no element!");
 
             N = dims.Length;
 
-            Dimensions = new int[N];
-            Multiplied = new int[N + 1];
+            Dimensions = new long[N];
+            Multiplied = new long[N + 1];
             Multiplied[N] = 1;
             for (int i = N - 1; i >= 0; i--)
             {
@@ -49,7 +49,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
-        public int this[int x]
+        public long this[int x]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get => Dimensions[x];
@@ -64,9 +64,9 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public int Index(int[] dims)
+        public long Index(int[] dims)
         {
-            int res = 0;
+            long res = 0;
             for (int i = 0; i < dims.Length; i++)
                 res += dims[i] * Multiplied[i + 1];
             return res;
@@ -83,37 +83,37 @@ namespace PerformanceWork.OptimizedNumerics
         //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public int Index(int x1)
+        public long Index(int x1)
         {
             return x1 * Multiplied[1];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public int Index(int x1, int x2)
+        public long Index(int x1, int x2)
         {
             return x1 * Multiplied[1] + x2 * Multiplied[2];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public int Index(int x1, int x2, int x3)
+        public long Index(int x1, int x2, int x3)
         {
             return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public int Index(int x1, int x2, int x3, int x4)
+        public long Index(int x1, int x2, int x3, int x4)
         {
             return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3] + x4 * Multiplied[4];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public int Index(int x1, int x2, int x3, int x4, int x5)
+        public long Index(int x1, int x2, int x3, int x4, int x5)
         {
             return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3] + x4 * Multiplied[4] + x5 * Multiplied[5];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public int Index(int x1, int x2, int x3, int x4, int x5, int x6)
+        public long Index(int x1, int x2, int x3, int x4, int x5, int x6)
         {
             return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3] + x4 * Multiplied[4] + x5 * Multiplied[5] + x6 * Multiplied[6];
         }

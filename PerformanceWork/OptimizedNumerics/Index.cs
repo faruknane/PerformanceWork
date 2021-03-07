@@ -8,11 +8,11 @@ namespace PerformanceWork.OptimizedNumerics
 {
     public unsafe class Index
     {
-        public int[] Indices;
+        public long[] Indices;
         public int N { get; private set; }
         public Shape Shape { get; private set; }
 
-        public int this[int x]
+        public long this[int x]
         {
             get => Indices[x];
             set => Indices[x] = value;
@@ -23,7 +23,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             this.Shape = s;
             this.N = s.N;
-            Indices = new int[N];
+            Indices = new long[N];
         }
 
         public void Increase(int x)
@@ -99,7 +99,7 @@ namespace PerformanceWork.OptimizedNumerics
         {
             Index i = new Index(this.Shape);
             i.N = this.N;
-            i.Indices = new int[i.N];
+            i.Indices = new long[i.N];
             for (int j = 0; j < i.N; j++)
                 i[j] = this[j];
             return i;

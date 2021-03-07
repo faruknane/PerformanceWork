@@ -13,7 +13,7 @@ namespace PerformanceWork.NCuda
         public static extern void Free(void* arr);
 
         [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false, EntryPoint = "NAllocate"), SuppressUnmanagedCodeSecurity]
-        public static extern void* Allocate(int bytesize, int gpuid);
+        public static extern void* Allocate(long bytesize, int gpuid);
 
         [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false, EntryPoint = "NGetDevice"), SuppressUnmanagedCodeSecurity]
         public static extern int GetDevice();
@@ -22,7 +22,7 @@ namespace PerformanceWork.NCuda
         public static extern void SetDevice(int gpuid);
         
         [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false, EntryPoint = "NCopyArray"), SuppressUnmanagedCodeSecurity]
-        public static extern void CopyArray(void* src, void* dst, int bytesize);
+        public static extern void CopyArray(void* src, void* dst, long bytesize);
         
         [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false, EntryPoint = "NCheckError"), SuppressUnmanagedCodeSecurity]
         public static extern void CheckError();
