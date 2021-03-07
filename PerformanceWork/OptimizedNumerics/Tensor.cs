@@ -160,6 +160,7 @@ namespace PerformanceWork.OptimizedNumerics
             Dispose(true);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public override string ToString()
         {
             static string CPUTensorFloat32ToString(Tensor x)
@@ -213,6 +214,7 @@ namespace PerformanceWork.OptimizedNumerics
             return Tensor.CopyTo(m, m.Config.Device);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor CopyTo(Tensor m, Device dev)
         {
             TensorConfig conf = new TensorConfig(dev, m.Config.NumType);
@@ -274,11 +276,11 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         /// <summary>
-        ///  It assumes that the new tensor is already returned. So, It won't do anything if the tensor gets disposed.
+        ///  Creates a tensor on Host Device. It assumes that the new tensor is already returned. So, It won't do anything if the tensor gets disposed.
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="s"></param>
-        /// <param name="tensorConfig"></param>
+        /// <param name="s">Shape for the tensor to be created.</param>
+        /// <param name="type">NumberType for the tensor to be created.</param>
         /// <returns></returns>
         public static unsafe Tensor ToDisposedTensor(Array data, Shape s, NumberType type)
         {
