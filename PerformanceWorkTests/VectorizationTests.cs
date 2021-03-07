@@ -85,7 +85,7 @@ namespace PerformanceWorkTest
             arr_expected = new float[9];
 
             VectorizationFloat.ElementWiseMultiplyAVX(arr1, arr2, arr_expected, 9);
-            result = Tensor.ToDisposedTensor(arr_expected, new Shape(3,3), NumberType.Float32);
+            result = Tensor.ToDisposedTensor(arr_expected, new Shape(9), NumberType.Float32);
 
             calculated = CpuKernels.MultiplyFloat32(m1, m2);
 
