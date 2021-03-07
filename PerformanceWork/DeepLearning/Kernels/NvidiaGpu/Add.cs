@@ -1,5 +1,6 @@
 ﻿using PerformanceWork.NCuda;
 using PerformanceWork.OptimizedNumerics;
+using PerformanceWork.OptimizedNumerics.Tensors;
 using System;
 using System.Runtime.CompilerServices;
 

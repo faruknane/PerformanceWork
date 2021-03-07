@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PerformanceWork.OptimizedNumerics
+namespace PerformanceWork.OptimizedNumerics.Tensors
 {
     public static class TensorExtension
     {

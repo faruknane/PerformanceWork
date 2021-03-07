@@ -4,6 +4,7 @@ using PerformanceWork.OptimizedNumerics;
 using System;
 
 using PerformanceWork.DeepLearning.Kernels.Cpu;
+using PerformanceWork.OptimizedNumerics.Tensors;
 
 namespace PerformanceWorkTests
 {

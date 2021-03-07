@@ -6,11 +6,13 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
-namespace PerformanceWork.OptimizedNumerics
+namespace PerformanceWork.OptimizedNumerics.Tensors
 {
     public unsafe class Tensor : IDisposable
     {
+        public static int DisposedCount = 0;
         public Shape Shape { get; private set; }
         public TensorConfig Config;
 
@@ -19,7 +21,7 @@ namespace PerformanceWork.OptimizedNumerics
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private Tensor(Shape s, void* ptr, TensorConfig devconfig)
+        protected Tensor(Shape s, void* ptr, TensorConfig devconfig)
         {
             this.Shape = s;
             this.Array = ptr;
@@ -149,11 +151,10 @@ namespace PerformanceWork.OptimizedNumerics
                 TensorPool.GetDevicePool(this.Config.Device).Return(Array, Shape.TotalSize, this.Config.GetUnitLength());
                 if (!gc)
                     GC.SuppressFinalize(this);
-                DisposedCount++;
+                Interlocked.Increment(ref DisposedCount); 
             }
         }
 
-        public static int DisposedCount = 0;
 
         ~Tensor()
         {
@@ -296,34 +297,9 @@ namespace PerformanceWork.OptimizedNumerics
             if (data.LongLength != s.TotalSize)
                 throw new Exception("Cant convert data into the given shape");
 
-            if (type == NumberType.Float32)
-            {
-                if (data is float[])
-                    fixed (float* ptr = (float[])data)
-                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
-                else if (data is float[,])
-                    fixed (float* ptr = (float[,])data)
-                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
-                else if (data is float[,,])
-                    fixed (float* ptr = (float[,,])data)
-                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
-                else if (data is float[,,,])
-                    fixed (float* ptr = (float[,,,])data)
-                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
-                else if (data is float[,,,,])
-                    fixed (float* ptr = (float[,,,,])data)
-                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
-                else if (data is float[,,,,,])
-                    fixed (float* ptr = (float[,,,,,])data)
-                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
-                else
-                    throw new Exception("Unsupported Array Type");
-            }
-            else
-                throw new Exception("Unsupported NumberType!");
+            return DisposedTensor.Create(data, s, type);
         }
 
-        
         public static unsafe Tensor NewDisposedTensor(Shape s, void* ptr, TensorConfig tensorConfig)
         {
             return new Tensor(s, ptr, tensorConfig);

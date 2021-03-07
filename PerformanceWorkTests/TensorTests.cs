@@ -2,6 +2,7 @@
 using PerformanceWork;
 using PerformanceWork.DeepLearning.Kernels.Cpu;
 using PerformanceWork.OptimizedNumerics;
+using PerformanceWork.OptimizedNumerics.Tensors;
 using System;
 using System.Collections.Generic;
 using System.Text;
