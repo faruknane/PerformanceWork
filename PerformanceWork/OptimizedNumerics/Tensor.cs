@@ -1,4 +1,5 @@
-﻿using PerformanceWork.OptimizedNumerics.Pool;
+﻿using PerformanceWork.NCuda;
+using PerformanceWork.OptimizedNumerics.Pool;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -161,7 +162,7 @@ namespace PerformanceWork.OptimizedNumerics
 
         public override string ToString()
         {
-            static string ptrToString(Tensor x)
+            static string CPUTensorFloat32ToString(Tensor x)
             {
                 StringBuilder a = new StringBuilder();
                 float* ptr = (float*)x.Array;
@@ -192,11 +193,13 @@ namespace PerformanceWork.OptimizedNumerics
                 return res;
             }
             if (this.Config == TensorConfig.Host_Float32)
-                return ptrToString(this);
+                return CPUTensorFloat32ToString(this);
             else if(this.Config == TensorConfig.NvidiaGPU_Float32)
             {
-                throw new Exception("Unsupported Tensor Configuration!");
-                return ptrToString(this);
+                Tensor m = Tensor.CopyTo(this, Device.Host);
+                string str = CPUTensorFloat32ToString(m);
+                m.Dispose();
+                return str;
             }
             else
                 throw new Exception("Unsupported Tensor Configuration!");
@@ -216,6 +219,30 @@ namespace PerformanceWork.OptimizedNumerics
             else
                 throw new Exception("Unsupported Device Configuration!");
         }
+
+        public static Tensor CopyTo(Tensor m, Device dev)
+        {
+            TensorConfig conf = new TensorConfig(dev, m.Config.NumType);
+            Tensor t = new Tensor(m.Shape.Clone(), conf);
+            if(m.Config.Device.Type == DeviceType.Host && dev.Type == DeviceType.Host)
+            {
+                VectorizationFloat.ElementWiseAssignAVX((float*)t.Array, (float*)m.Array, t.Shape.TotalSize);
+            }
+            else if (m.Config.Device.Type == DeviceType.Host && dev.Type == DeviceType.NvidiaGPU)
+            {
+                CudaManagement.CopyArray(m.Array, t.Array, m.Shape.TotalSize * m.Config.GetUnitLength());
+            }
+            else if (m.Config.Device.Type == DeviceType.NvidiaGPU && dev.Type == DeviceType.Host)
+            {
+                CudaManagement.CopyArray(m.Array, t.Array, m.Shape.TotalSize * m.Config.GetUnitLength());
+            }
+            else if (m.Config.Device.Type == DeviceType.NvidiaGPU && dev.Type == DeviceType.NvidiaGPU)
+            {
+                CudaManagement.CopyArray(m.Array, t.Array, m.Shape.TotalSize * m.Config.GetUnitLength());
+            }
+            return t;
+        }
+
 
         /// <summary>
         /// Creates an Identity Tensor using the double of the shape.
@@ -247,7 +274,10 @@ namespace PerformanceWork.OptimizedNumerics
             if (data.Shape.TotalSize < begin + s.TotalSize)
                 throw new Exception("data.Shape.TotalSize < begin + s.TotalSize!");
 
-            return new Tensor(s, (void*)((long)(data.Array) + begin * data.Config.GetUnitLength()), data.Config);
+            if (data.Config == TensorConfig.Host_Float32)
+                return new Tensor(s, (void*)((long)(data.Array) + begin * data.Config.GetUnitLength()), data.Config);
+            else
+                throw new Exception("Unsupported Device Configuration!");
         }
 
         /// <summary>

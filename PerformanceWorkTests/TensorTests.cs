@@ -131,8 +131,43 @@ namespace PerformanceWorkTests
                 Console.WriteLine(reluv);
                 Console.WriteLine(relugrad);
                 //todo make checks
-
             }
         }
+
+        [TestMethod]
+        public unsafe void CopyCpuToNvidiaGpuSmall()
+        {
+            const int size = 10;
+            var f = new float[size] { 1,2,3,4,5,6,7,8,9,10};
+            Tensor a = Tensor.LoadArrayToDisposedTensor(f, new Shape(size), TensorConfig.NvidiaGPU_Float32);
+            Tensor b = Tensor.CopyTo(a, Device.Host);
+            Console.WriteLine(a);
+            Console.WriteLine(b);
+            b.Dispose();
+        }
+
+        [TestMethod]
+        public unsafe void CopyCpuToNvidiaGpuBig()
+        {
+            int size = 10000000;
+            var f = new float[size];
+            Tensor a = Tensor.LoadArrayToDisposedTensor(f, new Shape(size), TensorConfig.NvidiaGPU_Float32);
+            Tensor b = Tensor.CopyTo(a, Device.Host);
+            //Console.WriteLine(b);
+            b.Dispose(); 
+        }
+
+        [TestMethod]
+        public unsafe void CopyCpuToNvidiaGpuBig2()
+        {
+            int size = 10000000;
+            var f = new float[size];
+            Tensor a = Tensor.LoadArrayToDisposedTensor(f, new Shape(size), TensorConfig.NvidiaGPU_Float32);
+            Tensor b = Tensor.CopyTo(a, Device.Host);
+            //Console.WriteLine(b);
+            b.Dispose();
+        }
+
+
     }
 }

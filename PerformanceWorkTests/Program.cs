@@ -18,7 +18,7 @@ namespace PerformanceWorkTests
 {
     public unsafe class Program
     {
-        static void f()
+        public static void f()
         {
             for (int i = 0; i < 100; i++)
             {
@@ -30,12 +30,18 @@ namespace PerformanceWorkTests
 
         static unsafe void Main(string[] args)
         {
-            f();
-            Console.WriteLine(Tensor.DisposedCount);
-            TensorPool.GetDevicePool(Device.Host).EraseAll();
-            TensorPool.GetDevicePool(Device.Nvidia(0)).EraseAll();
-            Console.WriteLine(Tensor.DisposedCount);
-            Thread.Sleep(3000);
+            int size = 100000000;
+            var f = new float[size];
+            Tensor a = Tensor.LoadArrayToDisposedTensor(f, new Shape(size), TensorConfig.NvidiaGPU_Float32);
+            Tensor b = Tensor.CopyTo(a, Device.Host);
+            Console.WriteLine(b);
+            return;
+            //f();
+            //Console.WriteLine(Tensor.DisposedCount);
+            //TensorPool.GetDevicePool(Device.Host).EraseAll();
+            //TensorPool.GetDevicePool(Device.Nvidia(0)).EraseAll();
+            //Console.WriteLine(Tensor.DisposedCount);
+            //Thread.Sleep(3000);
         }
     }
 }
