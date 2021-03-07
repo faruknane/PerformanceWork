@@ -16,20 +16,15 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
         public GCHandle Handle;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private DisposedTensor(Shape s, void* ptr, NumberType type) : base(s, ptr, new TensorConfig(Device.Host, type))
+        private DisposedTensor(Shape s, GCHandle handle, NumberType type) : base(s, (void*)handle.AddrOfPinnedObject(), new TensorConfig(Device.Host, type))
         {
-
+            this.Handle = handle;
         }
 
         public static DisposedTensor Create(Array arr, Shape s, NumberType type)
         {
-            GCHandle h = GCHandle.Alloc(arr, GCHandleType.Pinned);
-            void* ptr = (void*)h.AddrOfPinnedObject();
-            DisposedTensor d = new DisposedTensor(s, ptr, type);
-            d.Handle = h;
-            return d;
+            return new DisposedTensor(s, GCHandle.Alloc(arr, GCHandleType.Pinned), type);
         }
-
        
         public void UnpinPointer()
         {
