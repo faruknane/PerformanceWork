@@ -5,7 +5,7 @@ using System;
 
 using PerformanceWork.DeepLearning.Kernels.Cpu;
 
-namespace PerformanceWorkTest
+namespace PerformanceWorkTests
 {
     
     [TestClass]
