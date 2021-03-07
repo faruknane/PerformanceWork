@@ -30,12 +30,14 @@ namespace PerformanceWorkTests
 
         static unsafe void Main(string[] args)
         {
-            const int size = 10;
-            var f = new float[size] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            int size = 100000000;
+            var f = new float[size];
             Tensor a = f.ToDisposedTensor(new Shape(size), NumberType.Float32);
-            Tensor b = Tensor.CopyTo(a, Device.Nvidia(1));
-            Console.WriteLine(b);
+            Tensor b = Tensor.CopyTo(a, Device.Nvidia(0));
+            Thread.Sleep(5000);
+            //Console.WriteLine(b);
             b.Dispose();
+            Thread.Sleep(5000);
             return;
             //f();
             //Console.WriteLine(Tensor.DisposedCount);

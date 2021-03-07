@@ -20,9 +20,9 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         }
 
         public int MaxLength { get; private set; }
-        public int UnreturnedArrayCount { get; private set; } = 0;      
+        public int UnreturnedArrayCount { get; private set; } = 0;
 
-        public Stack<PointerArray>[] Stacks;
+        private Hashtable HashTable;
 
         public Device Device;
 
@@ -32,7 +32,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         public ArrayPool(int MaxLength, Device dev)
         {
             this.MaxLength = MaxLength;
-            Stacks = new Stack<PointerArray>[MaxLength];
+            HashTable = new Hashtable();
             Device = dev;
         }
 
@@ -50,9 +50,9 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                 UnreturnedArrayCount++;
 
                 length *= unitlength;
-                if (Stacks[length] != null && Stacks[length].Count > 0)
+                if (HashTable.ContainsKey(length) && (HashTable[length] is Stack<PointerArray> x) && x.Count > 0)
                 {
-                    PointerArray sr = Stacks[length].Pop();
+                    PointerArray sr = x.Pop();
                     return sr.Ptr;
                 }
                 else
@@ -83,7 +83,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                 PointerArray sr = new PointerArray();
                 sr.Ptr = arr;
 
-                (Stacks[length] ?? (Stacks[length] = new Stack<PointerArray>())).Push(sr);
+                ((Stack<PointerArray>)(HashTable.Contains(length) ? HashTable[length] : (HashTable[length] = new Stack<PointerArray>()))).Push(sr);
 
                 UnreturnedArrayCount--;
             }
@@ -93,38 +93,27 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         {
             lock (Mutex)
             {
-                if (this.Device.Type == DeviceType.NvidiaGPU)
+                foreach (DictionaryEntry item in HashTable)
                 {
-                    for (int i = 0; i < Stacks.Length; i++)
+                    Stack<PointerArray> s = item.Key as Stack<PointerArray>;
+                    if (s != null)
                     {
-                        Stack<PointerArray> s = Stacks[i];
-                        if (s != null)
+                        foreach (var arr in s)
                         {
-                            foreach (var arr in s)
+                            if (this.Device.Type == DeviceType.NvidiaGPU)
                             {
+                                CudaManagement.SetDevice(this.Device.ID);
                                 CudaManagement.Free(arr.Ptr);
                             }
-                            s.Clear();
-                        }
-                    }
-                }
-                else if (this.Device.Type == DeviceType.Host)
-                {
-                    for (int i = 0; i < Stacks.Length; i++)
-                    {
-                        Stack<PointerArray> s = Stacks[i];
-                        if (s != null)
-                        {
-                            foreach (var arr in s)
-                            {
+                            else if (this.Device.Type == DeviceType.Host)
                                 MKL.MKL_free(arr.Ptr);
-                            }
-                            s.Clear();
+                            else
+                                throw new Exception("Uknown Device in ArrayPool!");
                         }
+                        s.Clear();
                     }
                 }
-                else
-                    throw new Exception("Uknown Device in ArrayPool!");
+               
             }
         }
 
