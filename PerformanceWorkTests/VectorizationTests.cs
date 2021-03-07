@@ -84,6 +84,7 @@ namespace PerformanceWorkTest
             (arr2, m2) = CreateRandomTensor();
             arr_expected = new float[9];
 
+            //CpuKernels.MultiplyFloat32 already uses ElementWiseMultiplyAVX method. We should calculate the results manually.
             for (int i = 0; i < arr_expected.Length; i++)
                 arr_expected[i] = arr1[i] * arr2[i];
 
