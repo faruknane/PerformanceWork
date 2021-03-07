@@ -31,7 +31,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         public static ArrayPool GetNvidiaGpuPool(int deviceId)
         {
             for (int i = Gpu.Count; i <= deviceId; i++)
-                Gpu.Add(new ArrayPool(PoolSize, Device.Nvidia(Gpu.Count - 1)));
+                Gpu.Add(new ArrayPool(PoolSize, Device.Nvidia(Gpu.Count)));
             return Gpu[deviceId];
         }
     }

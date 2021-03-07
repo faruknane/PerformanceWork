@@ -8,7 +8,7 @@
 // CUDA runtime
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
-
+#include "ErrorChecking.cpp"
 #include <sstream>
 #include <iostream>
 
@@ -20,7 +20,7 @@ using namespace std;
     _message << std::string(s) + "\n" << __FILE__ << ':' << __LINE__;  \
     std::cerr << _message.str() << "\nAborting...\n";                  \
     cudaDeviceReset();                                                 \
-    exit(1);                                                           \
+    abort();														   \
 } while(0)
 
 #define checkCUDNN(status) do {                                        \
@@ -31,26 +31,16 @@ using namespace std;
     }                                                                  \
 } while(0)
 
-#define checkCudaErrors(status) do {                                   \
-    std::stringstream _error;                                          \
-    if (status != 0) {                                                 \
-      _error << "Cuda failure: " << status;                            \
-      FatalError(_error.str());                                        \
-    }                                                                  \
-} while(0)
-
-#define checkCudaErrors2(val) check((val), #val, __FILE__, __LINE__)
-
 
 extern "C" __declspec(dllexport) void NSetDevice(int gpuid)
 {
-	checkCudaErrors(cudaSetDevice(gpuid));
+	CheckCudaError(cudaSetDevice(gpuid), "setdevice");
 }
 
 extern "C" __declspec(dllexport) int NGetDevice()
 {
 	int devid;
-	checkCudaErrors(cudaGetDevice(&devid));
+	CheckCudaError(cudaGetDevice(&devid), "getdevice");
 	return devid;
 }
 
@@ -58,7 +48,7 @@ extern "C" __declspec(dllexport) void* NAllocate(int bytesize, int gpuid)
 {
 	NSetDevice(gpuid);
 	void* a = 0;
-	checkCudaErrors(cudaMalloc((void**)&a, bytesize));
+	CheckCudaError(cudaMalloc((void**)&a, bytesize), "cudamalloc");
 	if (a == 0)
 		FatalError("Allocation Error on GPU device!");
 	return a;
@@ -66,12 +56,12 @@ extern "C" __declspec(dllexport) void* NAllocate(int bytesize, int gpuid)
 
 extern "C" __declspec(dllexport) void NFree(void* arr)
 {
-	checkCudaErrors(cudaFree(arr));
+	CheckCudaError(cudaFree(arr), "Free");
 }
 
 extern "C" __declspec(dllexport) void NCopyArray(void* src, void* dst, int bytesize)
 {
-	checkCudaErrors(cudaMemcpy(dst, src, bytesize, cudaMemcpyDefault));
+	CheckCudaError(cudaMemcpy(dst, src, bytesize, cudaMemcpyDefault), "memcpy");
 }
 
 

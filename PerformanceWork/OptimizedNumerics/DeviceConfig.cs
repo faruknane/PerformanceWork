@@ -28,7 +28,7 @@ namespace PerformanceWork
     public struct Device
     {
         public static Device Host { get; } = new Device() { ID = 0, Type = DeviceType.Host };
-        public static Device Nvidia(int devid) => new Device() { ID = 0, Type = DeviceType.NvidiaGPU };
+        public static Device Nvidia(int devid) => new Device() { ID = devid, Type = DeviceType.NvidiaGPU };
         
         public int ID;
         public DeviceType Type;

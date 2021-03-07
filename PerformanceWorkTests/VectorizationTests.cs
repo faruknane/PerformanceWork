@@ -38,7 +38,7 @@ namespace PerformanceWorkTest
             {
                 arr[i] = (float)random.NextDouble();
             }
-            Tensor tensor = Tensor.Clone(Tensor.LoadArrayToDisposedTensor(arr, new Shape(size), TensorConfig.Host_Float32));
+            Tensor tensor = Tensor.Clone(Tensor.ToDisposedTensor(arr, new Shape(size), NumberType.Float32));
             return (arr, tensor);
         }
 
@@ -64,7 +64,7 @@ namespace PerformanceWorkTest
             }
 
             // add tensors
-            expected = Tensor.LoadArrayToDisposedTensor(expectedArr, new Shape(tensorSize), TensorConfig.Host_Float32);
+            expected = Tensor.ToDisposedTensor(expectedArr, new Shape(tensorSize), NumberType.Float32);
 
 
             CpuKernels.AddFloat32(calculated, inputs);

@@ -210,14 +210,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor Clone(Tensor m)
         {
-            if (m.Config == TensorConfig.Host_Float32)
-            {
-                Tensor n = new Tensor(m.Shape.Clone(), m.Config);
-                VectorizationFloat.ElementWiseAssignAVX((float*)n.Array, (float*)m.Array, n.Shape.TotalSize);
-                return n;
-            }
-            else
-                throw new Exception("Unsupported Device Configuration!");
+            return Tensor.CopyTo(m, m.Config.Device);
         }
 
         public static Tensor CopyTo(Tensor m, Device dev)
@@ -285,33 +278,33 @@ namespace PerformanceWork.OptimizedNumerics
         /// </summary>
         /// <param name="data"></param>
         /// <param name="s"></param>
-        /// <param name="dev"></param>
+        /// <param name="tensorConfig"></param>
         /// <returns></returns>
-        public static unsafe Tensor LoadArrayToDisposedTensor(Array data, Shape s, TensorConfig dev)
+        public static unsafe Tensor ToDisposedTensor(Array data, Shape s, NumberType type)
         {
             if (data.LongLength != s.TotalSize)
                 throw new Exception("Cant convert data into the given shape");
 
-            if (dev.NumType == NumberType.Float32)
+            if (type == NumberType.Float32)
             {
                 if (data is float[])
                     fixed (float* ptr = (float[])data)
-                        return new Tensor(s, ptr, dev);
+                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
                 else if (data is float[,])
                     fixed (float* ptr = (float[,])data)
-                        return new Tensor(s, ptr, dev);
+                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
                 else if (data is float[,,])
                     fixed (float* ptr = (float[,,])data)
-                        return new Tensor(s, ptr, dev);
+                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
                 else if (data is float[,,,])
                     fixed (float* ptr = (float[,,,])data)
-                        return new Tensor(s, ptr, dev);
+                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
                 else if (data is float[,,,,])
                     fixed (float* ptr = (float[,,,,])data)
-                        return new Tensor(s, ptr, dev);
+                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
                 else if (data is float[,,,,,])
                     fixed (float* ptr = (float[,,,,,])data)
-                        return new Tensor(s, ptr, dev);
+                        return new Tensor(s, ptr, new TensorConfig(Device.Host, type));
                 else
                     throw new Exception("Unsupported Array Type");
             }
@@ -319,6 +312,11 @@ namespace PerformanceWork.OptimizedNumerics
                 throw new Exception("Unsupported Device Configuration!");
         }
 
+        
+        public static unsafe Tensor NewDisposedTensor(Shape s, void* ptr, TensorConfig tensorConfig)
+        {
+            return new Tensor(s, ptr, tensorConfig);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor MatrixMultiply(Tensor a, Tensor b)

@@ -60,6 +60,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                     if (this.Device.Type == DeviceType.NvidiaGPU)
                     {
                         GC.AddMemoryPressure(length);
+                        CudaManagement.SetDevice(this.Device.ID);
                         return CudaManagement.Allocate(length, Device.ID);
                     }
                     else if (this.Device.Type == DeviceType.Host)

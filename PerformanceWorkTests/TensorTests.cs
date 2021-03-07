@@ -119,8 +119,8 @@ namespace PerformanceWorkTests
 
             fixed (float* ptr_v = vdata, ptr_grad = graddata)
             {
-                Tensor v = Tensor.LoadArrayToDisposedTensor(vdata, new Shape(vdata.Length), TensorConfig.Host_Float32);
-                Tensor grad = Tensor.LoadArrayToDisposedTensor(graddata, new Shape(graddata.Length), TensorConfig.Host_Float32);
+                Tensor v = Tensor.ToDisposedTensor(vdata, new Shape(vdata.Length), NumberType.Float32);
+                Tensor grad = Tensor.ToDisposedTensor(graddata, new Shape(graddata.Length), NumberType.Float32);
 
                 Tensor reluv = CpuKernels.ReluFloat32(v);
                 Tensor relugrad = CpuKernels.ReluFloat32_GetGradient_0(grad, v);
@@ -132,40 +132,6 @@ namespace PerformanceWorkTests
                 Console.WriteLine(relugrad);
                 //todo make checks
             }
-        }
-
-        [TestMethod]
-        public unsafe void CopyCpuToNvidiaGpuSmall()
-        {
-            const int size = 10;
-            var f = new float[size] { 1,2,3,4,5,6,7,8,9,10};
-            Tensor a = Tensor.LoadArrayToDisposedTensor(f, new Shape(size), TensorConfig.NvidiaGPU_Float32);
-            Tensor b = Tensor.CopyTo(a, Device.Host);
-            Console.WriteLine(a);
-            Console.WriteLine(b);
-            b.Dispose();
-        }
-
-        [TestMethod]
-        public unsafe void CopyCpuToNvidiaGpuBig()
-        {
-            int size = 10000000;
-            var f = new float[size];
-            Tensor a = Tensor.LoadArrayToDisposedTensor(f, new Shape(size), TensorConfig.NvidiaGPU_Float32);
-            Tensor b = Tensor.CopyTo(a, Device.Host);
-            //Console.WriteLine(b);
-            b.Dispose(); 
-        }
-
-        [TestMethod]
-        public unsafe void CopyCpuToNvidiaGpuBig2()
-        {
-            int size = 10000000;
-            var f = new float[size];
-            Tensor a = Tensor.LoadArrayToDisposedTensor(f, new Shape(size), TensorConfig.NvidiaGPU_Float32);
-            Tensor b = Tensor.CopyTo(a, Device.Host);
-            //Console.WriteLine(b);
-            b.Dispose(); 
         }
 
 
