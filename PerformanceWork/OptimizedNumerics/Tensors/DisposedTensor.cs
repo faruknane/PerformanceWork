@@ -31,14 +31,14 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
         }
 
        
-        public void UnPinPointer()
+        public void UnpinPointer()
         {
             Handle.Free();
         }
 
         ~DisposedTensor()
         {
-            UnPinPointer();
+            UnpinPointer();
             Interlocked.Increment(ref TEMP);
         }
     }
