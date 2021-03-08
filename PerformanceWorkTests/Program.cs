@@ -33,8 +33,13 @@ namespace PerformanceWorkTests
 
         public static void f2()
         {
-            var f = new float[10] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-            Tensor b = f.ToDisposedTensor(new Shape(10), NumberType.Float32);
+            Tensor a = new Tensor(new Shape(450000000), TensorConfig.NvidiaGPU_Float32);
+            Tensor b = new Tensor(new Shape(400000000), TensorConfig.NvidiaGPU_Float32);
+            NvidiaGpuKernels.AddFloat32_Result(a, a, b);
+            Thread.Sleep(3000);
+
+            a.Dispose();
+            b.Dispose();
         }
 
 

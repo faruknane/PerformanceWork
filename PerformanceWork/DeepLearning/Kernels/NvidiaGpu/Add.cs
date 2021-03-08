@@ -14,25 +14,18 @@ namespace PerformanceWork.DeepLearning.Kernels.NvidiaGpu
         /// <param name="tensors">Tensors to be summed</param>
         /// <returns>The sum of tensors</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor AddFloat32(params Tensor[] tensors)
+        public static Tensor AddFloat32(Tensor a, Tensor b, float cofa = 1, float cofb = 1, float cofadd = 0)
         {
-            for (int i = 0; i < tensors.Length - 1; i++)
-                if (tensors[i].Config != tensors[i + 1].Config || tensors[i].Shape.TotalSize != tensors[i+1].Shape.TotalSize)
-                    throw new Exception("Tensors are not suitable!");
-
-            Tensor res = new Tensor(tensors[0].Shape.Clone(), tensors[0].Config);
-            AddFloat32_Result(res, tensors);
+            Tensor res = new Tensor(a.Shape.Clone(), b.Config);
+            AddFloat32_Result(res, a, b, cofa, cofb, cofadd);
             return res;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static void AddFloat32_Result(Tensor res, params Tensor[] tensors)
+        public static void AddFloat32_Result(Tensor res, Tensor a, Tensor b, float cofa = 1, float cofb = 1, float cofadd = 0)
         {
             CudaManagement.SetDevice(res.Config.Device.ID);
-            if (tensors.Length == 2)
-                CudaKernels.AddFloat32((float*)res.Array, (float*)tensors[0].Array, (float*)tensors[1].Array, (int)res.Shape.TotalSize);
-            else
-                throw new Exception("More than 2 tensors are not supported for the operation!");
+            CudaKernels.AddFloat32((float*)res.Array, (float*)a.Array, (float*)b.Array, a.Shape.TotalSize, b.Shape.TotalSize, cofa, cofb, cofadd);
         }
 
     }
