@@ -35,7 +35,7 @@ namespace PerformanceWorkTests
         {
             Tensor a = new Tensor(new Shape(450000000), TensorConfig.NvidiaGPU_Float32);
             Tensor b = new Tensor(new Shape(400000000), TensorConfig.NvidiaGPU_Float32);
-            NvidiaGpuKernels.AddFloat32_Result(a, a, b);
+            NvidiaGpuKernels.AddFloat32(a, a, b);
             Thread.Sleep(3000);
 
             a.Dispose();

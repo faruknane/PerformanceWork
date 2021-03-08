@@ -114,8 +114,8 @@ namespace PerformanceWorkTests
             float[] x1, x2, expres;
             x1 = new float[size] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
             x2 = new float[size2] { 1, 2, 3, 4, 5 };
-            expres = new float[size] ;
-            
+            expres = new float[size];
+
             for (int i = 0; i < size; i++)
                 expres[i] = x1[i] + x2[i % size2];
 
@@ -125,6 +125,64 @@ namespace PerformanceWorkTests
             t1 = x1.ToDisposedTensor(new Shape(size)).CopyTo(Device.Nvidia(0));
             t2 = x2.ToDisposedTensor(new Shape(size2)).CopyTo(Device.Nvidia(0));
             Tensor myres = NvidiaGpuKernels.AddFloat32(t1, t2);
+
+
+            Console.WriteLine(myres);
+            Console.WriteLine(expected_res);
+            Assert.AreEqual(myres.ToString(), expected_res.ToString());
+            myres.Dispose();
+            t1.Dispose();
+            t2.Dispose();
+        }
+
+        [TestMethod]
+        public unsafe void MultiplyKernelFloat32()
+        {
+            const int size = 10;
+            const int size2 = 5;
+            float[] x1, x2, expres;
+            x1 = new float[size] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            x2 = new float[size2] { 1, 2, 3, 4, 5 };
+            expres = new float[size];
+
+            for (int i = 0; i < size; i++)
+                expres[i] = x1[i] * x2[i % size2];
+
+            Tensor expected_res = expres.ToDisposedTensor(new Shape(size));
+
+            Tensor t1, t2;
+            t1 = x1.ToDisposedTensor(new Shape(size)).CopyTo(Device.Nvidia(0));
+            t2 = x2.ToDisposedTensor(new Shape(size2)).CopyTo(Device.Nvidia(0));
+            Tensor myres = NvidiaGpuKernels.MultiplyFloat32(t1, t2);
+
+
+            Console.WriteLine(myres);
+            Console.WriteLine(expected_res);
+            Assert.AreEqual(myres.ToString(), expected_res.ToString());
+            myres.Dispose();
+            t1.Dispose();
+            t2.Dispose();
+        }
+
+        [TestMethod]
+        public unsafe void DivideKernelFloat32()
+        {
+            const int size = 10;
+            const int size2 = 5;
+            float[] x1, x2, expres;
+            x1 = new float[size] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            x2 = new float[size2] { 1, 2, 3, 4, 5 };
+            expres = new float[size];
+
+            for (int i = 0; i < size; i++)
+                expres[i] = x1[i] / x2[i % size2];
+
+            Tensor expected_res = expres.ToDisposedTensor(new Shape(size));
+
+            Tensor t1, t2;
+            t1 = x1.ToDisposedTensor(new Shape(size)).CopyTo(Device.Nvidia(0));
+            t2 = x2.ToDisposedTensor(new Shape(size2)).CopyTo(Device.Nvidia(0));
+            Tensor myres = NvidiaGpuKernels.DivideFloat32(t1, t2);
 
 
             Console.WriteLine(myres);

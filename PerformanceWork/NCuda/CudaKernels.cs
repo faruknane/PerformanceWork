@@ -45,7 +45,39 @@ namespace PerformanceWork.NCuda
         public static extern void AssignInt64(long* res, long* a, long lengthres, long lengtha, long alpha, long beta);
         #endregion
 
+        #region Multiply Vector Opreation
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void MultiplyFloat32(float* res, float* a, float* b, long lengtha, long lengthb, float cofmul, float cofadd);
 
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void MultiplyFloat64(double* res, double* a, double* b, long lengtha, long lengthb, double cofmul, double cofadd);
+
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void MultiplyInt16(short* res, short* a, short* b, long lengtha, long lengthb, short cofmul, short cofadd);
+
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void MultiplyInt32(int* res, int* a, int* b, long lengtha, long lengthb, int cofmul, int cofadd);
+
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void MultiplyInt64(long* res, long* a, long* b, long lengtha, long lengthb, long cofmul, long cofadd);
+        #endregion
+
+        #region Divide Vector Opreation
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void DivideFloat32(float* res, float* a, float* b, long lengtha, long lengthb, float cofdiv, float cofadd);
+
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void DivideFloat64(double* res, double* a, double* b, long lengtha, long lengthb, double cofdiv, double cofadd);
+
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void DivideInt16(short* res, short* a, short* b, long lengtha, long lengthb, short cofdiv, short cofadd);
+
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void DivideInt32(int* res, int* a, int* b, long lengtha, long lengthb, int cofdiv, int cofadd);
+
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void DivideInt64(long* res, long* a, long* b, long lengtha, long lengthb, long cofdiv, long cofadd);
+        #endregion
 
     }
 }

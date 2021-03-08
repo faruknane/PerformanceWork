@@ -29,10 +29,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void AddFloat32(Tensor res, params Tensor[] tensors)
-        {
-            if (res.Config != tensors[0].Config)
-                throw new Exception("Tensor Configs are not compatible!");
-            
+        {            
             VectorizationFloat.ElementWiseAddAVX((float*)tensors[0].Array, (float*)tensors[1].Array, (float*)res.Array, res.Shape.TotalSize);
 
             for (int i = 2; i < tensors.Length; i++) //todo add Optimize here. 
