@@ -132,6 +132,9 @@ namespace PerformanceWorkTests
                 Console.WriteLine(reluv);
                 Console.WriteLine(relugrad);
                 //todo make checks
+
+                reluv.Dispose();
+                relugrad.Dispose();
             }
         }
 

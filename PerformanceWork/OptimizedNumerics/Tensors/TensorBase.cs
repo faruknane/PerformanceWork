@@ -41,7 +41,7 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
             {
                 System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
                 Console.WriteLine("StackTrace: '{0}'", Environment.StackTrace);
-                throw new Exception("The tensor is already disposed!");
+                throw new Exception("The tensor base is already disposed!");
             }
 
             if (!ArrayReturned)

@@ -40,6 +40,11 @@ namespace PerformanceWorkTests
             Assert.AreEqual(expected.ToString(), calculated.ToString());
             Tensor calculated2 = CpuKernels.AddFloat32(inputs);
             Assert.AreEqual(expected.ToString(), calculated2.ToString());
+
+            expected.Dispose();
+            calculated.Dispose();
+            for (int i = 0; i < 5; i++)
+                inputs[i].Dispose();
         }
 
         [TestMethod]
@@ -73,6 +78,15 @@ namespace PerformanceWorkTests
             Console.WriteLine(expected.ToString());
 
             Assert.AreEqual(calculated.ToString(), expected.ToString());
+
+            //need to dipose tensors to remove them from memory
+            //we don't need to do this manually but better doing
+            calculated.Dispose();
+            for (int i = 0; i < arrSize; i++)
+                inputs[i].Dispose();
+
+            //expected.Dispose(); don't dispose expected tensor because it is already disposed tensor. line 72
+
         }
 
         [TestMethod]
@@ -98,6 +112,10 @@ namespace PerformanceWorkTests
             Console.WriteLine(result.ToString());
 
             Assert.AreEqual(calculated.ToString(), result.ToString());
+
+            m1.Dispose();
+            m2.Dispose();
+            calculated.Dispose();
         }
     }
 
