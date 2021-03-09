@@ -8,116 +8,7 @@ using PerformanceWork.OptimizedNumerics.Tensors;
 
 namespace PerformanceWorkTests
 {
-    [TestClass]
-    public class CpuTests
-    {
-        public (float[], Tensor) CreateRandomTensor(int size = 9)
-        {
-            Random random = new Random();
-            float[] arr = new float[size];
-            for (int i = 0; i < size; i++)
-            {
-                arr[i] = (float)random.NextDouble();
-            }
-            Tensor tensor = Tensor.Clone(Tensor.ToDisposedTensor(arr, new Shape(size), NumberType.Float32));
-            return (arr, tensor);
-        }
-
-        [TestMethod]
-        public void Add()
-        {
-            Tensor expected = new Tensor(new Shape(3, 3), TensorConfig.Host_Float32);
-            expected.SetFloat(15);
-            Tensor calculated = new Tensor(new Shape(3, 3), TensorConfig.Host_Float32);
-            calculated.SetFloat(0);
-            Tensor[] inputs = new Tensor[5];
-            for (int i = 0; i < 5; i++)
-            {
-                inputs[i] = new Tensor(new Shape(3, 3), TensorConfig.Host_Float32);
-                inputs[i].SetFloat(3);
-            }
-            CpuKernels.AddFloat32(calculated, inputs);
-            Assert.AreEqual(expected.ToString(), calculated.ToString());
-            Tensor calculated2 = CpuKernels.AddFloat32(inputs);
-            Assert.AreEqual(expected.ToString(), calculated2.ToString());
-
-            expected.Dispose();
-            calculated.Dispose();
-            for (int i = 0; i < 5; i++)
-                inputs[i].Dispose();
-        }
-
-        [TestMethod]
-        public void AddRandom()
-        {
-            int arrSize = 5;
-            int tensorSize = 9;
-
-            // initialize test tensors
-            Tensor expected, calculated;
-            float[] expectedArr = new float[tensorSize];
-            (_, calculated) = CreateRandomTensor(tensorSize);
-            Tensor[] inputs = new Tensor[arrSize];
-            float[][] arrays = new float[arrSize][];
-            for(int i = 0; i < arrSize; i++)
-            {
-                (arrays[i], inputs[i]) = CreateRandomTensor(tensorSize);
-                for(int j=0;j< tensorSize; j++)
-                {
-                    expectedArr[j] += arrays[i][j];
-                }
-            }
-
-            // add tensors
-            expected = Tensor.ToDisposedTensor(expectedArr, new Shape(tensorSize), NumberType.Float32);
-
-
-            CpuKernels.AddFloat32(calculated, inputs);
-
-            Console.WriteLine(calculated.ToString());
-            Console.WriteLine(expected.ToString());
-
-            Assert.AreEqual(calculated.ToString(), expected.ToString());
-
-            //need to dipose tensors to remove them from memory
-            //we don't need to do this manually but better doing
-            calculated.Dispose();
-            for (int i = 0; i < arrSize; i++)
-                inputs[i].Dispose();
-
-            //expected.Dispose(); don't dispose expected tensor because it is already disposed tensor. line 72
-
-        }
-
-        [TestMethod]
-        public void MultiplyRandom()
-        {
-            Tensor m1, m2, calculated, result;
-            float[] arr1, arr2, arr_expected;
-            (arr1, m1) = CreateRandomTensor();
-            (arr2, m2) = CreateRandomTensor();
-            arr_expected = new float[9];
-
-            //CpuKernels.MultiplyFloat32 already uses ElementWiseMultiplyAVX method. We should calculate the results manually.
-            for (int i = 0; i < arr_expected.Length; i++)
-                arr_expected[i] = arr1[i] * arr2[i];
-
-            //VectorizationFloat.ElementWiseMultiplyAVX(arr1, arr2, arr_expected, 9);
-
-            result = Tensor.ToDisposedTensor(arr_expected, new Shape(9), NumberType.Float32);
-
-            calculated = CpuKernels.MultiplyFloat32(m1, m2);
-
-            Console.WriteLine(calculated.ToString());
-            Console.WriteLine(result.ToString());
-
-            Assert.AreEqual(calculated.ToString(), result.ToString());
-
-            m1.Dispose();
-            m2.Dispose();
-            calculated.Dispose();
-        }
-    }
+    
 
     [TestClass]
     public class VectorizationTests
@@ -372,6 +263,50 @@ namespace PerformanceWorkTests
                 VectorizationFloat.ElementWiseAddAVXBetaB(ptr_v1, ptr_v2, ptr_v1, v1.Length, 10);
             float[] res = { 11, 22, 33, 11, 22, 33, 11, 22, 33 };
             Assert.IsTrue(ArrayEqual(res, v1));
+        }
+
+        [TestMethod]
+        public unsafe void MatrixMultiply()
+        {
+
+            for (int kk = 0; kk < 1000; kk++)
+            {
+                Random r = new Random();
+
+                int n = r.Next(2, 30);
+                int m = r.Next(2, 30);
+                int p = r.Next(2, 30);
+
+                Tensor a = new Tensor((n, m), TensorConfig.Host_Float32);
+                Tensor b = new Tensor((m, p), TensorConfig.Host_Float32);
+                Tensor res = new Tensor((n, p), TensorConfig.Host_Float32);
+
+                res.SetValue(0);
+
+                for (int i = 0; i < a.Shape[0]; i++)
+                    for (int j = 0; j < a.Shape[1]; j++)
+                        ((float*)a.Base.Array)[a.Shape.Index(i, j)] = r.Next(-10, 10);
+
+                for (int i = 0; i < b.Shape[0]; i++)
+                    for (int j = 0; j < b.Shape[1]; j++)
+                        ((float*)b.Base.Array)[b.Shape.Index(i, j)] = r.Next(-10, 10);
+
+                for (int i = 0; i < a.Shape[0]; i++)
+                    for (int j = 0; j < a.Shape[1]; j++)
+                        for (int k = 0; k < b.Shape[1]; k++)
+                            ((float*)res.Base.Array)[res.Shape.Index(i, k)] += ((float*)a.Base.Array)[a.Shape.Index(i, j)] * ((float*)b.Base.Array)[b.Shape.Index(j, k)];
+
+                Tensor c = PerformanceWork.DeepLearning.Kernels.Cpu.CpuKernels.MatrixMultiplyFloat32(a, b);
+
+                if (!VectorizationFloat.ElementWiseIsEqualsAVX((float*)res.Base.Array, (float*)c.Base.Array, res.Shape.TotalSize))
+                {
+                    throw new Exception("Eþit Deðil!");
+                }
+                a.Dispose();
+                b.Dispose();
+                c.Dispose();
+                res.Dispose();
+            }
         }
 
         [TestMethod]

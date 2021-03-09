@@ -23,7 +23,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void ShrinkFloat32(Tensor res, Tensor v, Shape thisShape, Shape term0, Shape Divisor)
         {
-            res.SetFloat(0);
+            res.SetValue(0);
 
             float* ptrres = (float*)res.Base.Array;
             float* ptrv = (float*)v.Base.Array;

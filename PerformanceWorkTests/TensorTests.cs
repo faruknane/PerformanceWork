@@ -13,77 +13,6 @@ namespace PerformanceWorkTests
     public class TensorTests
     {
         [TestMethod]
-        public void SumTensorsCPU()
-        {
-            Tensor t = new Tensor((3, 5), TensorConfig.Host_Float32);
-            Tensor t2 = new Tensor((3, 5), TensorConfig.Host_Float32);
-            unsafe
-            {
-                for (int i = 0; i < t.Shape[0]; i++)
-                    for (int j = 0; j < t.Shape[1]; j++)
-                    {
-                        ((float*)t.Base.Array)[t.Shape.Index(i, j)] = j;
-                        ((float*)t2.Base.Array)[t2.Shape.Index(i, j)] = i;
-                    }
-
-                Tensor t3 = Tensor.Sum(t, t2);
-
-                for (int i = 0; i < t.Shape[0]; i++)
-                    for (int j = 0; j < t.Shape[1]; j++)
-                        Assert.AreEqual(((float*)t3.Base.Array)[t3.Shape.Index(i, j)], i + j);
-
-                t.Dispose();
-                t2.Dispose();
-                t3.Dispose();
-            }
-        }
-
-        [TestMethod]
-        public unsafe void MatrixMultiply()
-        {
-
-            for (int kk = 0; kk < 1000; kk++)
-            {
-                Random r = new Random();
-
-                int n = r.Next(2, 30);
-                int m = r.Next(2, 30);
-                int p = r.Next(2, 30);
-
-                Tensor a = new Tensor((n, m), TensorConfig.Host_Float32);
-                Tensor b = new Tensor((m, p), TensorConfig.Host_Float32);
-                Tensor res = new Tensor((n, p), TensorConfig.Host_Float32);
-
-                res.SetFloat(0);
-
-                for (int i = 0; i < a.Shape[0]; i++)
-                    for (int j = 0; j < a.Shape[1]; j++)
-                        ((float*)a.Base.Array)[a.Shape.Index(i, j)] = r.Next(-10, 10);
-
-                for (int i = 0; i < b.Shape[0]; i++)
-                    for (int j = 0; j < b.Shape[1]; j++)
-                        ((float*)b.Base.Array)[b.Shape.Index(i, j)] = r.Next(-10, 10);
-
-                for (int i = 0; i < a.Shape[0]; i++)
-                    for (int j = 0; j < a.Shape[1]; j++)
-                        for (int k = 0; k < b.Shape[1]; k++)
-                            ((float*)res.Base.Array)[res.Shape.Index(i, k)] += ((float*)a.Base.Array)[a.Shape.Index(i, j)] * ((float*)b.Base.Array)[b.Shape.Index(j, k)];
-
-                Tensor c = PerformanceWork.DeepLearning.Kernels.Cpu.CpuKernels.MatrixMultiplyFloat32(a, b);
-
-                if (!VectorizationFloat.ElementWiseIsEqualsAVX((float*)res.Base.Array, (float*)c.Base.Array, res.Shape.TotalSize))
-                {
-                    throw new Exception("Eşit Değil!");
-                }
-                a.Dispose();
-                b.Dispose();
-                c.Dispose();
-                res.Dispose();
-            }
-        }
-
-
-        [TestMethod]
         public unsafe void ShapeCombining()
         {
             Shape s1 = new Shape(3, 2);
@@ -112,31 +41,7 @@ namespace PerformanceWorkTests
         }
 
 
-        [TestMethod]
-        public unsafe void ReluFloatCpu()
-        {
-            float[] vdata = new float[] { 0.1f, -0.2f, 2, 3, -1, 2, -5, -10, 9, -8 };
-            float[] graddata = new float[] { 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f };
-
-            fixed (float* ptr_v = vdata, ptr_grad = graddata)
-            {
-                Tensor v = Tensor.ToDisposedTensor(vdata, new Shape(vdata.Length), NumberType.Float32);
-                Tensor grad = Tensor.ToDisposedTensor(graddata, new Shape(graddata.Length), NumberType.Float32);
-
-                Tensor reluv = CpuKernels.ReluFloat32(v);
-                Tensor relugrad = CpuKernels.ReluFloat32_GetGradient_0(grad, v);
-
-                Console.WriteLine(v);
-                Console.WriteLine(grad);
-
-                Console.WriteLine(reluv);
-                Console.WriteLine(relugrad);
-                //todo make checks
-
-                reluv.Dispose();
-                relugrad.Dispose();
-            }
-        }
+        
 
 
     }

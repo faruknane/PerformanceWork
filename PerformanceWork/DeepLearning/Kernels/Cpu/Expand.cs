@@ -34,7 +34,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void ExpandFloat32_GetGradient_0(Tensor res, Tensor s, Shape thisShape, Shape term0, Shape Multiplier)
         {
-            res.SetFloat(0);
+            res.SetValue(0);
 
             float* ptrcombined = (float*)res.Base.Array;
             float* ptrs = (float*)s.Base.Array;

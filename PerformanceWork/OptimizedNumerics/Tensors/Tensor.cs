@@ -71,25 +71,12 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public void SetFloat(float value)
+        public void SetValue(float value)
         {
             if (this.Config == TensorConfig.Host_Float32)
                 VectorizationFloat.ElementWiseSetValueAVX((float*)this.Base.Array, value, Shape.TotalSize);
             else
                 throw new Exception("Unsupported Device Configuration!");
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public void SetTensor(Tensor value)
-        {
-            if (this.Config != value.Config)
-                throw new Exception("Device Configuration is different!");
-
-            if (this.Config == TensorConfig.Host_Float32)
-                VectorizationFloat.ElementWiseAssignAVX((float*)this.Base.Array, (float*)value.Base.Array, Shape.TotalSize);
-            else
-                throw new Exception("Unsupported Device Configuration!");
-
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -249,7 +236,7 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
         {
             Tensor t = new Tensor(s.Clone(), deviceConfig);
             if (t.Config == TensorConfig.Host_Float32)
-                t.SetFloat(1.0f);
+                t.SetValue(1.0f);
             else
                 throw new Exception("Unsupported Device Configuration!");
             return t;
@@ -269,10 +256,7 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
             if (data.Shape.TotalSize < begin + s.TotalSize)
                 throw new Exception("data.Shape.TotalSize < begin + s.TotalSize!");
 
-            if (data.Config == TensorConfig.Host_Float32)
-                return new Tensor(s, (void*)((long)(data.Base.Array) + begin * data.Config.GetUnitLength()), data.Config);
-            else
-                throw new Exception("Unsupported Device Configuration!");
+            return new Tensor(s, (void*)((long)(data.Base.Array) + begin * data.Config.GetUnitLength()), data.Config);
         }
 
         /// <summary>
@@ -293,50 +277,7 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
         {
             return new Tensor(s, ptr, tensorConfig);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor Sum(Tensor t1, Tensor t2)
-        {
-            if (t1.Config != t2.Config)
-                throw new Exception("Device Configurations are different!");
-
-            if (t1.Shape.TotalSize != t2.Shape.TotalSize)
-                throw new Exception("Size of Tensors are different!");
-
-            Tensor res = new Tensor(t1.Shape.Clone(), t1.Config);
-
-            if (t1.Config == TensorConfig.Host_Float32)
-            {
-                VectorizationFloat.ElementWiseAddAVX((float*)t1.Base.Array, (float*)t2.Base.Array, (float*)res.Base.Array, t1.Shape.TotalSize);
-            }
-            else
-                throw new Exception("Unsupported Device Configuration!");
-
-            return res;
-        }
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor Subtract(Tensor t1, Tensor t2)
-        {
-            if (t1.Config != t2.Config)
-                throw new Exception("Device Configurations are different!");
-
-            if (t1.Shape.TotalSize != t2.Shape.TotalSize)
-                throw new Exception("Size of Tensors are different!");
-
-            Tensor res = new Tensor(t1.Shape.Clone(), t1.Config);
-
-            if (t1.Config == TensorConfig.Host_Float32)
-            {
-                VectorizationFloat.ElementWiseSubtractAVX((float*)t1.Base.Array, (float*)t2.Base.Array, (float*)res.Base.Array, t1.Shape.TotalSize);
-            }
-            else
-                throw new Exception("Unsupported Device Configuration!");
-
-            return res;
-        }
-
+        
         #endregion
 
     }
