@@ -22,15 +22,15 @@ namespace PerformanceWorkTests
                 for (int i = 0; i < t.Shape[0]; i++)
                     for (int j = 0; j < t.Shape[1]; j++)
                     {
-                        ((float*)t.Array)[t.Shape.Index(i, j)] = j;
-                        ((float*)t2.Array)[t2.Shape.Index(i, j)] = i;
+                        ((float*)t.Base.Array)[t.Shape.Index(i, j)] = j;
+                        ((float*)t2.Base.Array)[t2.Shape.Index(i, j)] = i;
                     }
 
                 Tensor t3 = Tensor.Sum(t, t2);
 
                 for (int i = 0; i < t.Shape[0]; i++)
                     for (int j = 0; j < t.Shape[1]; j++)
-                        Assert.AreEqual(((float*)t3.Array)[t3.Shape.Index(i, j)], i + j);
+                        Assert.AreEqual(((float*)t3.Base.Array)[t3.Shape.Index(i, j)], i + j);
 
                 t.Dispose();
                 t2.Dispose();
@@ -58,20 +58,20 @@ namespace PerformanceWorkTests
 
                 for (int i = 0; i < a.Shape[0]; i++)
                     for (int j = 0; j < a.Shape[1]; j++)
-                        ((float*)a.Array)[a.Shape.Index(i, j)] = r.Next(-10, 10);
+                        ((float*)a.Base.Array)[a.Shape.Index(i, j)] = r.Next(-10, 10);
 
                 for (int i = 0; i < b.Shape[0]; i++)
                     for (int j = 0; j < b.Shape[1]; j++)
-                        ((float*)b.Array)[b.Shape.Index(i, j)] = r.Next(-10, 10);
+                        ((float*)b.Base.Array)[b.Shape.Index(i, j)] = r.Next(-10, 10);
 
                 for (int i = 0; i < a.Shape[0]; i++)
                     for (int j = 0; j < a.Shape[1]; j++)
                         for (int k = 0; k < b.Shape[1]; k++)
-                            ((float*)res.Array)[res.Shape.Index(i, k)] += ((float*)a.Array)[a.Shape.Index(i, j)] * ((float*)b.Array)[b.Shape.Index(j, k)];
+                            ((float*)res.Base.Array)[res.Shape.Index(i, k)] += ((float*)a.Base.Array)[a.Shape.Index(i, j)] * ((float*)b.Base.Array)[b.Shape.Index(j, k)];
 
                 Tensor c = PerformanceWork.DeepLearning.Kernels.Cpu.CpuKernels.MatrixMultiplyFloat32(a, b);
 
-                if (!VectorizationFloat.ElementWiseIsEqualsAVX((float*)res.Array, (float*)c.Array, res.Shape.TotalSize))
+                if (!VectorizationFloat.ElementWiseIsEqualsAVX((float*)res.Base.Array, (float*)c.Base.Array, res.Shape.TotalSize))
                 {
                     throw new Exception("Eşit Değil!");
                 }

@@ -18,23 +18,6 @@ __global__ void AddVector_Kernel(T* res, T* a, T* b, size_t lengtha, size_t leng
     res[i] = a[i] * cofa + b[i % lengthb] * cofb + cofadd;
 }
 
-//extern "C" __declspec(dllexport) void AddFloat16(half* res, half * a, half * b, size_t lengtha, size_t lengthb, half cofa, half cofb, half cofadd)
-//{
-//    int devid;
-//    CheckCudaError(cudaGetDevice(&devid), "GetDevice");
-//    cudaDeviceProp prop;
-//    CheckCudaError(cudaGetDeviceProperties(&prop, devid), "GetDeviceProp");
-//
-//    cudaStream_t stream;
-//    cudaStreamCreate(&stream);
-//    size_t th = prop.maxThreadsPerBlock;
-//    if (lengtha < th)
-//        th = lengtha;
-//    AddVector_Kernel<half> << <(lengtha + th - 1) / th, th, 0, stream >> > (res, a, b, lengtha, lengthb, cofa, cofb, cofadd);
-//    CheckCudaError(cudaStreamSynchronize(stream), "StreamSync");
-//    CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
-//}
-
 extern "C" __declspec(dllexport) void AddFloat32(float* res, float* a, float* b, size_t lengtha, size_t lengthb, float cofa, float cofb, float cofadd)
 {
     int devid;
@@ -130,23 +113,6 @@ __global__ void AssignVector_Kernel(T* res, T* a, size_t length, size_t lenghta,
     if (i < length)
         res[i] = a[i % lenghta] * alpha + beta;
 }
-
-//extern "C" __declspec(dllexport) void AssignFloat16(half* res, half* a, size_t length, size_t lengtha, half alpha, half beta)
-//{
-//    int devid;
-//    CheckCudaError(cudaGetDevice(&devid), "GetDevice");
-//    cudaDeviceProp prop;
-//    CheckCudaError(cudaGetDeviceProperties(&prop, devid), "GetDeviceProp");
-//
-//    cudaStream_t stream;
-//    cudaStreamCreate(&stream);
-//    size_t th = prop.maxThreadsPerBlock;
-//    if (length < th)
-//        th = length;
-//    AssignVector_Kernel<half> << <(length + th - 1) / th, th, 0, stream >> > (res, a, length, lengtha, alpha, beta);
-//    CheckCudaError(cudaStreamSynchronize(stream), "StreamSync");
-//    CheckCudaError(cudaStreamDestroy(stream), "StreamDestroy");
-//}
 
 extern "C" __declspec(dllexport) void AssignFloat32(float* res, float* a, size_t length, size_t lengtha, float alpha, float beta)
 {

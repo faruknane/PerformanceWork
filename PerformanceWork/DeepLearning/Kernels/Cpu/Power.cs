@@ -34,9 +34,9 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void Power2Float32_GetGradient_0(Tensor combined, Tensor s, Tensor res)
         {
-            float* ptr_combined = (float*)combined.Array;
-            float* ptr_s = (float*)s.Array;
-            VectorizationFloat.ElementWise_A_MultipliedBy_B_MultipliedBy_C((float*)res.Array, ptr_s, 2, ptr_combined, res.Shape.TotalSize);
+            float* ptr_combined = (float*)combined.Base.Array;
+            float* ptr_s = (float*)s.Base.Array;
+            VectorizationFloat.ElementWise_A_MultipliedBy_B_MultipliedBy_C((float*)res.Base.Array, ptr_s, 2, ptr_combined, res.Shape.TotalSize);
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void Power2Float32(Tensor res, Tensor input)
         {
-            VectorizationFloat.ElementWiseSquareAVX((float*)input.Array, (float*)res.Array, res.Shape.TotalSize);
+            VectorizationFloat.ElementWiseSquareAVX((float*)input.Base.Array, (float*)res.Base.Array, res.Shape.TotalSize);
         }
     }
 }

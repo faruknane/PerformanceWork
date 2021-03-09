@@ -8,6 +8,8 @@ using System.Text;
 
 namespace PerformanceWork.OptimizedNumerics
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "<Pending>")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
     public static unsafe class MKL
     {
         [DllImport("MKL\\mkl_rt.dll", CallingConvention = CallingConvention.Cdecl,
@@ -52,6 +54,7 @@ namespace PerformanceWork.OptimizedNumerics
         public sealed class ORDER
         {
             private ORDER() { }
+
             public static int RowMajor = 101;  /* row-major arrays */
             public static int ColMajor = 102;  /* column-major arrays */
         }

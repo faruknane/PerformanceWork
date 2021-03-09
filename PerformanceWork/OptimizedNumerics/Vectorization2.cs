@@ -15,7 +15,7 @@ namespace PerformanceWork.OptimizedNumerics
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void MatrixMultiply(Tensor a, Tensor b, Tensor c)
         {
-            MKL.cblas_sgemm(MKL.ORDER.RowMajor, MKL.TRANSPOSE.NoTrans, MKL.TRANSPOSE.NoTrans, a.Shape[0], b.Shape[1], b.Shape[0], 1.0f, (float*)a.Array, b.Shape[0], (float*)b.Array, b.Shape[1], 0.0f, (float*)c.Array, b.Shape[1]);
+            MKL.cblas_sgemm(MKL.ORDER.RowMajor, MKL.TRANSPOSE.NoTrans, MKL.TRANSPOSE.NoTrans, a.Shape[0], b.Shape[1], b.Shape[0], 1.0f, (float*)a.Base.Array, b.Shape[0], (float*)b.Base.Array, b.Shape[1], 0.0f, (float*)c.Base.Array, b.Shape[1]);
         }
      
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

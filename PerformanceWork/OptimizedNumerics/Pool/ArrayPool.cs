@@ -21,7 +21,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
 
         public int UnreturnedArrayCount { get; private set; } = 0;
 
-        private Hashtable HashTable;
+        private Dictionary<long, Stack<PointerArray>> Stacks;
 
         public Device Device;
 
@@ -30,7 +30,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public ArrayPool(Device dev)
         {
-            HashTable = new Hashtable();
+            Stacks = new Dictionary<long, Stack<PointerArray>>();
             Device = dev;
         }
 
@@ -42,7 +42,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                 UnreturnedArrayCount++;
 
                 length *= unitlength;
-                if (HashTable.ContainsKey(length) && (HashTable[length] is Stack<PointerArray> x) && x.Count > 0)
+                if (Stacks.ContainsKey(length) && (Stacks[length] is Stack<PointerArray> x) && x.Count > 0)
                 {
                     PointerArray sr = x.Pop();
                     return sr.Ptr;
@@ -54,7 +54,6 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                         GC.AddMemoryPressure(length);
                         CudaManagement.SetDevice(this.Device.ID);
                         return CudaManagement.Allocate(length, Device.ID);
-                        //TODO: length should be long edit allocate method
                     }
                     else if (this.Device.Type == DeviceType.Host)
                     {
@@ -76,7 +75,7 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                 PointerArray sr = new PointerArray();
                 sr.Ptr = arr;
 
-                ((Stack<PointerArray>)(HashTable.Contains(length) ? HashTable[length] : (HashTable[length] = new Stack<PointerArray>()))).Push(sr);
+                (Stacks.ContainsKey(length) ? Stacks[length] : (Stacks[length] = new Stack<PointerArray>())).Push(sr);
 
                 UnreturnedArrayCount--;
             }
@@ -86,12 +85,11 @@ namespace PerformanceWork.OptimizedNumerics.Pool
         {
             lock (Mutex)
             {
-                foreach (DictionaryEntry item in HashTable)
+                foreach (var item in Stacks)
                 {
-                    Stack<PointerArray> s = item.Value as Stack<PointerArray>;
-                    if (s != null)
+                    if (item.Value != null)
                     {
-                        foreach (var arr in s)
+                        foreach (var arr in item.Value)
                         {
                             if (this.Device.Type == DeviceType.NvidiaGPU)
                             {
@@ -106,10 +104,10 @@ namespace PerformanceWork.OptimizedNumerics.Pool
                             else
                                 throw new Exception("Uknown Device in ArrayPool!");
                         }
-                        s.Clear();
+                        item.Value.Clear();
                     }
                 }
-               
+                Stacks.Clear();
             }
         }
 

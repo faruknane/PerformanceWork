@@ -36,15 +36,15 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         {
             res.SetFloat(0);
 
-            float* ptrcombined = (float*)res.Array;
-            float* ptrs = (float*)s.Array;
+            float* ptrcombined = (float*)res.Base.Array;
+            float* ptrs = (float*)s.Base.Array;
 
             if (Multiplier.N == 2 && Multiplier[1] == 1)
             {
                 for (int i = 0; i < Multiplier[0]; i++)
                 {
-                    float* me = ((float*)s.Array) + i * term0.TotalSize;
-                    VectorizationFloat.ElementWiseAddAVX((float*)res.Array, me, (float*)res.Array, term0.TotalSize);
+                    float* me = ((float*)s.Base.Array) + i * term0.TotalSize;
+                    VectorizationFloat.ElementWiseAddAVX((float*)res.Base.Array, me, (float*)res.Base.Array, term0.TotalSize);
                 }
             }
             else
@@ -98,15 +98,15 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void ExpandFloat32(Tensor res, Tensor v, Shape thisShape, Shape term0, Shape Multiplier)
         {
-            float* ptrres = (float*)res.Array;
-            float* ptrv = (float*)v.Array;
+            float* ptrres = (float*)res.Base.Array;
+            float* ptrv = (float*)v.Base.Array;
 
             if (Multiplier.N == 2 && Multiplier[1] == 1)
             {
                 for (int i = 0; i < Multiplier[0]; i++)
                 {
-                    float* me = ((float*)res.Array) + i * term0.TotalSize;
-                    VectorizationFloat.ElementWiseAssignAVX(me, (float*)v.Array, term0.TotalSize);
+                    float* me = ((float*)res.Base.Array) + i * term0.TotalSize;
+                    VectorizationFloat.ElementWiseAssignAVX(me, (float*)v.Base.Array, term0.TotalSize);
                 }
             }
             else

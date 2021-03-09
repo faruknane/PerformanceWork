@@ -30,10 +30,10 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void AddFloat32(Tensor res, params Tensor[] tensors)
         {            
-            VectorizationFloat.ElementWiseAddAVX((float*)tensors[0].Array, (float*)tensors[1].Array, (float*)res.Array, res.Shape.TotalSize);
+            VectorizationFloat.ElementWiseAddAVX((float*)tensors[0].Base.Array, (float*)tensors[1].Base.Array, (float*)res.Base.Array, res.Shape.TotalSize);
 
             for (int i = 2; i < tensors.Length; i++) //todo add Optimize here. 
-                VectorizationFloat.ElementWiseAddAVX((float*)res.Array, (float*)tensors[i].Array, (float*)res.Array, res.Shape.TotalSize);
+                VectorizationFloat.ElementWiseAddAVX((float*)res.Base.Array, (float*)tensors[i].Base.Array, (float*)res.Base.Array, res.Shape.TotalSize);
         }
 
     }

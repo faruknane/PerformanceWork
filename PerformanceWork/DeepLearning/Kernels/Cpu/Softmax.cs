@@ -22,7 +22,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void SoftmaxFloat32(Tensor res, Tensor v)
         {
-            VectorizationFloat.Softmax((float*)v.Array, (float*)res.Array, v.Shape[v.Shape.N - 1], v.Shape.TotalSize);
+            VectorizationFloat.Softmax((float*)v.Base.Array, (float*)res.Base.Array, v.Shape[v.Shape.N - 1], v.Shape.TotalSize);
         }
 
 
@@ -35,11 +35,11 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
 
             for (long start = 0; start < combined.Shape.TotalSize; start += groupsize)
             {
-                float averageK = VectorizationFloat.SumOfProduction((float*)s.Array + start, (float*)sm.Array + start, groupsize);
-                VectorizationFloat.ElementWiseAddAVX((float*)combined.Array + start, -averageK, (float*)combined.Array + start, groupsize);
+                float averageK = VectorizationFloat.SumOfProduction((float*)s.Base.Array + start, (float*)sm.Base.Array + start, groupsize);
+                VectorizationFloat.ElementWiseAddAVX((float*)combined.Base.Array + start, -averageK, (float*)combined.Base.Array + start, groupsize);
             }
 
-            VectorizationFloat.ElementWiseMultiplyAVX((float*)combined.Array, (float*)sm.Array, (float*)combined.Array, combined.Shape.TotalSize);
+            VectorizationFloat.ElementWiseMultiplyAVX((float*)combined.Base.Array, (float*)sm.Base.Array, (float*)combined.Base.Array, combined.Shape.TotalSize);
 
             return combined;
         }

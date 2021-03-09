@@ -27,7 +27,7 @@ namespace PerformanceWorkTests
         }
 
         [TestMethod]
-        public unsafe void CopyCpuToNvidiaGpuBig()
+        public unsafe void AddFloat32NvidiaGpuBig()
         {
             int size = 1000000;
             Tensor a = new Tensor(new Shape(size), TensorConfig.NvidiaGPU_Float32);
@@ -151,8 +151,8 @@ namespace PerformanceWorkTests
             Tensor expected_res = expres.ToDisposedTensor(new Shape(size));
 
             Tensor t1, t2;
-            t1 = x1.ToDisposedTensor(new Shape(size)).CopyTo(Device.Nvidia(0));
-            t2 = x2.ToDisposedTensor(new Shape(size2)).CopyTo(Device.Nvidia(0));
+            t1 = x1.ToDisposedTensor().CopyTo(Device.Nvidia(0));
+            t2 = x2.ToDisposedTensor().CopyTo(Device.Nvidia(0));
             Tensor myres = NvidiaGpuKernels.MultiplyFloat32(t1, t2);
 
 

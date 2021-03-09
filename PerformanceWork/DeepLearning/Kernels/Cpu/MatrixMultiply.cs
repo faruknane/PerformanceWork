@@ -14,7 +14,6 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
     /// </summary>
     public unsafe partial class CpuKernels
     {
-
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor MatrixMultiplyFloat32_GetGradient_0(Tensor s, Tensor B, Shape thisShape, Shape term0, Shape term1)
         {
@@ -26,8 +25,12 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void MatrixMultiplyFloat32_GetGradient_0(Tensor combinedleft, Tensor s, Tensor B, Shape thisShape, Shape term0, Shape term1)
         {
-            float* ptr_left = (float*)combinedleft.Array, ptr_s = (float*)s.Array, ptr_b = (float*)B.Array;
+            float* ptr_left = (float*)combinedleft.Base.Array, ptr_s = (float*)s.Base.Array, ptr_b = (float*)B.Base.Array;
             VectorizationFloat.TransposeBandMatrixMultiply(ptr_s, (int)thisShape[0], (int)thisShape[1], ptr_b, (int)B.Shape[0], (int)B.Shape[1], ptr_left);
+            //Derivative of A = s*Transpose(B)
+            //A -> m,k
+            //B -> k,n
+            //s -> m,n
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -41,8 +44,12 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void MatrixMultiplyFloat32_GetGradient_1(Tensor combinedright, Tensor s, Tensor A, Shape thisShape, Shape term0, Shape term1)
         {
-            float* ptr_right = (float*)combinedright.Array, ptr_a = (float*)A.Array, ptr_s = (float*)s.Array;
+            float* ptr_right = (float*)combinedright.Base.Array, ptr_a = (float*)A.Base.Array, ptr_s = (float*)s.Base.Array;
             VectorizationFloat.TransposeAandMatrixMultiply(ptr_a, A.Shape[0], A.Shape[1], ptr_s, thisShape[0], thisShape[1], ptr_right);
+            //Derivative of B = Transpose(A)*s
+            //A -> m,k
+            //B -> k,n
+            //s -> m,n
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

@@ -25,7 +25,7 @@ namespace PerformanceWork.DeepLearning.Kernels.NvidiaGpu
         public static void DivideFloat32(Tensor res, Tensor a, Tensor b, float cofmul = 1, float cofadd = 0)
         {
             CudaManagement.SetDevice(res.Config.Device.ID);
-            CudaKernels.DivideFloat32((float*)res.Array, (float*)a.Array, (float*)b.Array, a.Shape.TotalSize, b.Shape.TotalSize, cofmul, cofadd);
+            CudaKernels.DivideFloat32((float*)res.Base.Array, (float*)a.Base.Array, (float*)b.Base.Array, a.Shape.TotalSize, b.Shape.TotalSize, cofmul, cofadd);
         }
 
     }

@@ -14,18 +14,15 @@ namespace PerformanceWork.DeepLearning.Kernels.NvidiaGpu
         /// <param name="tensors">Tensors to be summed</param>
         /// <returns>The sum of tensors</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static Tensor AddFloat32(Tensor a, Tensor b, float cofa = 1, float cofb = 1, float cofadd = 0)
+        public static Tensor MatrixMultiplyFloat32(Tensor a, Tensor b)
         {
-            Tensor res = new Tensor(a.Shape.Clone(), b.Config);
-            AddFloat32(res, a, b, cofa, cofb, cofadd);
-            return res;
+            return null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static void AddFloat32(Tensor res, Tensor a, Tensor b, float cofa = 1, float cofb = 1, float cofadd = 0)
+        public static void MatrixMultiplyFloat32(Tensor res, Tensor a, Tensor b, float cofmul = 1, float cofadd = 0)
         {
-            CudaManagement.SetDevice(res.Config.Device.ID);
-            CudaKernels.AddFloat32((float*)res.Base.Array, (float*)a.Base.Array, (float*)b.Base.Array, a.Shape.TotalSize, b.Shape.TotalSize, cofa, cofb, cofadd);
+
         }
 
     }

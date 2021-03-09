@@ -22,7 +22,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void SubtractFloat32(Tensor res, Tensor t1, Tensor t2)
         {
-            VectorizationFloat.ElementWiseSubtractAVX((float*)t1.Array, (float*)t2.Array, (float*)res.Array, t1.Shape.TotalSize);
+            VectorizationFloat.ElementWiseSubtractAVX((float*)t1.Base.Array, (float*)t2.Base.Array, (float*)res.Base.Array, t1.Shape.TotalSize);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -36,7 +36,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void SubtractFloat32_GetGradient_1(Tensor res, Tensor m, Tensor t1, Tensor t2)
         {
-            VectorizationFloat.MakeNegativeAVX((float*)m.Array, (float*)res.Array, m.Shape.TotalSize);
+            VectorizationFloat.MakeNegativeAVX((float*)m.Base.Array, (float*)res.Base.Array, m.Shape.TotalSize);
         }
 
 

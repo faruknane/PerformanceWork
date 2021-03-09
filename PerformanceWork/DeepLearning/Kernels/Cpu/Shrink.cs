@@ -25,8 +25,8 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         {
             res.SetFloat(0);
 
-            float* ptrres = (float*)res.Array;
-            float* ptrv = (float*)v.Array;
+            float* ptrres = (float*)res.Base.Array;
+            float* ptrv = (float*)v.Base.Array;
 
             Index iterator = new Index(term0);
 

@@ -9,21 +9,16 @@ using System.Threading.Tasks;
 
 namespace PerformanceWork.OptimizedNumerics.Tensors
 {
-    internal unsafe class DisposedTensor : Tensor
+    public unsafe class DisposedTensorBase : TensorBase
     {
         public static int TEMP = 0;
 
         public GCHandle Handle;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        private DisposedTensor(Shape s, GCHandle handle, NumberType type) : base(s, (void*)handle.AddrOfPinnedObject(), new TensorConfig(Device.Host, type))
+        public DisposedTensorBase(GCHandle handle, long length, bool returned, TensorConfig conf) : base((void*)handle.AddrOfPinnedObject(), length, returned, conf)
         {
             this.Handle = handle;
-        }
-
-        public static DisposedTensor Create(Array arr, Shape s, NumberType type)
-        {
-            return new DisposedTensor(s, GCHandle.Alloc(arr, GCHandleType.Pinned), type);
         }
        
         public void UnpinPointer()
@@ -31,7 +26,7 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
             Handle.Free();
         }
 
-        ~DisposedTensor()
+        ~DisposedTensorBase()
         {
             UnpinPointer();
             Interlocked.Increment(ref TEMP);

@@ -17,7 +17,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
             public static void DropoutFloat(Tensor s, float p)
             {
                 Random r = new Random();
-                float* ptr = (float*)s.Array;
+                float* ptr = (float*)s.Base.Array;
                 for (int i = 0; i < s.Shape.TotalSize; i++)
                     if (r.NextDouble() > p)
                         ptr[i] = 1;

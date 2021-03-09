@@ -22,40 +22,29 @@ namespace PerformanceWorkTests
     {
         public static void f()
         {
+            TensorBase t = new TensorBase(100, TensorConfig.Host_Float32);
+
             for (int i = 0; i < 100; i++)
             {
                 //4mb
-                Tensor a = new Tensor(new Shape(1024 * 1024), TensorConfig.Host_Float32);
-                a.Dispose();
+                Tensor a = new Tensor(new Shape(100), t);
             }
             
         }
 
-        public static void f2()
-        {
-            Tensor a = new Tensor(new Shape(450000000), TensorConfig.NvidiaGPU_Float32);
-            Tensor b = new Tensor(new Shape(400000000), TensorConfig.NvidiaGPU_Float32);
-            NvidiaGpuKernels.AddFloat32(a, a, b);
-            Thread.Sleep(3000);
-
-            a.Dispose();
-            b.Dispose();
-        }
-
-
         static unsafe void Main(string[] args)
         {
-            f2();
-            Console.WriteLine(Tensor.DisposedCount);
+            f();
+            Console.WriteLine(TensorBase.DisposedCount);
             GC.Collect();
             Thread.Sleep(100);
-            Console.WriteLine(Tensor.DisposedCount);
+            Console.WriteLine(TensorBase.DisposedCount);
             GC.Collect();
             Thread.Sleep(100);
-            Console.WriteLine(Tensor.DisposedCount);
+            Console.WriteLine(TensorBase.DisposedCount);
             TensorPool.GetDevicePool(Device.Host).EraseAll();
             TensorPool.GetDevicePool(Device.Nvidia(0)).EraseAll();
-            Console.WriteLine(Tensor.DisposedCount);
+            Console.WriteLine(TensorBase.DisposedCount);
             Thread.Sleep(3000);
         }
     }

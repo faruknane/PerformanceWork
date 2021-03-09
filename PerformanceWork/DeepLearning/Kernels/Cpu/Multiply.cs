@@ -23,7 +23,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void MultiplyFloat32(Tensor res, Tensor a, Tensor b)
         {
-            VectorizationFloat.ElementWiseMultiplyAVX((float*)a.Array, (float*)b.Array, (float*)res.Array, res.Shape.TotalSize);
+            VectorizationFloat.ElementWiseMultiplyAVX((float*)a.Base.Array, (float*)b.Base.Array, (float*)res.Base.Array, res.Shape.TotalSize);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -37,7 +37,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void MultiplyFloat32_GetGradient_0(Tensor res, Tensor s, Tensor a, Tensor b)
         {
-            VectorizationFloat.ElementWiseMultiplyAVX((float*)s.Array, (float*)b.Array, (float*)res.Array, res.Shape.TotalSize);
+            VectorizationFloat.ElementWiseMultiplyAVX((float*)s.Base.Array, (float*)b.Base.Array, (float*)res.Base.Array, res.Shape.TotalSize);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -51,7 +51,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void MultiplyFloat32_GetGradient_1(Tensor res, Tensor s, Tensor a, Tensor b)
         {
-            VectorizationFloat.ElementWiseMultiplyAVX((float*)s.Array, (float*)a.Array, (float*)res.Array, res.Shape.TotalSize);
+            VectorizationFloat.ElementWiseMultiplyAVX((float*)s.Base.Array, (float*)a.Base.Array, (float*)res.Base.Array, res.Shape.TotalSize);
         }
     }
 }

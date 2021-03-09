@@ -9,7 +9,6 @@ namespace PerformanceWork.NCuda
 {
     public static unsafe class CudaKernels
     {
-
         #region Add Vector Opreation
        
         [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
@@ -79,5 +78,13 @@ namespace PerformanceWork.NCuda
         public static extern void DivideInt64(long* res, long* a, long* b, long lengtha, long lengthb, long cofdiv, long cofadd);
         #endregion
 
+        #region Matrix Multiply
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void MatrixMultiplyFloat32(float* A, float* B, float* C, long dim1, long dim2, long dim3, float alpha, float beta);
+
+        [DllImport("NCuda\\NCuda.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = false), SuppressUnmanagedCodeSecurity]
+        public static extern void MatrixMultiplyFloat64(double* A, double* B, double* C, long dim1, long dim2, long dim3, double alpha, double beta);
+
+        #endregion
     }
 }
