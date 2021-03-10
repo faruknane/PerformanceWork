@@ -1,5 +1,15 @@
 #include <cublasLt.h>
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+#include "cuda_runtime.h"
+#include <stdio.h>
+#include <chrono>
+#include <cuda_runtime.h>
+#include <cublas_v2.h>
 #include "ErrorChecking.cpp"
+#include <sstream>
+#include <iostream>
+
 
 //https://github.com/NVIDIA/CUDALibrarySamples/blob/master/cuBLASLt/LtSgemm/sample_cublasLt_LtSgemm.cu
 /// Sample wrapper executing single precision gemm with cublasLtMatmul, nearly a drop-in replacement for cublasSgemm,

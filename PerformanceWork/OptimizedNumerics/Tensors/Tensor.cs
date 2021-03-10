@@ -13,7 +13,7 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
     public unsafe class Tensor : IDisposable
     {
         public Shape Shape { get; private set; }
-        public TensorConfig Config;
+        public TensorConfig Config { get; private set; }
         public TensorBase Base;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

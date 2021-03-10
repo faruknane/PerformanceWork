@@ -64,60 +64,13 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public long Index(int[] dims)
+        public long Index(params int[] dims)
         {
             long res = 0;
             for (int i = 0; i < dims.Length; i++)
                 res += dims[i] * Multiplied[i + 1];
             return res;
         }
-
-        ////todo create unit test for index methods
-        //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        //public int Index(Index ind)
-        //{
-        //    int res = 0;
-        //    for (int i = 0; i < ind.N; i++)
-        //        res += ind[i] * Multiplied[i + 1];
-        //    return res;
-        //}
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public long Index(int x1)
-        {
-            return x1 * Multiplied[1];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public long Index(int x1, int x2)
-        {
-            return x1 * Multiplied[1] + x2 * Multiplied[2];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public long Index(int x1, int x2, int x3)
-        {
-            return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public long Index(int x1, int x2, int x3, int x4)
-        {
-            return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3] + x4 * Multiplied[4];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public long Index(int x1, int x2, int x3, int x4, int x5)
-        {
-            return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3] + x4 * Multiplied[4] + x5 * Multiplied[5];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public long Index(int x1, int x2, int x3, int x4, int x5, int x6)
-        {
-            return x1 * Multiplied[1] + x2 * Multiplied[2] + x3 * Multiplied[3] + x4 * Multiplied[4] + x5 * Multiplied[5] + x6 * Multiplied[6];
-        }
-
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public Shape Clone()
@@ -132,8 +85,38 @@ namespace PerformanceWork.OptimizedNumerics
             return s;
         }
 
+        public static bool operator ==(Shape obj, object obj2)
+        {
+            return obj.Equals(obj2);
+        }
+
+        public static bool operator !=(Shape obj, object obj2)
+        {
+            return !obj.Equals(obj2);
+        }
+
+        public static bool operator ==(Shape obj, Shape obj2)
+        {
+            return obj.EqualShape(obj2);
+        }
+
+        public static bool operator !=(Shape obj, Shape obj2)
+        {
+            return !obj.EqualShape(obj2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj != null && obj is Shape s)
+            {
+                return EqualShape(s);
+            }
+            else
+                return false;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public bool EqualShape(Shape s)
+        private bool EqualShape(Shape s)
         {
             if (this.N != s.N) return false;
             for (int i = 0; i < N; i++)

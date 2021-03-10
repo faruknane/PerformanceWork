@@ -12,22 +12,49 @@ namespace PerformanceWorkTests
     [TestClass]
     public class TensorTests
     {
+        
+
+        
+
+
+    }
+
+
+    [TestClass]
+    public class ShapeTests
+    {
+
         [TestMethod]
-        public unsafe void ShapeCombining()
+        public void Equality()
+        {
+            Shape a = new Shape(1, 2, 3);
+            Shape b = new Shape(1, 2, 3);
+            Assert.AreEqual(a, b);
+            Assert.IsTrue(a == b);
+
+            b.Dimensions[1] = 5;
+            b.CalculateMultiplied();
+
+            Assert.IsFalse(a == b);
+            Assert.AreNotEqual(a, b);
+        }
+
+
+        [TestMethod]
+        public void ShapeCombining()
         {
             Shape s1 = new Shape(3, 2);
             Shape s2 = new Shape(5, 6, 7);
             Shape res = Shape.Combine(s1, s2);
             Shape res2 = new Shape(3, 2, 5, 6, 7);
 
-            for (int i = 0; i < res.N; i++)
-                if (res.Dimensions[i] != res2.Dimensions[i])
-                    throw new Exception("Hata");
+            Assert.AreEqual(res, res2);
+            Assert.IsTrue(res == res2);
         }
 
 
         [TestMethod]
-        public unsafe void ShapeSwapTail()
+        public void ShapeSwapTail()
         {
             Shape s1 = new Shape(3, 5, 6, 7, 2);
             Shape s2 = new Shape(7, 2);
@@ -35,14 +62,9 @@ namespace PerformanceWorkTests
             Shape res = Shape.SwapTail(s1, s2, s3);
             Shape res2 = new Shape(3, 5, 6, 1, 1);
 
-            for (int i = 0; i < res.N; i++)
-                if (res.Dimensions[i] != res2.Dimensions[i])
-                    throw new Exception("Hata");
+            Assert.AreEqual(res, res2);
+            Assert.IsTrue(res == res2);
         }
-
-
-        
-
 
     }
 }
