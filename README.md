@@ -1,22 +1,23 @@
+Under development!
 
 # PerformanceWork Library
-This library is dependent on Intel MKL, Nvidia Cuda 11.1, Cutensor 1.2.2.5. Currently, native codes are compiled for windows 10 only. Works on both CPU and Nvidia GPUs
+This library is dependent on Intel MKL, Nvidia Cuda 11.1, Cutensor 1.2.2.5. Works on both CPU and Nvidia GPUs. Currently, native codes are compiled for windows 10 only. 
 
 ## Supported Tensor Operations
 - Element-Wise Add / Subtract / Multiply / Divide
 - Element-Wise Power
-- Relu (Cpu-Only)
-- Sigmoid (Cpu-Only)
-- Softmax (Cpu-Only)
+- Relu (CPU-Only)
+- Sigmoid (CPU-Only)
+- Softmax (CPU-Only)
 - Matrix Multiplication
-- Einsum Operation (Gpu-Only)
-- Expand and Shrink Tensor (Cpu-Only)
+- Einsum Operation (GPU-Only)
+- Expand and Shrink Tensor (CPU-Only)
 
 ## Supported Gradient Tensor Operations
 - Element-Wise Add / Subtract / Multiply / Divide
 - Element-Wise Power
-- Relu (Cpu-Only)
-- Sigmoid (Cpu-Only)
-- Softmax (Cpu-Only)
+- Relu (CPU-Only)
+- Sigmoid (CPU-Only)
+- Softmax (CPU-Only)
 - Matrix Multiplication
-- Expand and Shrink Tensor (Cpu-Only)
+- Expand and Shrink Tensor (CPU-Only)
