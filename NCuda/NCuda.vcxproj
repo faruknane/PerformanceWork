@@ -86,7 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ErrorChecking.cpp" />
-    <ClCompile Include="Gemm.cpp" />
+    <ClCompile Include="Einsum.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="vectors.txt" />

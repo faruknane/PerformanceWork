@@ -30,3 +30,9 @@
         fprintf(stderr, "Cuda error!\n");                               \
         abort();                                                        \
     }  
+
+#define CheckCutensorError(x)                                         \
+{ const auto err = x;                                                 \
+  if( err != CUTENSOR_STATUS_SUCCESS )                                \
+  { printf("Error: %s\n", cutensorGetErrorString(err)); return err; } \
+};

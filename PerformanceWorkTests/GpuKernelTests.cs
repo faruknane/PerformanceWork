@@ -193,5 +193,26 @@ namespace PerformanceWorkTests
             t2.Dispose();
         }
 
+        [TestMethod]
+        public unsafe void Einsum()
+        {
+            float[,] fA = new float[2, 3] { { 1, 2, 3 }, { 4, 5, 6 } };
+            float[,] fB = new float[3, 2] { { 1, 2 }, { 3, 4 }, { 5, 6 } };
+
+            Tensor A = fA.ToDisposedTensor().CopyTo(Device.Nvidia(0));
+            Tensor B = fB.ToDisposedTensor().CopyTo(Device.Nvidia(0));
+
+            Tensor C = new Tensor((2, 2), TensorConfig.NvidiaGPU_Float32);
+
+            NvidiaGpuKernels.Einsum(C, A, "mk", B, "kn", C, "mn");
+
+            Console.WriteLine(A);
+            Console.WriteLine(B);
+            Console.WriteLine(C);
+
+            A.Dispose();
+            B.Dispose();
+            C.Dispose();
+        }
     }
 }
