@@ -34,13 +34,7 @@ namespace PerformanceWorkTests
 
         static unsafe void Main(string[] args)
         {
-            float[] a = new float[] { 1, 2, 3, 4, 5, 6 };
-
-            Tensor x1 = a.ToDisposedTensor();
-            Tensor x2 = x1.Reshape(3, 2);
-
-            Console.WriteLine(x1);
-            Console.WriteLine(x2);
+            
 
             f();
             Console.WriteLine(TensorBase.DisposedCount);

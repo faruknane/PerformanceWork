@@ -19,6 +19,9 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public Tensor(Shape s, TensorBase tbase)
         {
+            if (s.TotalSize > tbase.Length)
+                throw new Exception("Can't create a tensor larger than its base!");
+
             this.Shape = s;
             this.Config = tbase.Config;
             this.Base = tbase;

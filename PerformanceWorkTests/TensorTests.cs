@@ -12,8 +12,22 @@ namespace PerformanceWorkTests
     [TestClass]
     public class TensorTests
     {
-        
+        [TestMethod]
+        public unsafe void Reshape()
+        {
+            float[] a = new float[] { 1, 2, 3, 4, 5, 6 };
 
+            Tensor x1 = a.ToDisposedTensor();
+            Tensor x2 = x1.Reshape(3, 2);
+
+            Assert.AreEqual(x1.Base, x2.Base);
+            
+            fixed(float* ptr = a)
+                Assert.AreEqual((long)x1.Base.Array, (long)ptr);
+
+            Console.WriteLine(x1);
+            Console.WriteLine(x2);
+        }
         
 
 
