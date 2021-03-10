@@ -1,9 +1,22 @@
-# Performance-Work
-Heavily Optimized Numeric Library
 
-## Couple of benchmarks between Performance-Work and IntelMKL
+# PerformanceWork Library
+This library is dependent on Intel MKL, Nvidia Cuda 11.1, Cutensor 1.2.2.5. Currently, native codes are compiled for windows 10 only. Works on both CPU and Nvidia GPUs
 
-Single Thread | Multi Thread
------------- | -------------
-Dot Product - Single Thread ![Dot Product - Single Thread](https://github.com/faruknane/Performance-Work/blob/master/Benchmarks/Performance%20Benchmarks%20between%20PerformanceWork%20and%20Intel%20MKL%20(Dot%20Product%20Single%20Thread).png) | Dot Product - Multi Thread ![Dot Product - Multi Thread](https://github.com/faruknane/Performance-Work/blob/master/Benchmarks/Performance%20Benchmarks%20between%20PerformanceWork%20and%20Intel%20MKL%20(Dot%20Product%20Multi%20Thread).png)
-Matrix Multiplication - Single Thread ![Matrix Multiplication - Single Thread](https://github.com/faruknane/Performance-Work/blob/master/Benchmarks/Performance%20Benchmarks%20between%20PerformanceWork%20and%20Intel%20MKL%20(Matrix%20Multiplication%20Single%20Thread).png) | Null
+## Supported Tensor Operations
+- Element-Wise Add / Subtract / Multiply / Divide
+- Element-Wise Power
+- Relu (Cpu-Only)
+- Sigmoid (Cpu-Only)
+- Softmax (Cpu-Only)
+- Matrix Multiplication
+- Einsum Operation (Gpu-Only)
+- Expand and Shrink Tensor (Cpu-Only)
+
+## Supported Gradient Tensor Operations
+- Element-Wise Add / Subtract / Multiply / Divide
+- Element-Wise Power
+- Relu (Cpu-Only)
+- Sigmoid (Cpu-Only)
+- Softmax (Cpu-Only)
+- Matrix Multiplication
+- Expand and Shrink Tensor (Cpu-Only)
