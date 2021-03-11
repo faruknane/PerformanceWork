@@ -5,7 +5,7 @@ This library is dependent on Intel MKL, Nvidia Cuda 11.1, Cutensor 1.2.2.5. Work
 
 ## Supported Tensor Operations
 - Element-Wise Add / Subtract / Multiply / Divide
-- Element-Wise Power
+- Element-Wise Power (CPU-Only)
 - Relu (CPU-Only)
 - Sigmoid (CPU-Only)
 - Softmax (CPU-Only)
@@ -15,7 +15,7 @@ This library is dependent on Intel MKL, Nvidia Cuda 11.1, Cutensor 1.2.2.5. Work
 
 ## Supported Gradient Tensor Operations
 - Element-Wise Add / Subtract / Multiply / Divide
-- Element-Wise Power
+- Element-Wise Power (CPU-Only)
 - Relu (CPU-Only)
 - Sigmoid (CPU-Only)
 - Softmax (CPU-Only)
