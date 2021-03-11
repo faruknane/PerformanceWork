@@ -195,6 +195,28 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
         }
 
         #region Static Methods
+        
+        public static Tensor Arange(int start, int end, int stride = 1, NumberType type = NumberType.Float32)
+        {
+            //todo not sure how to design this function
+            //assume its on host device?
+            //asume float32?
+            //also needs optimizing!
+            //need a kernel for gpu and cpu i think, gpu kernel is easy, cpu kernel doesn't have to optimized!
+
+            if (type == NumberType.Float32)
+            {
+                float[] f = new float[(end - start) / stride];
+
+                int add = 0;
+                for (int i = 0; i < f.Length; i++, add += stride) 
+                    f[i] = start + add;
+
+                return f.ToDisposedTensor().Clone();
+            }
+            else
+                throw new Exception("Unsupported type!");
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor Clone(Tensor m)

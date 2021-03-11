@@ -194,25 +194,107 @@ namespace PerformanceWorkTests
         }
 
         [TestMethod]
-        public unsafe void Einsum()
+        public unsafe void Einsum1()
         {
             float[,] fA = new float[2, 3] { { 1, 2, 3 }, { 4, 5, 6 } };
             float[,] fB = new float[3, 2] { { 1, 2 }, { 3, 4 }, { 5, 6 } };
+            float[,] fRes = new float[2, 2] { { 22, 28 }, { 49, 64 } };
 
             Tensor A = fA.ToDisposedTensor().CopyTo(Device.Nvidia(0));
             Tensor B = fB.ToDisposedTensor().CopyTo(Device.Nvidia(0));
 
             Tensor C = new Tensor((2, 2), TensorConfig.NvidiaGPU_Float32);
 
-            NvidiaGpuKernels.Einsum(C, A, "mk", B, "kn", C, "mn");
 
-            Console.WriteLine(A);
-            Console.WriteLine(B);
-            Console.WriteLine(C);
+            /* can use instead -> NvidiaGpuKernels.Einsum(C, A, "mk", B, "kn", C, "mn");
+             * 
+             * C = A*B + C
+             * A -> mk
+             * B -> kn
+             * C -> mn
+             */
+            NvidiaGpuKernels.Einsum(C, "mk,kn->mn", A, B, C);
+
+            Tensor myres = C.CopyTo(Device.Host);
+            Tensor expectedres = fRes.ToDisposedTensor();
+
+            Assert.AreEqual(myres.ToString(), expectedres.ToString());
+            //there is no equailty operator for tensors so we use ToString for now!
 
             A.Dispose();
             B.Dispose();
             C.Dispose();
+            myres.Dispose();
+        }
+
+        [TestMethod]
+        public unsafe void Einsum2()
+        {
+            float[,] fA = new float[2, 3] { { 1, 2, 3 }, { 4, 5, 6 } };
+            float[,] fB = new float[3, 2] { { 1, 2 }, { 3, 4 }, { 5, 6 } };
+            float[,] fRes = new float[3, 2] { { 1, 8 }, { 6, 20 }, { 15, 36 } };
+
+            Tensor expectedres = fRes.ToDisposedTensor();
+
+            Tensor A = fA.ToDisposedTensor().CopyTo(Device.Nvidia(0));
+            Tensor B = fB.ToDisposedTensor().CopyTo(Device.Nvidia(0));
+
+            Tensor C = new Tensor(expectedres.Shape.Clone(), TensorConfig.NvidiaGPU_Float32);
+
+            NvidiaGpuKernels.Einsum(C, "mk,km->km", A, B, C);
+
+            Tensor myres = C.CopyTo(Device.Host);
+
+            Assert.AreEqual(expectedres.ToString(), myres.ToString());
+            //there is no equailty operator for tensors so we use ToString for now!
+
+            A.Dispose();
+            B.Dispose();
+            C.Dispose();
+            myres.Dispose();
+        }
+
+        [TestMethod]
+        public unsafe void Einsum3()
+        {
+            float[,,,] fA = new float[11, 1, 5, 3];
+            float[,,,] fB = new float[1, 7, 3, 2];
+
+
+            Tensor A = fA.ToDisposedTensor().CopyTo(Device.Nvidia(0));
+            Tensor B = fB.ToDisposedTensor().CopyTo(Device.Nvidia(0));
+
+            Tensor C = new Tensor(new Shape(11, 7, 5, 2), TensorConfig.NvidiaGPU_Float32);
+
+            NvidiaGpuKernels.Einsum(C, "a.ij,.bjk->abik", A, B, C);
+
+            Tensor myres = C.CopyTo(Device.Host);
+
+            A.Dispose();
+            B.Dispose();
+            C.Dispose();
+            myres.Dispose();
+        }
+
+
+        [TestMethod]
+        public unsafe void Einsum4()
+        {
+            Tensor A = Tensor.Arange(0, 6).Reshape(2, 3).CopyTo(Device.Nvidia(0));
+            Tensor B = Tensor.Arange(0, 6).Reshape(2, 3).CopyTo(Device.Nvidia(0));
+            Tensor C = new Tensor(new Shape(2, 3), TensorConfig.NvidiaGPU_Float32);
+
+            NvidiaGpuKernels.Einsum(C, "mn,mn->mn", A, B, C);
+
+            Tensor myres = C.CopyTo(Device.Host);
+
+            Console.WriteLine(myres);
+            Assert.IsTrue("[[0, 1, 4][9, 16, 25]]" == myres.ToString());
+
+            A.Dispose();
+            B.Dispose();
+            C.Dispose();
+            myres.Dispose();
         }
     }
 }

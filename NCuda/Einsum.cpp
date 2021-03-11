@@ -135,10 +135,10 @@ cutensorStatus_t cutensorContractionSimple(const cutensorHandle_t* handle,
 }
 
 
-extern "C" __declspec(dllexport) int Einsum(void* A_d, int nmodeA, int* modeA, int64_t * extentA, int typeAA,
-    void* B_d, int nmodeB, int* modeB, int64_t * extentB, int typeBB,
-    void* C_d, int nmodeC, int* modeC, int64_t * extentC, int typeCC,
-    void* D_d, int nmodeD, int* modeD, int64_t * extentD, int typeDD,
+extern "C" __declspec(dllexport) int Einsum(void* A_d, int nmodeA, int* modeA, int64_t * extentA, int64_t * strideA, int typeAA,
+    void* B_d, int nmodeB, int* modeB, int64_t * extentB, int64_t * strideB, int typeBB,
+    void* C_d, int nmodeC, int* modeC, int64_t * extentC, int64_t * strideC, int typeCC,
+    void* D_d, int nmodeD, int* modeD, int64_t * extentD, int64_t * strideD, int typeDD,
     void* alpha, void* beta, int typeCompute2)
 {
     cudaDataType_t typeA = (cudaDataType_t)typeAA;
@@ -166,7 +166,7 @@ extern "C" __declspec(dllexport) int Einsum(void* A_d, int nmodeA, int* modeA, i
         &descA,
         nmodeA,
         extentA,
-        NULL /* stride */,
+        strideA /* stride */,
         typeA, CUTENSOR_OP_IDENTITY));
 
     cutensorTensorDescriptor_t descB;
@@ -174,7 +174,7 @@ extern "C" __declspec(dllexport) int Einsum(void* A_d, int nmodeA, int* modeA, i
         &descB,
         nmodeB,
         extentB,
-        NULL /* stride */,
+        strideB /* stride */,
         typeB, CUTENSOR_OP_IDENTITY));
 
     cutensorTensorDescriptor_t descC;
@@ -182,7 +182,7 @@ extern "C" __declspec(dllexport) int Einsum(void* A_d, int nmodeA, int* modeA, i
         &descC,
         nmodeC,
         extentC,
-        NULL /* stride */,
+        strideC /* stride */,
         typeC, CUTENSOR_OP_IDENTITY));
 
 

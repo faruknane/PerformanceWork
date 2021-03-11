@@ -9,10 +9,11 @@ namespace PerformanceWork.DeepLearning.Kernels.NvidiaGpu
     public unsafe static partial class NvidiaGpuKernels
     {
         /// <summary>
-        /// Returns the sum of tensors.
+        /// Assumes that Tensor A is larger than or equal to Tensor B. 
         /// </summary>
-        /// <param name="tensors">Tensors to be summed</param>
-        /// <returns>The sum of tensors</returns>
+        /// <param name="a">Tensors to be summed.</param>
+        /// <param name="b">Tensors to be summed.</param>
+        /// <returns>Returns the sum of A and B tensors.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static Tensor AddFloat32(Tensor a, Tensor b, float cofa = 1, float cofb = 1, float cofadd = 0)
         {
