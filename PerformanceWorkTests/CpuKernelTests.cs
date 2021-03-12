@@ -13,6 +13,33 @@ namespace PerformanceWorkTests
     [TestClass]
     public class CpuKernelTests
     {
+        [TestMethod]
+        public unsafe void AddKernelFloat32()
+        {
+            const int size = 11;
+            const int size2 = 5;
+            float[] x1, x2, expres;
+            x1 = new float[size] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+            x2 = new float[size2] { 1, 2, 3, 4, 5 };
+            expres = new float[size];
+
+            for (int i = 0; i < size; i++)
+                expres[i] = x1[i] + x2[i % size2];
+
+            Tensor expected_res = expres.ToDisposedTensor(new Shape(size));
+
+            Tensor t1, t2;
+            t1 = x1.ToDisposedTensor(new Shape(size));
+            t2 = x2.ToDisposedTensor(new Shape(size2));
+            Tensor myres = CpuKernels.AddFloat32(t1, t2);
+
+
+            Console.WriteLine(myres);
+            Console.WriteLine(expected_res);
+            Assert.AreEqual(myres.ToString(), expected_res.ToString());
+            myres.Dispose();
+        }
+
         public (float[], Tensor) CreateRandomTensor(int size = 9)
         {
             Random random = new Random();

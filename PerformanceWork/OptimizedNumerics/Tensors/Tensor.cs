@@ -73,6 +73,56 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
             this.Base = new TensorBase(s.TotalSize, devconfig);
         }
 
+        public dynamic this[params long[] indices]
+        {
+            get
+            {
+                long index = this.Shape.Index(indices);
+                if (this.Config.Device == Device.Host)
+                {
+                    if (this.Config.NumType == NumberType.Float16)
+                        return *((Half*)this.Base.Array + index);
+                    else if (this.Config.NumType == NumberType.Float32)
+                        return *((float*)this.Base.Array + index);
+                    else if (this.Config.NumType == NumberType.Float64)
+                        return *((double*)this.Base.Array + index);
+                    else if (this.Config.NumType == NumberType.Int16)
+                        return *((short*)this.Base.Array + index);
+                    else if (this.Config.NumType == NumberType.Int32)
+                        return *((int*)this.Base.Array + index);
+                    else if (this.Config.NumType == NumberType.Int64)
+                        return *((long*)this.Base.Array + index);
+                    else
+                        throw new Exception("Unsupported Numtype for direct set and get!");
+                }
+                else
+                    throw new Exception("Unsupported device for direct set and get!");
+            }
+            set
+            {
+                long index = this.Shape.Index(indices);
+                if (this.Config.Device == Device.Host)
+                {
+                    if (this.Config.NumType == NumberType.Float16)
+                        *((Half*)this.Base.Array + index) = (Half)value;
+                    else if (this.Config.NumType == NumberType.Float32)
+                        *((float*)this.Base.Array + index) = (float)value;
+                    else if (this.Config.NumType == NumberType.Float64)
+                        *((double*)this.Base.Array + index) = (double)value;
+                    else if (this.Config.NumType == NumberType.Int16)
+                        *((short*)this.Base.Array + index) = (short)value;
+                    else if (this.Config.NumType == NumberType.Int32)
+                        *((int*)this.Base.Array + index) = (int)value;
+                    else if (this.Config.NumType == NumberType.Int64)
+                        *((long*)this.Base.Array + index) = (long)value;
+                    else
+                        throw new Exception("Unsupported Numtype for direct set and get!");
+                }
+                else
+                    throw new Exception("Unsupported device for direct set and get!");
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public void SetValue(float value)
         {
@@ -281,7 +331,7 @@ namespace PerformanceWork.OptimizedNumerics.Tensors
             if (data.Shape.TotalSize < begin + s.TotalSize)
                 throw new Exception("data.Shape.TotalSize < begin + s.TotalSize!");
 
-            return new Tensor(s, (void*)((long)(data.Base.Array) + begin * data.Config.GetUnitLength()), data.Config);
+            return new Tensor(s, (void*)((long)data.Base.Array + begin * data.Config.GetUnitLength()), data.Config);
         }
 
         /// <summary>

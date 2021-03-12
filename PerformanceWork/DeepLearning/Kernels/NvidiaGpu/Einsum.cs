@@ -9,10 +9,11 @@ namespace PerformanceWork.DeepLearning.Kernels.NvidiaGpu
 {
     public unsafe static partial class NvidiaGpuKernels
     {
-
+        //todo write the function definition
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void Einsum(Tensor D,
-            Tensor A, string modeA, Tensor B, string modeB, Tensor C, string modeC, double alpha = 1f, double beta = 0f)
+            Tensor A, string modeA, Tensor B, string modeB, Tensor C, string modeC, 
+            double alpha = 1f, double beta = 0f)
         {
             int[] mA = new int[modeA.Length];
             int[] mB = new int[modeB.Length];

@@ -21,16 +21,34 @@ namespace PerformanceWorkTests
             Tensor x2 = x1.Reshape(3, 2);
 
             Assert.AreEqual(x1.Base, x2.Base);
-            
-            fixed(float* ptr = a)
+
+            fixed (float* ptr = a)
                 Assert.AreEqual((long)x1.Base.Array, (long)ptr);
 
             Console.WriteLine(x1);
             Console.WriteLine(x2);
         }
-        
 
 
+        [TestMethod]
+        public unsafe void TensorGetSet()
+        {
+            long size = 100000;
+            Tensor t = new Tensor(new Shape(size), TensorConfig.Host_Float32);
+
+            for (int i = 0; i < size; i++)
+                t[i] = 1.5f;
+
+            t[0] = 5;
+            t[1] = 4.3f;
+            t[2] = 2.5;
+
+            Console.WriteLine(t[0]);
+            Console.WriteLine(t[1]);
+            Console.WriteLine(t[2]);
+            Console.WriteLine(t[3]);
+            //Console.WriteLine(t);
+        }
     }
 
 

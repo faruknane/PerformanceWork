@@ -49,7 +49,7 @@ namespace PerformanceWork.OptimizedNumerics
             }
         }
 
-        public long this[int x]
+        public long this[long x]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get => Dimensions[x];
@@ -64,7 +64,7 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public long Index(params int[] dims)
+        public long Index(params long[] dims)
         {
             long res = 0;
             for (int i = 0; i < dims.Length; i++)
