@@ -4,8 +4,10 @@ Under development!
 This library is dependent on Intel MKL, Nvidia Cuda 11.1, Cutensor 1.2.2.5. Works on both CPU and Nvidia GPUs. Currently, native codes are compiled for windows 10 only. 
 
 ### Hardware Requirements
-- For GPUs: nvidia > sm50
-- For CPUs: avx2 support
+#### For GPUs: 
+- Nvidia > sm50
+#### For CPUs: 
+- Avx2 support
 
 ## Supported Tensor Operations
 - Element-Wise Add / Subtract / Multiply / Divide
