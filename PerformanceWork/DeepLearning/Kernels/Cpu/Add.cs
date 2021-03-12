@@ -61,15 +61,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
             {
                 gradienta = new Tensor(a.Shape.Clone(), TensorConfig.Host_Float32);
 
-                long go = s.Shape.TotalSize / gradienta.Shape.TotalSize * gradienta.Shape.TotalSize;
-                for (long i = 0; i < go; i += gradienta.Shape.TotalSize)
-                    if (go == 0)
-                        VectorizationFloat.ElementWiseAssignAVX((float*)gradienta.Base.Array, (float*)s.Base.Array + i, gradienta.Shape.TotalSize);
-                    else
-                        VectorizationFloat.ElementWiseAddAVX((float*)s.Base.Array + i, (float*)gradienta.Base.Array, (float*)gradienta.Base.Array, gradienta.Shape.TotalSize);
-
-                if (go < s.Shape.TotalSize)
-                    VectorizationFloat.ElementWiseAddAVX((float*)s.Base.Array + go, (float*)gradienta.Base.Array, (float*)gradienta.Base.Array, s.Shape.TotalSize - go);
+                AddFloat32_GetGradient(gradienta, s, a);
             }
             return gradienta;
         }
@@ -79,7 +71,7 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         {
             long go = s.Shape.TotalSize / gradienta.Shape.TotalSize * gradienta.Shape.TotalSize;
             for (long i = 0; i < go; i += gradienta.Shape.TotalSize)
-                if (go == 0)
+                if (i == 0)
                     VectorizationFloat.ElementWiseAssignAVX((float*)gradienta.Base.Array, (float*)s.Base.Array + i, gradienta.Shape.TotalSize);
                 else
                     VectorizationFloat.ElementWiseAddAVX((float*)s.Base.Array + i, (float*)gradienta.Base.Array, (float*)gradienta.Base.Array, gradienta.Shape.TotalSize);
@@ -88,6 +80,9 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
                 VectorizationFloat.ElementWiseAddAVX((float*)s.Base.Array + go, (float*)gradienta.Base.Array, (float*)gradienta.Base.Array, s.Shape.TotalSize - go);
         }
 
+
+
+        //buranın altı gereksiz aslında
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static (Tensor, Tensor) AddFloat32_GetGradients(Tensor s, Tensor a, Tensor b, bool generateseperately = false)
         {
@@ -100,7 +95,6 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
             AddFloat32_GetGradient(gradients_a, s, a);
             AddFloat32_GetGradient(gradients_b, s, b);
         }
-
 
         //no need for tensor array
         /// <summary>
