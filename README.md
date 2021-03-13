@@ -5,8 +5,9 @@ This library is dependent on Intel MKL, Nvidia Cuda 11.1, Cutensor 1.2.2.5. Work
 
 ### Hardware Requirements
 #### For GPUs: 
-- Nvidia > sm50
+- Nvidia compute_52, sm_52; compute_60, sm_60; compute_61, sm_61; compute_70, sm_70; compute_75, sm_75; compute_80, sm_80; compute_86, sm_86;
 #### For CPUs: 
+- x86-64 assembly support (for intel mkl and native c++ codes)
 - Avx2 support
 
 ## Supported Tensor Operations
