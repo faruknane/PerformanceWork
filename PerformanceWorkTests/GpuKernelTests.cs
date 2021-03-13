@@ -5,6 +5,7 @@ using PerformanceWork.OptimizedNumerics;
 using PerformanceWork.OptimizedNumerics.Tensors;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -39,7 +40,7 @@ namespace PerformanceWorkTests
         }
 
         [TestMethod]
-        public unsafe void AddKernelFloat32()
+        public unsafe void AddFloat32_Test()
         {
             Random r = new Random();
             int size = 10000;
@@ -72,7 +73,7 @@ namespace PerformanceWorkTests
         }
 
         [TestMethod]
-        public unsafe void AddKernelFloat32_2()
+        public unsafe void AddFloat32_Test_2()
         {
             Random r = new Random();
             int size = 10000;
@@ -107,7 +108,7 @@ namespace PerformanceWorkTests
         }
 
         [TestMethod]
-        public unsafe void AddKernelFloat32_3()
+        public unsafe void AddFloat32_Test_3()
         {
             const int size = 10;
             const int size2 = 5;
@@ -136,7 +137,7 @@ namespace PerformanceWorkTests
         }
 
         [TestMethod]
-        public unsafe void MultiplyKernelFloat32()
+        public unsafe void MultiplyFloat32_Test()
         {
             const int size = 10;
             const int size2 = 5;
@@ -213,7 +214,9 @@ namespace PerformanceWorkTests
              * B -> kn
              * C -> mn
              */
+                
             NvidiaGpuKernels.Einsum(C, "mk,kn->mn", A, B, C);
+          
 
             Tensor myres = C.CopyTo(Device.Host);
             Tensor expectedres = fRes.ToDisposedTensor();

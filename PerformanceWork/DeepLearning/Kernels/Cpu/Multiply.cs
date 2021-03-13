@@ -48,23 +48,36 @@ namespace PerformanceWork.DeepLearning.Kernels.Cpu
         public static Tensor MultiplyFloat32_GetGradientA(Tensor s, Tensor a, Tensor b)
         {
             Tensor res = new Tensor(a.Shape.Clone(), TensorConfig.Host_Float32);
-            MultiplyFloat32_GetGradient(res, s, a, b);
+            MultiplyFloat32_GetGradientA(res, s, a, b);
             return res;
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static void MultiplyFloat32_GetGradient(Tensor gradienta, Tensor s, Tensor a, Tensor b)
+        public static void MultiplyFloat32_GetGradientA(Tensor gradienta, Tensor s, Tensor a, Tensor b)
         {
-            long go = s.Shape.TotalSize / gradienta.Shape.TotalSize * gradienta.Shape.TotalSize;
-            for (long i = 0; i < go; i += gradienta.Shape.TotalSize)
-                if (i == 0)
-                    VectorizationFloat.ElementWiseMultiplyAVX((float*)s.Base.Array, (float*)b.Base.Array, (float*)gradienta.Base.Array, gradienta.Shape.TotalSize);
-                else
-                    VectorizationFloat.ElementWiseAddAVX((float*)s.Base.Array + i, (float*)gradienta.Base.Array, (float*)gradienta.Base.Array, gradienta.Shape.TotalSize);
+            if (s.Shape.TotalSize == a.Shape.TotalSize)
+            {
+                long go = s.Shape.TotalSize / b.Shape.TotalSize * b.Shape.TotalSize;
+                for (long i = 0; i < go; i += b.Shape.TotalSize)
+                    VectorizationFloat.ElementWiseMultiplyAVX((float*)s.Base.Array + i, (float*)b.Base.Array, (float*)gradienta.Base.Array + i, b.Shape.TotalSize);
+                if (go < s.Shape.TotalSize)
+                    VectorizationFloat.ElementWiseMultiplyAVX((float*)s.Base.Array + go, (float*)b.Base.Array, (float*)gradienta.Base.Array + go, s.Shape.TotalSize - go);
+            }
+            else if (s.Shape.TotalSize == b.Shape.TotalSize)
+            {
+                long go = s.Shape.TotalSize / a.Shape.TotalSize * a.Shape.TotalSize;
+                for (long i = 0; i < go; i += a.Shape.TotalSize)
+                    if (i == 0)
+                        VectorizationFloat.ElementWiseMultiplyAVX((float*)s.Base.Array, (float*)b.Base.Array, (float*)gradienta.Base.Array, gradienta.Shape.TotalSize);
+                    else
+                        VectorizationFloat.ElementWiseFMA((float*)s.Base.Array + i, (float*)b.Base.Array + i, (float*)gradienta.Base.Array, (float*)gradienta.Base.Array, gradienta.Shape.TotalSize);
 
-            if (go < s.Shape.TotalSize)
-                VectorizationFloat.ElementWiseAddAVX((float*)s.Base.Array + go, (float*)gradienta.Base.Array, (float*)gradienta.Base.Array, s.Shape.TotalSize - go);
+                if (go < s.Shape.TotalSize)
+                    VectorizationFloat.ElementWiseFMA((float*)s.Base.Array + go, (float*)b.Base.Array + go, (float*)gradienta.Base.Array, (float*)gradienta.Base.Array, s.Shape.TotalSize - go);
+            }
+            else
+                throw new Exception("Impossible reagion MultiplyFloat32_GetGradientA!");
         }
 
 

@@ -45,7 +45,7 @@ namespace PerformanceWork.DeepLearning.Kernels.NvidiaGpu
 
         //Todo: noktalı kullanım ve Tensor D siz olan function da yaz.
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static void Einsum(Tensor D, string op, 
+        public static void Einsum(Tensor D, string op,
             Tensor A, Tensor B, Tensor C, double alpha = 1f, double beta = 0f)
         {
             var sp = op.Split("->", StringSplitOptions.None);
@@ -63,6 +63,26 @@ namespace PerformanceWork.DeepLearning.Kernels.NvidiaGpu
             string sC = sp[1];
             Einsum(D, A, sA, B, sB, C, sC, alpha, beta);
         }
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        //public static void Einsum(string op,
+        //    Tensor A, Tensor B, double alpha = 1f, double beta = 0f)
+        //{
+        //    var sp = op.Split("->", StringSplitOptions.None);
+
+        //    if (sp.Length != 2)
+        //        throw new Exception("Operation is illegal!");
+
+        //    var sp2 = sp[0].Split(',', StringSplitOptions.None);
+
+        //    if (sp2.Length != 2)
+        //        throw new Exception("Operation is illegal!");
+
+        //    string sA = sp2[0];
+        //    string sB = sp2[1];
+        //    string sC = sp[1];
+        //    Einsum(D, A, sA, B, sB, C, sC, alpha, beta);
+        //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static void MatrixMultiplyFloat32(Tensor res, Tensor a, Tensor b, float cofmul = 1, float cofadd = 0)

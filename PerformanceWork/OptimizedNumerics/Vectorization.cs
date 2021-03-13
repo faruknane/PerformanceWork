@@ -560,6 +560,26 @@ namespace PerformanceWork.OptimizedNumerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static unsafe void ElementWiseFMA(float* ptr_a, float* ptr_b, float* ptr_c, float* ptr_res, long length)
+        {
+            long l = length / Vector256<float>.Count * Vector256<float>.Count;
+            {
+                for (long i = 0; i < l; i += Vector256<float>.Count)
+                {
+                    Vector256<float> v1 = Avx2.LoadVector256(&ptr_a[i]);
+                    Vector256<float> v2 = Avx2.LoadVector256(&ptr_b[i]);
+                    Vector256<float> v3 = Avx2.LoadVector256(&ptr_c[i]);
+                    Vector256<float> res = Fma.MultiplyAdd(v1, v2, v3);
+                    Avx2.Store(&ptr_res[i], res);
+                }
+                for (long i = l; i < length; i++)
+                {
+                    ptr_res[i] = ptr_a[i] * ptr_b[i] + ptr_c[i];
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ElementWiseSquareAVX(float* ptr_a, float* ptr_res, long length)
         {
             long l = length / Vector256<float>.Count * Vector256<float>.Count;
