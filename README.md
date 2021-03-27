@@ -1,4 +1,4 @@
-Under development!
+(not continuing)
 
 # PerformanceWork Library
 This library is dependent on Intel MKL, Nvidia Cuda 11.1, Cutensor 1.2.2.5. Works on both CPU and Nvidia GPUs. Currently, native codes are compiled for windows 10 only. 
